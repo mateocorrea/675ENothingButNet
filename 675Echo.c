@@ -47,7 +47,7 @@ void progSkills();
 void pre_auton()
 {
 
-	stopAllTasks();
+
 	bStopTasksBetweenModes = false;
 	SensorType[in1] = sensorNone;
   	wait1Msec(1000);
@@ -145,3 +145,22 @@ void progSkills()
 		redShoot();
 	}
 }
+////////////////////////// OLD CODE /////////////////////////
+//bool voltageMode = false;
+/*else if(voltageMode) {
+				int sum = (values * averageBattery) + flyBattery;
+				values++;
+				averageBattery = sum / values;
+
+				if(values == 1000)
+					values = 100;
+
+				highSpeed = (-0.1231 * averageBattery + 160.24 + backUpHighSpeed );
+				midSpeed = (-0.1231 * averageBattery + 174.54 + backUpMidSpeed );
+
+
+
+				flySpeedRight = flyWheelSpeed;
+				flySpeedLeft = flyWheelSpeed;
+
+			}*/

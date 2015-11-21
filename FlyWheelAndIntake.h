@@ -55,7 +55,7 @@ bool doneShooting();
 /////////////////////////////////////////////////////////
 int lowSpeed = 37;
 int midSpeed = 43;
-int highSpeed = 80;
+int highSpeed = 75;//80 soft balls
 int flyWheelSpeed = highSpeed;
 
 
@@ -142,9 +142,10 @@ task flyWheelPower() {
 				    rpmRight = abs(flyEncRight * factor);
 				    flyEncLeft = 0;
 				    flyEncRight = 0;
+				    flySpeedLeft = flyWheelSpeed;
+					flySpeedRight = flyWheelSpeed;
 				}
-				flySpeedLeft = flyWheelSpeed;
-				flySpeedRight = flyWheelSpeed;
+
 			} else {
 				if(justChangedToRPM && (rpmGoal == rpmHigh)) {
 					flyWheelMotors(20.0, 20.0);
