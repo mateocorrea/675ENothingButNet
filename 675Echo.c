@@ -33,9 +33,10 @@
 void init();
 #pragma userControlDuration(120)
 #include "cool.c"
-#include "DriveAndPneumatics.h"
 #include "FlyWheelAndIntake.h"
 #include "SpeakerAndLCD.h"
+#include "DriveAndPneumatics.h"
+
 void runAuto(int chosen);
 void redShoot();
 void redSide();

@@ -46,6 +46,7 @@ task pneumatics()
 			{
 				releaseLift();
 				liftCount++;
+				PlayMario();
 			}
 			else {
 				lockLift();

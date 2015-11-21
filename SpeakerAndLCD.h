@@ -3,6 +3,7 @@ task speaker();
 void PlayTune(string music);
 void PlayMario();
 void PlayJingleBells();
+void playSong(int song);
 
 const int NaturalNotes[7]    = { 14080, 15804, 8372, 9397, 10548, 11175, 12544 }; /* A9, B9, C9, D9, E9, F9, G9 */
 const int AccidentalNotes[7] = { 14917,     0, 8870, 9956,     0, 11840, 13290 }; /* A#9, x, C#9, D#9, x, F#9, G#9  */
@@ -18,6 +19,7 @@ int name = 7;
 int music = 8;
 int screen = name;
 int chosenAuto = redShootNum;
+int holdTime = 1500;
 
 task LCD()
 {
@@ -55,23 +57,29 @@ task LCD()
 				screen = 8;
 			}
 		} else if(nLCDButtons == 2) {
-			chosenAuto = screen;
-			if(chosenAuto > 5) {
-				chosenAuto = 0;
-			}
-			lastPlay = true;
-		} else {
-			if(lastPlay == false)
-			{
-				if(screen == music) {
-					if(holdTime > 600 && switched == false) {
+			if(screen == music) {
+				int baseTime = nSysTime;
+				int time = 0;
+				while((nLCDButtons == 2) && (time - baseTime < holdTime)) {
+					time = nSysTime;
+				}
+				if((time - baseTime) >= holdTime) {
+					playSong(song);
+				} else {
+					if(screen == music)
 						song++;
-						switched = true;
-					}
+					if(song > 1)
+						song = 0;
+				}
 
+			} else {
+				chosenAuto = screen;
+				if(chosenAuto > 5) {
+					chosenAuto = 0;
 				}
 			}
-			lastPlay = false;
+
+
 		}
 		while(nLCDButtons != 0) {}
 
@@ -196,4 +204,12 @@ void PlayJingleBells()
 	string JingleBells2 = "oEr4D5BA4GpDrDDrD5BA4GpE";
 	PlayTune(JingleBells);
 	PlayTune(JingleBells2);
+}
+
+void playSong(int song)
+{
+	if(song == 0)
+		PlayMario();
+	else
+		PlayJingleBells();
 }

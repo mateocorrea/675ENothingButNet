@@ -55,7 +55,7 @@ bool doneShooting();
 /////////////////////////////////////////////////////////
 int lowSpeed = 37;
 int midSpeed = 43;
-int highSpeed = 75;//80 soft balls
+int highSpeed = 65;//80 soft balls
 int flyWheelSpeed = highSpeed;
 
 
