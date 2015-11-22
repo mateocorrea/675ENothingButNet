@@ -40,6 +40,7 @@ task pneumatics()
 			if(liftCount == 0)
 			{
 				deploy();
+				actuateBrake();
 				liftCount++;
 			}
 			else if(liftCount == 1)

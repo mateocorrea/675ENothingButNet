@@ -55,7 +55,7 @@ bool doneShooting();
 /////////////////////////////////////////////////////////
 int lowSpeed = 37;
 int midSpeed = 43;
-int highSpeed = 65;//80 soft balls
+int highSpeed = 60;//80 soft balls
 int flyWheelSpeed = highSpeed;
 
 
@@ -94,7 +94,7 @@ float KdHighLS  = 0.000000050;
 float KpHighRS = KpHighLS;
 float KiHighRS = KiHighLS;
 float KdHighRS  = KdHighLS;
-const int rpmHigh = 1880;
+const int rpmHigh = 1900;
 float rpmGoal = rpmHigh;
 /////////////////////////////////////////////////////////
 
