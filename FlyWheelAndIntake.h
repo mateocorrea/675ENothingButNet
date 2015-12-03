@@ -1,5 +1,7 @@
-#define flyEncLeft nMotorEncoder[topleftlauncher]
-#define flyEncRight nMotorEncoder[toprightlauncher]
+#define flyEncLeft nMotorEncoder[topLeftLauncher]
+#define flyEncRight nMotorEncoder[topRightLauncher]
+#define driveEncRight nMotorEncoder[rightfront]
+#define driveEncLeft nMotorEncoder[leftfront]
 #define intakeSensor SensorValue[intakeTouchSensor]
 #define shootSensor SensorValue[launcherLimitSwitch]
 
@@ -29,7 +31,7 @@ float timeSinceShot = 0;
 
 int encoderTimer = 20;
 int ticksPerTurnSpeed = 372;
-float launcherRatio = 12.8;
+float launcherRatio = 10.2;
 //////////////
 
 bool lastModeBtn = false;
@@ -40,7 +42,7 @@ bool lastFlyWheelBtn = false;
 bool lastRollerBtn = false;
 bool flyWheelOn = false;
 bool rollerOn = true;
-bool rpmMode = false;
+bool rpmMode = true;
 bool justChangedToRPM = false;
 
 task flyWheelControl();
@@ -55,7 +57,7 @@ bool doneShooting();
 /////////////////////////////////////////////////////////
 int lowSpeed = 37;
 int midSpeed = 43;
-int highSpeed = 60;//80 soft balls
+int highSpeed = 85;//80 soft balls
 int flyWheelSpeed = highSpeed;
 
 
@@ -82,11 +84,12 @@ float KpMid  = 0.000086500;
 float KiMid  = 0.000000000;
 float KdMid  = 0.000000000;
 
-float KpHighL = 0.00000;
-float KiHighL = 0.0000000;//2200;
-float KdHighL = 0.000000;//250;
-float KpHighLS = 0.00000000;
-float KiHighLS = 0.00000000;
+float KpHighL = 0.0120;
+float KiHighL = 0.0001200;//2200;
+float KdHighL = 0.000040;//250;
+
+float KpHighLS = 0.009000000000;
+float KiHighLS = 0.00001100;
 float KdHighLS  = 0.000000000;
 float KpHighR = KpHighL;
 float KiHighR = KiHighL;
@@ -94,7 +97,7 @@ float KdHighR = KdHighL;
 float KpHighRS = KpHighLS;
 float KiHighRS = KiHighLS;
 float KdHighRS  = KdHighLS;
-const int rpmHigh = 1900;
+const int rpmHigh = 1882;
 float rpmGoal = rpmHigh;
 /////////////////////////////////////////////////////////
 
@@ -362,10 +365,10 @@ void flyWheelMotors(float left, float right)
 		l = 118;
 	if(r > 118)
 		r = 118;
-	motor[toprightlauncher] = r;
-	motor[topleftlauncher] = l;
-	motor[bottomrightlauncher] = r;
-	motor[bottomleftlauncher] = l;
+	motor[topRightLauncher] = r;
+	motor[topLeftLauncher] = l;
+	motor[bottomRightLauncher] = r;
+	motor[bottomLeftLauncher] = l;
 }
 
 void pidChange(int rpmGoal)
