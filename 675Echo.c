@@ -44,7 +44,6 @@ void blueBot();
 void blueSide();
 void defense();
 void progSkills();
-int richie = 0;
 
 void pre_auton()
 {
