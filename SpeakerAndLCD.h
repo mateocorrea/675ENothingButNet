@@ -21,6 +21,8 @@ int screen = name;
 int chosenAuto = redShootNum;
 int holdTime = 1500;
 
+
+
 task LCD()
 {
 	int holdTime = 0;

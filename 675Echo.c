@@ -47,8 +47,6 @@ void progSkills();
 
 void pre_auton()
 {
-
-
 	bStopTasksBetweenModes = false;
 	SensorType[in1] = sensorNone;
   	wait1Msec(1000);
