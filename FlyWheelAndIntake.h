@@ -84,20 +84,30 @@ float KpMid  = 0.000086500;
 float KiMid  = 0.000000000;
 float KdMid  = 0.000000000;
 
-float KpHighL = 0.0120;
-float KiHighL = 0.0001200;//2200;
-float KdHighL = 0.000040;//250;
+float KpHighL = 0.0080;
+float KiHighL = 0.0000200;//2200;
+float KdHighL = 0.000000;//250;
 
-float KpHighLS = 0.009000000000;
-float KiHighLS = 0.00001100;
-float KdHighLS  = 0.000000000;
+float KpHighRS = 0.0094190000000;
+float KiHighRS = 0.0000830;
+float KdHighRS  = 0.000002000;
+
+/*
+good values
+float KpHighRS = 0.0094190000000;
+float KiHighRS = 0.0000700;
+float KdHighRS  = 0.000002000;
+*/
+//////////////////////////////
+float KpHighLS = KpHighRS + 0.000015;
+float KiHighLS = KiHighRS;
+float KdHighLS  = KdHighRS;
+
+
 float KpHighR = KpHighL;
 float KiHighR = KiHighL;
 float KdHighR = KdHighL;
-float KpHighRS = KpHighLS;
-float KiHighRS = KiHighLS;
-float KdHighRS  = KdHighLS;
-const int rpmHigh = 1882;
+const int rpmHigh = 1802;
 float rpmGoal = rpmHigh;
 /////////////////////////////////////////////////////////
 

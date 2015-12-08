@@ -28,10 +28,9 @@
 #pragma platform(VEX)
 //#pragma systemFile //disables annoying warnings
 #pragma competitionControl(Competition)
-#pragma autonomousDuration(15)
-
+//#pragma autonomousDuration(20)
+//#pragma userControlDuration(120)
 void init();
-#pragma userControlDuration(120)
 #include "cool.c"
 #include "FlyWheelAndIntake.h"
 #include "SpeakerAndLCD.h"
