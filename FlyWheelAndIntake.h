@@ -14,6 +14,8 @@
 #define rollerBtn vexRT[Btn8R]
 #define rollerOutBtn vexRT[Btn8D]
 #define raiseBtn vexRT[Btn8L]
+
+int flyBat = 0;
 float rpmLeft = 0;
 float rpmRight = 0;
 
@@ -51,7 +53,7 @@ task intake();
 void turnOn(int color);
 void flyWheelMotors(float left, float right);
 void pidChange(int rpmGoal);
-void voltageCorrection(int rpm);
+int voltageCorrection(int rpm);
 bool notShooting();
 bool doneShooting();
 
@@ -90,8 +92,8 @@ float KiHighL = 0.0000200;//2200;
 float KdHighL = 0.000000;//250;
 
 float KpHighRS = 0.0094190000000;
-float KiHighRS = 0.0000830;
-float KdHighRS  = 0.000002000;
+float KiHighRS = 0.0001000;
+float KdHighRS  = 0.000009000;
 
 /*
 good values
@@ -433,15 +435,15 @@ void pidChange(int rpmGoal)
 
 int voltageCorrection(int rpm)
 {
-    int sum = (batteryValues * averageBattery) + flyBattery; //flyBattery is the sensor value
+		flyBat = SensorValue[in4];
+    int sum = (batteryValues * averageBattery) + flyBat; //flyBattery is the sensor value
     batteryValues++;
     averageBattery = sum / batteryValues;
-    if(batteryValues == 1000)
+    if(batteryValues == 500)
         batteryValues = 100;
-    
-    if(rpm == rpmHigh)
-        return 5 * averageBattery + 10  //mx + b
-    else
-        return rpm
-}
 
+    if(rpm == rpmHigh)
+        return rpm + (-0.1123 * averageBattery + 178.03);  //mx + b
+    else
+        return rpm;
+}
