@@ -51,6 +51,7 @@ task intake();
 void turnOn(int color);
 void flyWheelMotors(float left, float right);
 void pidChange(int rpmGoal);
+void voltageCorrection(int rpm);
 bool notShooting();
 bool doneShooting();
 
@@ -114,6 +115,9 @@ float rpmGoal = rpmHigh;
 const int red = 0;
 const int green = 1;
 const int yellow = 2;
+
+int batteryValues = 0;
+int averageBattery = 0;
 
 task flyWheelPower() {
 	int values = 0;
@@ -387,8 +391,8 @@ void pidChange(int rpmGoal)
 	rpmLeft = abs(flyEncLeft * factor);
 	rpmRight = abs(flyEncRight * factor);
 
-	float leftError = rpmGoal - rpmLeft;
-	float rightError = rpmGoal - rpmRight;
+	float leftError = voltageCorrection(rpmGoal) - rpmLeft;
+	float rightError = voltageCorrection(rpmGoal) - rpmRight;
 
 	////// Proportional /////
 
@@ -426,3 +430,18 @@ void pidChange(int rpmGoal)
   flyEncLeft = 0;
   flyEncRight = 0;
 }
+
+int voltageCorrection(int rpm)
+{
+    int sum = (batteryValues * averageBattery) + flyBattery; //flyBattery is the sensor value
+    batteryValues++;
+    averageBattery = sum / batteryValues;
+    if(batteryValues == 1000)
+        batteryValues = 100;
+    
+    if(rpm == rpmHigh)
+        return 5 * averageBattery + 10  //mx + b
+    else
+        return rpm
+}
+
