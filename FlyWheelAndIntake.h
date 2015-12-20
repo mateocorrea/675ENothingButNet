@@ -31,7 +31,7 @@ float integralLeft = 0;
 
 float timeSinceShot = 0;
 
-int encoderTimer = 20;
+int encoderTimer = 25;
 int ticksPerTurnSpeed = 372;
 float launcherRatio = 10.2;
 //////////////
@@ -56,6 +56,9 @@ void pidChange(int rpmGoal);
 int voltageCorrection(int rpm);
 bool notShooting();
 bool doneShooting();
+void averageRPMS(float left, float right);
+
+float lastTime = 0.0;
 
 /////////////////////////////////////////////////////////
 int lowSpeed = 37;
@@ -87,13 +90,22 @@ float KpMid  = 0.000086500;
 float KiMid  = 0.000000000;
 float KdMid  = 0.000000000;
 
-float KpHighL = 0.0080;
-float KiHighL = 0.0000200;//2200;
-float KdHighL = 0.000000;//250;
+float KpHighL = 0.00071;
+float KiHighL = 0.000045;//2200;
+float KdHighL = 0.000030;//250;
+float KpHighR = KpHighL;
+float KiHighR = KiHighL;
+float KdHighR = KdHighL;
 
-float KpHighRS = 0.0094190000000;
-float KiHighRS = 0.0001000;
-float KdHighRS  = 0.000009000;
+/*
+float KpHighRS = 0.009419000;
+float KiHighRS = 0.000077000;
+float KdHighRS = 0.000004000;
+*/
+
+float KpHighRS = 0.0804190;
+float KiHighRS = KpHighRS / 125.0;
+float KdHighRS = KpHighRS / 2354.0;
 
 /*
 good values
@@ -103,14 +115,10 @@ float KdHighRS  = 0.000002000;
 */
 //////////////////////////////
 float KpHighLS = KpHighRS + 0.000015;
-float KiHighLS = KiHighRS;
-float KdHighLS  = KdHighRS;
+float KiHighLS = KpHighRS / 122.35;
+float KdHighLS = KpHighRS / 2354.0;
 
-
-float KpHighR = KpHighL;
-float KiHighR = KiHighL;
-float KdHighR = KdHighL;
-const int rpmHigh = 1850;
+const int rpmHigh = 1690;
 float rpmGoal = rpmHigh;
 /////////////////////////////////////////////////////////
 
@@ -120,10 +128,12 @@ const int yellow = 2;
 
 int batteryValues = 0;
 int averageBattery = 0;
+int rightValues = 0;
+int averageRight = 0;
+int leftValues = 0;
+int averageLeft = 0;
 
 task flyWheelPower() {
-	int values = 0;
-	int averageBattery = 0;
 	flyWheelMotors(20.0, 20.0);
 	wait1Msec(70);
 	flyWheelMotors(40.0, 40.0);
@@ -230,6 +240,10 @@ task flyWheelPower() {
 	    		flySpeedLeft = 30;
 	    	if(flySpeedRight < 30)
 	    		flySpeedRight = 30;
+	    	if(flySpeedLeft > 120)
+	    		flySpeedLeft = 120;
+	    	if(flySpeedRight > 120)
+	    		flySpeedRight = 120;
 	    	flyWheelMotors(flySpeedLeft, flySpeedRight);
 	  	} else {
 			flyWheelMotors(0,0);
@@ -389,10 +403,12 @@ void flyWheelMotors(float left, float right)
 
 void pidChange(int rpmGoal)
 {
-	float factor = ( ( launcherRatio * 60000 ) / encoderTimer ) / ticksPerTurnSpeed;
+	float deltaTime = abs(nSysTime - lastTime);
+	//writeDebugStreamLine("%f", deltaTime);
+	float factor = ( ( launcherRatio * 60000 ) / deltaTime ) / ticksPerTurnSpeed;
 	rpmLeft = abs(flyEncLeft * factor);
 	rpmRight = abs(flyEncRight * factor);
-
+	averageRPMS(rpmLeft, rpmRight);
 	float leftError = voltageCorrection(rpmGoal) - rpmLeft;
 	float rightError = voltageCorrection(rpmGoal) - rpmRight;
 
@@ -403,18 +419,18 @@ void pidChange(int rpmGoal)
 
 
 	////// Integral //////
-	integralRight = integralRight + (rightError * encoderTimer);
-	integralLeft = integralLeft + (leftError * encoderTimer);
+	integralRight = integralRight + (rightError * deltaTime);
+	integralLeft = integralLeft + (leftError * deltaTime);
 	if( ((integralRight > 0) && (rightError < 0)) || ((integralRight < 0) && (rightError > 0)) )
-		integralRight = (rightError * encoderTimer);
+		integralRight = (rightError * deltaTime);
 	if( ((integralLeft > 0) && (leftError < 0)) || ((integralLeft < 0) && (leftError > 0)) )
-		integralLeft = (leftError * encoderTimer);
+		integralLeft = (leftError * deltaTime);
 	float iLeft = KiL * integralLeft;
 	float iRight = KiR * integralRight;
 
 	////// Derivative /////
-	float derivativeLeft = (leftError - oldLeftError) / encoderTimer;
-	float derivativeRight = (rightError - oldRightError) / encoderTimer;
+	float derivativeLeft = (leftError - oldLeftError) / deltaTime;
+	float derivativeRight = (rightError - oldRightError) / deltaTime;
 	float dLeft = KdL * derivativeLeft;
 	float dRight = KdR * derivativeRight;
 
@@ -426,11 +442,15 @@ void pidChange(int rpmGoal)
   flySpeedLeft += leftChange;
   flySpeedRight += rightChange;
 
+  //writeDebugStreamLine("%f", leftChange);
+  //writeDebugStreamLine("%f", rightChange);
+
   // Reset the errors and the encoders
   oldLeftError = leftError;
   oldRightError = rightError;
   flyEncLeft = 0;
   flyEncRight = 0;
+  lastTime = nSysTime;
 }
 
 int voltageCorrection(int rpm)
@@ -441,9 +461,22 @@ int voltageCorrection(int rpm)
     averageBattery = sum / batteryValues;
     if(batteryValues == 500)
         batteryValues = 100;
-
     if(rpm == rpmHigh)
-        return rpm + (-0.1123 * averageBattery + 178.03);  //mx + b
+        return rpm + (-0.112 * averageBattery + 176.03);  //mx + b
     else
         return rpm;
+}
+
+void averageRPMS(float left, float right)
+{
+	int rightSum = (rightValues * averageRight) + right;
+	rightValues++;
+	averageRight = rightSum / rightValues++;
+
+	int leftSum = (leftValues * averageLeft) + left;
+	leftValues++;
+	averageLeft = leftSum / leftValues++;
+	clearDebugStream();
+	writeDebugStreamLine("Average Right: %f", averageRight);
+	writeDebugStreamLine("Average Left: %f", averageLeft);
 }
