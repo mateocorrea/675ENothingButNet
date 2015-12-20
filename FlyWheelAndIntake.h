@@ -67,7 +67,7 @@ int highSpeed = 85;//80 soft balls
 int flyWheelSpeed = highSpeed;
 
 
-const int rpmMid = 1650;
+const int rpmMid = 1400;
 
 
 
@@ -84,11 +84,11 @@ float KdLow  = 0.0000000;//0.000000250;
 float KpLowShooting  = 0.000900500;
 float KiLowShooting  = 0.000002150;
 float KdLowShooting  = 0.000000020;
-const int rpmLow = 1350;
+const int rpmLow = 1100;
 
-float KpMid  = 0.000086500;
-float KiMid  = 0.000000000;
-float KdMid  = 0.000000000;
+float KpMid  = 0.000900500;
+float KiMid  = 0.000002150;
+float KdMid  = 0.000000020;
 
 float KpHighL = 0.00071;
 float KiHighL = 0.000045;//2200;

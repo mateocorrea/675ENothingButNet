@@ -40,14 +40,14 @@ task pneumatics()
 			if(liftCount == 0)
 			{
 				deploy();
-				actuateBrake();
+
 				liftCount++;
 			}
 			else if(liftCount == 1)
 			{
 				releaseLift();
 				liftCount++;
-				PlayMario();
+
 			}
 			else {
 				lockLift();
