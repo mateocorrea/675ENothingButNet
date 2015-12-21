@@ -7,6 +7,7 @@
 #define brakeBtn vexRT[Btn5U]
 bool lastRampBtn = false;
 
+int mapped(int x);
 task drive();
 task pneumatics();
 void drivePower(int left, int right);
@@ -16,6 +17,8 @@ void actuateBrake();
 void releaseLift();
 void lockLift();
 void deploy();
+
+bool cubicMapping = true;
 
 const int threshold = 12;
 int liftCount = 0;
@@ -131,12 +134,21 @@ void turn(int degrees)
 
 void drivePower(int left, int right)
 {
+    
 	if(abs(left) < threshold)
 		left = 0;
 	if(abs(right) < threshold)
 		right = 0;
+    if (cubicMapping) {
+        left = mapped(left);
+        right = mapped(right);
+    }
 	motor[rightback] = right;
 	motor[rightfront] = right;
 	motor[leftback] = left;
 	motor[leftfront] = left;
+}
+
+int mapped(int x) {
+    return round(0.0001*x*x*x - 0.0095*x*x + 0.4605*x - 0.6284);
 }
