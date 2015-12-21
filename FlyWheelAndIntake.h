@@ -15,27 +15,17 @@
 #define rollerOutBtn vexRT[Btn8D]
 #define raiseBtn vexRT[Btn8L]
 
-int flyBat = 0;
-float rpmLeft = 0;
-float rpmRight = 0;
-
-float flySpeedLeft = 0;
-float flySpeedRight = 0;
-
-// PID Code //
-float oldLeftError = 0;
-float oldRightError = 0;
-
-float integralRight = 0;
-float integralLeft = 0;
-
-float timeSinceShot = 0;
-
-int encoderTimer = 25;
-int ticksPerTurnSpeed = 372;
-float launcherRatio = 10.2;
-//////////////
-
+//            VARIABLES AND FUNCTIONS                  //
+/////////////////////////////////////////////////////////
+int rpmLow = 1100;
+int rpmMid = 1400;
+int rpmHigh = 1690;
+float rpmGoal = rpmHigh;
+int lowSpeed = 37;
+int midSpeed = 43;
+int highSpeed = 85;
+int flyWheelSpeed = highSpeed;
+/////////////////////////////////////////////////////////
 bool lastModeBtn = false;
 bool lastRaiseBtn = false;
 bool lastLowerBtn = false;
@@ -46,99 +36,81 @@ bool flyWheelOn = false;
 bool rollerOn = true;
 bool rpmMode = true;
 bool justChangedToRPM = false;
-
-task flyWheelControl();
-task flyWheelPower();
-task intake();
-void turnOn(int color);
-void flyWheelMotors(float left, float right);
-void pidChange(int rpmGoal);
-int voltageCorrection(int rpm);
-bool notShooting();
-bool doneShooting();
-void averageRPMS(float left, float right);
-
-float lastTime = 0.0;
-
-/////////////////////////////////////////////////////////
-int lowSpeed = 37;
-int midSpeed = 43;
-int highSpeed = 85;//80 soft balls
-int flyWheelSpeed = highSpeed;
-
-
-const int rpmMid = 1400;
-
-
-
-float KpL = 1.0;
-float KpR = 1.0;
-float KiL = 1.0;
-float KiR = 1.0;
-float KdL = 1.0;
-float KdR = 1.0;
-
-float KpLow  = 0.000900500;
-float KiLow  = 0.000001200;
-float KdLow  = 0.0000000;//0.000000250;
-float KpLowShooting  = 0.000900500;
-float KiLowShooting  = 0.000002150;
-float KdLowShooting  = 0.000000020;
-const int rpmLow = 1100;
-
-float KpMid  = 0.000900500;
-float KiMid  = 0.000002150;
-float KdMid  = 0.000000020;
-
-float KpHighL = 0.00071;
-float KiHighL = 0.000045;//2200;
-float KdHighL = 0.000030;//250;
-float KpHighR = KpHighL;
-float KiHighR = KiHighL;
-float KdHighR = KdHighL;
-
-/*
-float KpHighRS = 0.009419000;
-float KiHighRS = 0.000077000;
-float KdHighRS = 0.000004000;
-*/
-
-float KpHighRS = 0.0804190;
-float KiHighRS = KpHighRS / 125.0;
-float KdHighRS = KpHighRS / 2354.0;
-
-/*
-good values
-float KpHighRS = 0.0094190000000;
-float KiHighRS = 0.0000700;
-float KdHighRS  = 0.000002000;
-*/
-//////////////////////////////
-float KpHighLS = KpHighRS + 0.000015;
-float KiHighLS = KpHighRS / 122.35;
-float KdHighLS = KpHighRS / 2354.0;
-
-const int rpmHigh = 1690;
-float rpmGoal = rpmHigh;
-/////////////////////////////////////////////////////////
-
-const int red = 0;
-const int green = 1;
-const int yellow = 2;
-
+float launcherRatio = 10.2;
+float rpmLeft = 0.0;
+float rpmRight = 0.0;
+float flySpeedLeft = 0.0;
+float flySpeedRight = 0.0;
+float oldLeftError = 0.0;
+float oldRightError = 0.0;
+float integralRight = 0.0;
+float integralLeft = 0.0;
+int maxPower = 118;
+int minPower = 35;
+int encoderTimer = 25;
+int ticksPerTurnSpeed = 372;
 int batteryValues = 0;
 int averageBattery = 0;
 int rightValues = 0;
 int averageRight = 0;
 int leftValues = 0;
 int averageLeft = 0;
+int powerBias = 0;
+int red = 0;
+int green = 1;
+int yellow = 2;
+/////////////////////////////////////////////////////////
+bool notShooting();
+bool doneShooting();
+int voltageCorrection(int rpm);
+task flyWheelControl();
+task flyWheelPower();
+task intake();
+void turnOn(int color);
+void flyWheelMotors(float left, float right);
+void pidChange(int rpmGoal);
+void averageRPMS(float left, float right);
+void normalizeFlyPower();
+void setPIDConstants();
+void slowStart();
+/////////////////////////////////////////////////////////
+
+
+//                 PID CONSTANTS                       //
+/////////////////////////////////////////////////////////
+float KpL = 1.0;
+float KpR = 1.0;
+float KiL = 1.0;
+float KiR = 1.0;
+float KdL = 1.0;
+float KdR = 1.0;
+/////////////////////////////////////////////////////////
+float KpLow  = 0.000900500;
+float KiLow  = 0.000001200;
+float KdLow  = 0.0000000;//0.000000250;
+float KpLowShooting  = 0.000900500;
+float KiLowShooting  = 0.000002150;
+float KdLowShooting  = 0.000000020;
+/////////////////////////////////////////////////////////
+float KpMid  = 0.000900500;
+float KiMid  = 0.000002150;
+float KdMid  = 0.000000020;
+/////////////////////////////////////////////////////////
+float KpHighL = 0.00071;
+float KiHighL = 0.000045;
+float KdHighL = 0.000030;
+float KpHighR = KpHighL;
+float KiHighR = KiHighL;
+float KdHighR = KdHighL;
+float KpHighRS = 0.0804190;
+float KiHighRS = KpHighRS / 125.0;
+float KdHighRS = KpHighRS / 2354.0;
+float KpHighLS = KpHighRS + 0.000015;
+float KiHighLS = KpHighRS / 125.0;
+float KdHighLS = KpHighRS / 2354.0;
+/////////////////////////////////////////////////////////
 
 task flyWheelPower() {
-	flyWheelMotors(20.0, 20.0);
-	wait1Msec(70);
-	flyWheelMotors(40.0, 40.0);
-	wait1Msec(70);
-	flyWheelMotors(80.0, 80.0);
 	while(true)
 	{
 		if(flyWheelOn) {
@@ -147,103 +119,20 @@ task flyWheelPower() {
 					turnOn(green);
 				if((flyWheelSpeed == midSpeed) && (SensorValue[yellowLED] == 1))
 					turnOn(yellow);
-				wait1Msec(encoderTimer);
-				if(flyWheelSpeed == lowSpeed)	{
-					KpL = KpLow;
-        	KpR = KpLow;
-        	KiL = KiLow;
-        	KiR = KiLow;
-        	KdL = KdLow;
-        	KdR = KdLow;
-        	if(intakeBtn == 1)
-        	{
-        		KpL = KpLowShooting;
-        		KpR = KpLowShooting;
-	        	KiL = KiLowShooting;
-	        	KiR = KiLowShooting;
-	        	KdL = KdLowShooting;
-	        	KdR = KdLowShooting;
-	        }
-	        pidChange(rpmGoal);
-				} else {
-						float factor = ( ( launcherRatio * 60000.0 ) / encoderTimer ) / ticksPerTurnSpeed;
-				    rpmLeft = abs(flyEncLeft * factor);
-				    rpmRight = abs(flyEncRight * factor);
-				    flyEncLeft = 0;
-				    flyEncRight = 0;
-				    flySpeedLeft = flyWheelSpeed;
-					flySpeedRight = flyWheelSpeed;
-				}
-
+                if((flyWheelSpeed == lowSpeed) && (SensorValue[redLED] == 1))
+                    turnOn(red);
+                flySpeedLeft = flyWheelSpeed + powerBias;
+                flySpeedRight = flyWheelSpeed + powerBias;
 			} else {
-				if(justChangedToRPM && (rpmGoal == rpmHigh)) {
-					flyWheelMotors(20.0, 20.0);
-					wait1Msec(70);
-					flyWheelMotors(40.0, 40.0);
-					wait1Msec(70);
-					flyWheelMotors(80.0, 80.0);
-					justChangedToRPM = false;
+				if(justChangedToRPM) {
+                    slowStart();
+                    justChangedToRPM = false;
 				}
 				wait1Msec(encoderTimer);
-
-				//delta_ms = nSysTime - nSysTime_last;
-
-				timeSinceShot += encoderTimer;
-
-				if(shootSensor) {
-					timeSinceShot = 0;
-				}
-				if(rpmGoal == rpmLow) {
-		        	KpL = KpLow;
-		        	KpR = KpLow;
-		        	KiL = KiLow;
-		        	KiR = KiLow;
-		        	KdL = KdLow;
-		        	KdR = KdLow;
-		        	if(intakeBtn == 1)
-		        	{
-		        		KpL = KpLowShooting;
-		        		KpR = KpLowShooting;
-			        	KiL = KiLowShooting;
-			        	KiR = KiLowShooting;
-			        	KdL = KdLowShooting;
-			        	KdR = KdLowShooting;
-			        }
-				} else if(rpmGoal == rpmMid) {
-		        	KpL = KpMid;
-		        	KpR = KpMid;
-		        	KiL = KiMid;
-		        	KiR = KiMid;
-		        	KdL = KdMid;
-		        	KdR = KdMid;
-		        } else {
-		        	KpL = KpHighL;
-		        	KpR = KpHighR;
-		        	KiL = KiHighL;
-		        	KiR = KiHighR;
-		        	KdL = KdHighL;
-		        	KdR = KdHighR;
-		        	if(intakeBtn == 1)
-		        	{
-		        		KpL = KpHighLS;
-		        		KpR = KpHighRS;
-			        	KiL = KiHighLS;
-			        	KiR = KiHighRS;
-			        	KdL = KdHighLS;
-			        	KdR = KdHighRS;
-			        }
-		      	}
-
-		        pidChange(rpmGoal);
+                setPIDConstants();
+		        pidChange(rpmGoal + powerBias);
 	    	}
-	    	if(flySpeedLeft < 30)
-	    		flySpeedLeft = 30;
-	    	if(flySpeedRight < 30)
-	    		flySpeedRight = 30;
-	    	if(flySpeedLeft > 120)
-	    		flySpeedLeft = 120;
-	    	if(flySpeedRight > 120)
-	    		flySpeedRight = 120;
+            normalizeFlyPower();
 	    	flyWheelMotors(flySpeedLeft, flySpeedRight);
 	  	} else {
 			flyWheelMotors(0,0);
@@ -252,13 +141,7 @@ task flyWheelPower() {
 }
 
 task flyWheelControl() {
-	if(rpmGoal == rpmHigh)
-		flyWheelSpeed = highSpeed;
-	if(rpmGoal == rpmMid)
-		flyWheelSpeed = midSpeed;
-	if(rpmGoal == rpmLow)
-		flyWheelSpeed = lowSpeed;
-
+    initFlyWheel();
 	while(true) {
 
 		// Flywheel On/Off //
@@ -279,8 +162,8 @@ task flyWheelControl() {
 				turnOn(yellow);
 			} else if (flyWheelSpeed == midSpeed) {
 				flyWheelSpeed = highSpeed;
-				flySpeedLeft = 80;
-				flySpeedRight = 80;
+                flySpeedLeft = highSpeed; // to speed up recovery
+                flySpeedRight = highSpeed; // to speed up recovery
 				rpmGoal = rpmHigh;
 				turnOn(green);
 			} else {
@@ -303,27 +186,14 @@ task flyWheelControl() {
 		}
 
 		if(raiseBtn == 1 && lastRaiseBtn == false) {
-			highSpeed += 2;
-			midSpeed += 2;
-
-			if(flyWheelSpeed == (highSpeed-2))
-				flyWheelSpeed = highSpeed;
-			else if(flyWheelSpeed == (midSpeed-2))
-				flyWheelSpeed = midSpeed;
+			powerBias += 2
 			lastRaiseBtn = true;
 		} else if (raiseBtn == 0) {
 			lastRaiseBtn = false;
 		}
 
 		if(lowerBtn == 1 && lastLowerBtn == false) {
-			highSpeed -= 2;
-			midSpeed -= 2;
-
-			if(flyWheelSpeed == (highSpeed+2))
-				flyWheelSpeed = highSpeed;
-			else if(flyWheelSpeed == (midSpeed+2))
-				flyWheelSpeed = midSpeed;
-
+			powerBias -= 2
 			lastLowerBtn = true;
 		} else if (lowerBtn == 0) {
 			lastLowerBtn = false;
@@ -336,11 +206,7 @@ task intake()
 	while(true) {
 
 		/* Intake Power */
-		if(rpmMode == true) {
-			motor[chain] = 127 * (intakeBtn - outtakeBtn);
-		} else {
-			motor[chain] = 127 * (intakeBtn - outtakeBtn);
-		}
+		motor[chain] = 127 * (intakeBtn - outtakeBtn);
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false) {
@@ -370,19 +236,6 @@ void turnOn(int color) {
 	}
 }
 
-bool notShooting()
-{
-	if(timeSinceShot > 5000)
-		return true;
-	return false;
-}
-
-bool doneShooting() {
-	if((timeSinceShot > 2000) && (timeSinceShot < 5000))
-		return true;
-	return false;
-}
-
 void flyWheelMotors(float left, float right)
 {
 	int l = round(left);
@@ -391,10 +244,10 @@ void flyWheelMotors(float left, float right)
 		l *= -1;
 	if(r < 0)
 		r *= -1;
-	if(l > 118)
-		l = 118;
-	if(r > 118)
-		r = 118;
+	if(l > maxPower)
+		l = maxPower;
+	if(r > maxPower)
+		r = maxPower;
 	motor[topRightLauncher] = r;
 	motor[topLeftLauncher] = l;
 	motor[bottomRightLauncher] = r;
@@ -404,7 +257,6 @@ void flyWheelMotors(float left, float right)
 void pidChange(int rpmGoal)
 {
 	float deltaTime = abs(nSysTime - lastTime);
-	//writeDebugStreamLine("%f", deltaTime);
 	float factor = ( ( launcherRatio * 60000 ) / deltaTime ) / ticksPerTurnSpeed;
 	rpmLeft = abs(flyEncLeft * factor);
 	rpmRight = abs(flyEncRight * factor);
@@ -413,10 +265,8 @@ void pidChange(int rpmGoal)
 	float rightError = voltageCorrection(rpmGoal) - rpmRight;
 
 	////// Proportional /////
-
 	float pLeft = KpL * leftError;
 	float pRight = KpR * rightError;
-
 
 	////// Integral //////
 	integralRight = integralRight + (rightError * deltaTime);
@@ -439,30 +289,30 @@ void pidChange(int rpmGoal)
 	float rightChange = pRight + iRight + dRight;
 
 	// Adjust Speed //
-  flySpeedLeft += leftChange;
-  flySpeedRight += rightChange;
+    flySpeedLeft += leftChange;
+    flySpeedRight += rightChange;
 
-  //writeDebugStreamLine("%f", leftChange);
-  //writeDebugStreamLine("%f", rightChange);
+    //writeDebugStreamLine("%f", leftChange);
+    //writeDebugStreamLine("%f", rightChange);
 
-  // Reset the errors and the encoders
-  oldLeftError = leftError;
-  oldRightError = rightError;
-  flyEncLeft = 0;
-  flyEncRight = 0;
-  lastTime = nSysTime;
+    // Reset the errors and the encoders
+    oldLeftError = leftError;
+    oldRightError = rightError;
+    flyEncLeft = 0;
+    flyEncRight = 0;
+    lastTime = nSysTime;
 }
 
 int voltageCorrection(int rpm)
 {
-		flyBat = SensorValue[in4];
-    int sum = (batteryValues * averageBattery) + flyBat; //flyBattery is the sensor value
+    int flyBat = SensorValue[in4];
+    int sum = (batteryValues * averageBattery) + flyBat;
     batteryValues++;
     averageBattery = sum / batteryValues;
     if(batteryValues == 500)
         batteryValues = 100;
     if(rpm == rpmHigh)
-        return rpm + (-0.112 * averageBattery + 176.03);  //mx + b
+        return rpm + (-0.112 * averageBattery + 176.03);
     else
         return rpm;
 }
@@ -472,11 +322,85 @@ void averageRPMS(float left, float right)
 	int rightSum = (rightValues * averageRight) + right;
 	rightValues++;
 	averageRight = rightSum / rightValues++;
-
 	int leftSum = (leftValues * averageLeft) + left;
 	leftValues++;
 	averageLeft = leftSum / leftValues++;
 	clearDebugStream();
 	writeDebugStreamLine("Average Right: %f", averageRight);
 	writeDebugStreamLine("Average Left: %f", averageLeft);
+}
+
+void setPIDConstants()
+{
+    if(rpmGoal == rpmLow) {
+        KpL = KpLow;
+        KpR = KpLow;
+        KiL = KiLow;
+        KiR = KiLow;
+        KdL = KdLow;
+        KdR = KdLow;
+        if(intakeBtn == 1)
+        {
+            KpL = KpLowShooting;
+            KpR = KpLowShooting;
+            KiL = KiLowShooting;
+            KiR = KiLowShooting;
+            KdL = KdLowShooting;
+            KdR = KdLowShooting;
+        }
+    } else if(rpmGoal == rpmMid) {
+        KpL = KpMid;
+        KpR = KpMid;
+        KiL = KiMid;
+        KiR = KiMid;
+        KdL = KdMid;
+        KdR = KdMid;
+    } else {
+        KpL = KpHighL;
+        KpR = KpHighR;
+        KiL = KiHighL;
+        KiR = KiHighR;
+        KdL = KdHighL;
+        KdR = KdHighR;
+        if(intakeBtn == 1)
+        {
+            KpL = KpHighLS;
+            KpR = KpHighRS;
+            KiL = KiHighLS;
+            KiR = KiHighRS;
+            KdL = KdHighLS;
+            KdR = KdHighRS;
+        }
+    }
+}
+
+void normalizeFlyPower()
+{
+    if(flySpeedLeft < minPower)
+        flySpeedLeft = minPower;
+    if(flySpeedRight < minPower)
+        flySpeedRight = minPower;
+    if(flySpeedLeft > maxPower)
+        flySpeedLeft = maxPower;
+    if(flySpeedRight > maxPower)
+        flySpeedRight = maxPower;
+}
+
+void slowStart()
+{
+    flyWheelMotors(20.0, 20.0);
+    wait1Msec(100);
+    flyWheelMotors(40.0, 40.0);
+    wait1Msec(100);
+    flyWheelMotors(60.0, 60.0);
+}
+
+void initFlyWheel()
+{
+    if(rpmGoal == rpmHigh)
+        flyWheelSpeed = highSpeed;
+    if(rpmGoal == rpmMid)
+        flyWheelSpeed = midSpeed;
+    if(rpmGoal == rpmLow)
+        flyWheelSpeed = lowSpeed;
 }
