@@ -5,7 +5,12 @@
 #define rampBtn vexRT[Btn7D]
 #define rampBtn2 vexRT[Btn7L]
 #define brakeBtn vexRT[Btn5U]
+
+bool braking = false;
+bool cubicMapping = true;
 bool lastRampBtn = false;
+int threshold = 12;
+int liftCount = 0;
 
 int mapped(int x);
 task drive();
@@ -17,12 +22,6 @@ void actuateBrake();
 void releaseLift();
 void lockLift();
 void deploy();
-
-bool cubicMapping = true;
-
-const int threshold = 12;
-int liftCount = 0;
-bool braking = false;
 
 task drive()
 {
@@ -149,6 +148,7 @@ void drivePower(int left, int right)
 	motor[leftfront] = left;
 }
 
-int mapped(int x) {
+int mapped(int x)
+{
     return round(0.0001*x*x*x - 0.0095*x*x + 0.4605*x - 0.6284);
 }
