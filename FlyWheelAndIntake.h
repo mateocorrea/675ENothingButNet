@@ -18,8 +18,8 @@
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
 int rpmLow = 1100;
-int rpmMid = 1400;
-int rpmHigh = 1690;
+int rpmMid = 1390;
+int rpmHigh = 1720;
 float rpmGoal = rpmHigh;
 int lowSpeed = 37;
 int midSpeed = 43;
@@ -85,29 +85,29 @@ float KiR = 1.0;
 float KdL = 1.0;
 float KdR = 1.0;
 /////////////////////////////////////////////////////////
-float KpLow  = 0.000900500;
-float KiLow  = 0.000001200;
-float KdLow  = 0.0000000;//0.000000250;
-float KpLowShooting  = 0.000900500;
-float KiLowShooting  = 0.000002150;
-float KdLowShooting  = 0.000000020;
+float KpLow = 0.000900500;
+float KiLow = 0.000000200;
+float KdLow = 0.005000000;
+float KpLowShooting = 0.01152500;
+float KiLowShooting = 0.00000000;
+float KdLowShooting = 0.92000000;
 /////////////////////////////////////////////////////////
-float KpMid  = 0.000900500;
-float KiMid  = 0.000002150;
-float KdMid  = 0.000000020;
+float KpMid = 0.005050000;
+float KiMid = 0.000000000;
+float KdMid = 0.035000000;
 /////////////////////////////////////////////////////////
-float KpHighL = 0.00071;
-float KiHighL = 0.000045;
-float KdHighL = 0.000030;
+float KpHighL = 0.000710000;
+float KiHighL = 0.000045000;
+float KdHighL = 0.000030000;
 float KpHighR = KpHighL;
 float KiHighR = KiHighL;
 float KdHighR = KdHighL;
-float KpHighRS = 0.0804190;
-float KiHighRS = KpHighRS / 125.0;
-float KdHighRS = KpHighRS / 2354.0;
+float KpHighRS = 0.120419000;
+float KiHighRS = 0;//KpHighRS / 125.0;
+float KdHighRS = 0;//KpHighRS / 2354.0;
 float KpHighLS = KpHighRS + 0.000015;
-float KiHighLS = KpHighRS / 125.0;
-float KdHighLS = KpHighRS / 2354.0;
+float KiHighLS = 0;//KpHighRS / 125.0;
+float KdHighLS = 0;//KpHighRS / 2354.0;
 /////////////////////////////////////////////////////////
 
 task flyWheelPower() {
