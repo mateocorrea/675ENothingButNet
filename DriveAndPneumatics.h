@@ -7,7 +7,7 @@
 #define brakeBtn vexRT[Btn5U]
 
 bool braking = false;
-bool cubicMapping = true;
+bool cubicMapping = false;
 bool lastRampBtn = false;
 int threshold = 12;
 int liftCount = 0;
@@ -133,7 +133,7 @@ void turn(int degrees)
 
 void drivePower(int left, int right)
 {
-    
+
 	if(abs(left) < threshold)
 		left = 0;
 	if(abs(right) < threshold)

@@ -174,9 +174,9 @@ void PlayTune(string music)
     } else if (c>='*' && c<='/') {
       wait10Msec(WHOLE_NOTE >> (c-'*')); // rest
     } else if (c>='A' && c<='G') {
-      PlayTone(NaturalNotes[c-'A']>>(9-octave), duration);
+      playTone(NaturalNotes[c-'A']>>(9-octave), duration);
     } else if (c>='a' && c<='g') {
-      PlayTone(AccidentalNotes[c-'a']>>(9-octave), duration);
+      playTone(AccidentalNotes[c-'a']>>(9-octave), duration);
     }
   } while (c);
 }

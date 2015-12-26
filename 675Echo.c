@@ -28,8 +28,6 @@
 
 #pragma platform(VEX)
 #pragma competitionControl(Competition)
-#pragma autonomousDuration(20)
-#pragma userControlDuration(120)
 void init();
 #include "cool.c"
 #include "FlyWheelAndIntake.h"
@@ -63,6 +61,7 @@ task autonomous()
 
 task usercontrol()
 {
+	clearDebugStream();
 	if(getTaskState(LCD) == taskStateStopped)
 		startTask(LCD);
 	if(getTaskState(flyWheelPower) == taskStateStopped)
