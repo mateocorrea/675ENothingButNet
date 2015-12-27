@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////
 int rpmLow = 1100;
 int rpmMid = 1390;
-int rpmHigh = 1604;
+int rpmHigh = 1670;
 float rpmGoal = rpmHigh;
 int lowSpeed = 37;
 int midSpeed = 43;
@@ -99,9 +99,9 @@ float KiMid = 0.000000000;
 float KdMid = 0.035000000;
 /////////////////////////////////////////////////////////
 
-float KpHighRS = 0.00800000;
-float KiHighRS = 0.00070;
-float KdHighRS  = 0.009000;/*
+float KpHighRS = 0.018000000;//.008
+float KiHighRS = 0.0122;//.0007
+float KdHighRS  = 0.0025900;/* .009//.00155
 float KpHighRS = 0.100419000;
 float KiHighRS = 0.000001200;//KpHighRS / 125.0;
 float KdHighRS = 0.450000000;//KpHighRS / 2354.0; */
@@ -219,7 +219,7 @@ task intake()
 	while(true) {
 
 		/* Intake Power */
-		motor[chain] = 127 * (intakeBtn - outtakeBtn);
+		motor[chain] = 70 * (intakeBtn - outtakeBtn);
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false) {
