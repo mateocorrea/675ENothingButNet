@@ -17,8 +17,8 @@
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
-int rpmLow = 1100;
-int rpmMid = 1390;
+int rpmLow = 1000;
+int rpmMid = 1200;
 int rpmHigh = 1670;
 float rpmGoal = rpmHigh;
 int lowSpeed = 37;
@@ -94,9 +94,9 @@ float KpLowShooting = 0.01152500;
 float KiLowShooting = 0.00000000;
 float KdLowShooting = 0.92000000;
 /////////////////////////////////////////////////////////
-float KpMid = 0.005050000;
-float KiMid = 0.000000000;
-float KdMid = 0.035000000;
+float KpMid = 0.01150000;
+float KiMid = 0.01220000;
+float KdMid = 0.002100000;
 /////////////////////////////////////////////////////////
 
 float KpHighRS = 0.018000000;//.008
@@ -125,29 +125,29 @@ task flyWheelPower() {
 					turnOn(green);
 				if((flyWheelSpeed == midSpeed) && (SensorValue[yellowLED] == 1))
 					turnOn(yellow);
-                if((flyWheelSpeed == lowSpeed) && (SensorValue[redLED] == 1))
-                    turnOn(red);
-                flySpeedLeft = flyWheelSpeed + powerBias;
-                flySpeedRight = flyWheelSpeed + powerBias;
-			} else {
+				if((flyWheelSpeed == lowSpeed) && (SensorValue[redLED] == 1))
+					turnOn(red);
+				flySpeedLeft = flyWheelSpeed + powerBias;
+				flySpeedRight = flyWheelSpeed + powerBias;
+				} else {
 				if(justChangedToRPM) {
-                    slowStart();
-                    justChangedToRPM = false;
+					slowStart();
+					justChangedToRPM = false;
 				}
 				wait1Msec(encoderTimer);
-                setPIDConstants();
-		        pidChange(rpmGoal + powerBias);
-	    	}
-            normalizeFlyPower();
-	    	flyWheelMotors(flySpeedLeft, flySpeedRight);
-	  	} else {
+				setPIDConstants();
+				pidChange(rpmGoal + powerBias);
+			}
+			normalizeFlyPower();
+			flyWheelMotors(flySpeedLeft, flySpeedRight);
+			} else {
 			flyWheelMotors(0,0);
 		}
 	}
 }
 
 task flyWheelControl() {
-    initFlyWheel();
+	initFlyWheel();
 	while(true) {
 
 		// Flywheel On/Off //
@@ -156,7 +156,7 @@ task flyWheelControl() {
 			if((flyWheelOn == true) && (rpmMode == true))
 				justChangedToRPM = true;
 			lastFlyWheelBtn = true;
-		} else if (flyWheelBtn == 0) {
+			} else if (flyWheelBtn == 0) {
 			lastFlyWheelBtn = false;
 		}
 
@@ -166,19 +166,19 @@ task flyWheelControl() {
 				flyWheelSpeed = midSpeed;
 				rpmGoal = rpmMid;
 				turnOn(yellow);
-			} else if (flyWheelSpeed == midSpeed) {
+				} else if (flyWheelSpeed == midSpeed) {
 				flyWheelSpeed = highSpeed;
-                flySpeedLeft = highSpeed; // to speed up recovery
-                flySpeedRight = highSpeed; // to speed up recovery
+				flySpeedLeft = highSpeed; // to speed up recovery
+				flySpeedRight = highSpeed; // to speed up recovery
 				rpmGoal = rpmHigh;
 				turnOn(green);
-			} else {
+				} else {
 				flyWheelSpeed = lowSpeed;
 				rpmGoal = rpmLow;
 				turnOn(red);
 			}
 			lastSpeedBtn = true;
-		} else if ( speedBtn == 0 ) {
+			} else if ( speedBtn == 0 ) {
 			lastSpeedBtn = false;
 		}
 
@@ -187,28 +187,28 @@ task flyWheelControl() {
 			if(rpmMode == true)
 				justChangedToRPM = true;
 			lastModeBtn = true;
-		} else if (modeBtn == 0) {
+			} else if (modeBtn == 0) {
 			lastModeBtn = false;
 		}
 
 		if(raiseBtn == 1 && lastRaiseBtn == false) {
 			powerBias += 2;
 			lastRaiseBtn = true;
-		} else if (raiseBtn == 0) {
+			} else if (raiseBtn == 0) {
 			lastRaiseBtn = false;
 		}
 
 		if(lowerBtn == 1 && lastLowerBtn == false) {
 			powerBias -= 2;
 			lastLowerBtn = true;
-		} else if (lowerBtn == 0) {
+			} else if (lowerBtn == 0) {
 			lastLowerBtn = false;
 		}
 
 		if(intakeBtn && !lastIntakeBtn) {
 			initialTime = nSysTime;
 			lastIntakeBtn = true;
-		} else if (intakeBtn == 0) {
+			} else if (intakeBtn == 0) {
 			lastIntakeBtn = false;
 		}
 	}
@@ -225,7 +225,7 @@ task intake()
 		if(rollerBtn == 1 && lastRollerBtn == false) {
 			rollerOn = !rollerOn;
 			lastRollerBtn = true;
-		} else if (rollerBtn == 0) {
+			} else if (rollerBtn == 0) {
 			lastRollerBtn = false;
 		}
 		if(rollerOutBtn)
@@ -242,9 +242,9 @@ void turnOn(int color) {
 
 	if(color == red) {
 		SensorValue[redLED] = 0;
-	} else if (color == green) {
+		} else if (color == green) {
 		SensorValue[greenLED] = 0;
-	} else if (color == yellow) {
+		} else if (color == yellow) {
 		SensorValue[yellowLED] = 0;
 	}
 }
@@ -302,34 +302,34 @@ void pidChange(int rpmGoal)
 	float rightChange = pRight + iRight + dRight;
 
 	// Adjust Speed //
-    flySpeedLeft += leftChange;
-    flySpeedRight += rightChange;
+	flySpeedLeft += leftChange;
+	flySpeedRight += rightChange;
 
-    //writeDebugStreamLine("%f", leftChange);
-    //writeDebugStreamLine("%f", rightChange);
+	//writeDebugStreamLine("%f", leftChange);
+	//writeDebugStreamLine("%f", rightChange);
 
-    // Reset the errors and the encoders
-    oldLeftError = leftError;
-    oldRightError = rightError;
-    flyEncLeft = 0;
-    flyEncRight = 0;
-    lastTime = nSysTime;
+	// Reset the errors and the encoders
+	oldLeftError = leftError;
+	oldRightError = rightError;
+	flyEncLeft = 0;
+	flyEncRight = 0;
+	lastTime = nSysTime;
 
-    writeDebugStreamLine("%d, %f", nSysTime-initialTime, rpmLeft);
+	writeDebugStreamLine("%d, %f", nSysTime-initialTime, rpmLeft);
 }
 
 int voltageCorrection(int rpm)
 {
-    int flyBat = SensorValue[in4];
-    int sum = (batteryValues * averageBattery) + flyBat;
-    batteryValues++;
-    averageBattery = sum / batteryValues;
-    if(batteryValues == 500)
-        batteryValues = 100;
-    if(rpm == rpmHigh)
-        return rpm + (-0.122 * averageBattery + 176.03);
-    else
-        return rpm;
+	int flyBat = SensorValue[in4];
+	int sum = (batteryValues * averageBattery) + flyBat;
+	batteryValues++;
+	averageBattery = sum / batteryValues;
+	if(batteryValues == 500)
+		batteryValues = 100;
+	if(rpm == rpmHigh)
+		return rpm + (-0.122 * averageBattery + 176.03);
+	else
+		return rpm;
 }
 
 void averageRPMS(float left, float right)
@@ -347,77 +347,77 @@ void averageRPMS(float left, float right)
 
 void setPIDConstants()
 {
-    if(rpmGoal == rpmLow) {
-        KpL = KpLow;
-        KpR = KpLow;
-        KiL = KiLow;
-        KiR = KiLow;
-        KdL = KdLow;
-        KdR = KdLow;
-        if(intakeBtn == 1)
-        {
-            KpL = KpLowShooting;
-            KpR = KpLowShooting;
-            KiL = KiLowShooting;
-            KiR = KiLowShooting;
-            KdL = KdLowShooting;
-            KdR = KdLowShooting;
-        }
-    } else if(rpmGoal == rpmMid) {
-        KpL = KpMid;
-        KpR = KpMid;
-        KiL = KiMid;
-        KiR = KiMid;
-        KdL = KdMid;
-        KdR = KdMid;
-    } else {
-        KpL = KpHighL;
-        KpR = KpHighR;
-        KiL = KiHighL;
-        KiR = KiHighR;
-        KdL = KdHighL;
-        KdR = KdHighR;
-        if(intakeBtn == 1)
-        {
-            KpL = KpHighLS;
-            KpR = KpHighRS;
-            KiL = KiHighLS;
-            KiR = KiHighRS;
-            KdL = KdHighLS;
-            KdR = KdHighRS;
-        }
-    }
+	if(rpmGoal == rpmLow) {
+		KpL = KpLow;
+		KpR = KpLow;
+		KiL = KiLow;
+		KiR = KiLow;
+		KdL = KdLow;
+		KdR = KdLow;
+		if(intakeBtn == 1)
+		{
+			KpL = KpLowShooting;
+			KpR = KpLowShooting;
+			KiL = KiLowShooting;
+			KiR = KiLowShooting;
+			KdL = KdLowShooting;
+			KdR = KdLowShooting;
+		}
+		} else if(rpmGoal == rpmMid) {
+		KpL = KpMid;
+		KpR = KpMid;
+		KiL = KiMid;
+		KiR = KiMid;
+		KdL = KdMid;
+		KdR = KdMid;
+		} else {
+		KpL = KpHighL;
+		KpR = KpHighR;
+		KiL = KiHighL;
+		KiR = KiHighR;
+		KdL = KdHighL;
+		KdR = KdHighR;
+		if(intakeBtn == 1)
+		{
+			KpL = KpHighLS;
+			KpR = KpHighRS;
+			KiL = KiHighLS;
+			KiR = KiHighRS;
+			KdL = KdHighLS;
+			KdR = KdHighRS;
+		}
+	}
 }
 
 void normalizeFlyPower()
 {
-    if(flySpeedLeft < minPower)
-        flySpeedLeft = minPower;
-    if(flySpeedRight < minPower)
-        flySpeedRight = minPower;
-    if(flySpeedLeft > maxPower)
-        flySpeedLeft = maxPower;
-    if(flySpeedRight > maxPower)
-        flySpeedRight = maxPower;
+	if(flySpeedLeft < minPower)
+		flySpeedLeft = minPower;
+	if(flySpeedRight < minPower)
+		flySpeedRight = minPower;
+	if(flySpeedLeft > maxPower)
+		flySpeedLeft = maxPower;
+	if(flySpeedRight > maxPower)
+		flySpeedRight = maxPower;
 }
 
 void slowStart()
 {
 	initialTime = nSysTime;
-    flyWheelMotors(20.0, 20.0);
-    wait1Msec(100);
-    flyWheelMotors(40.0, 40.0);
-    wait1Msec(100);
-    flyWheelMotors(60.0, 60.0);
+	flyWheelMotors(20.0, 20.0);
+	wait1Msec(100);
+	flyWheelMotors(40.0, 40.0);
+	wait1Msec(100);
+	flyWheelMotors(60.0, 60.0);
 }
 
 void initFlyWheel()
 {
 	initialTime = nSysTime;
-    if(rpmGoal == rpmHigh)
-        flyWheelSpeed = highSpeed;
-    if(rpmGoal == rpmMid)
-        flyWheelSpeed = midSpeed;
-    if(rpmGoal == rpmLow)
-        flyWheelSpeed = lowSpeed;
+	if(rpmGoal == rpmHigh)
+		flyWheelSpeed = highSpeed;
+	if(rpmGoal == rpmMid)
+		flyWheelSpeed = midSpeed;
+	if(rpmGoal == rpmLow)
+		flyWheelSpeed = lowSpeed;
 }
