@@ -17,7 +17,7 @@
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
-int rpmLow = 1000;
+int rpmLow = 108 0;
 int rpmMid = 1200;
 int rpmHigh = 1670;
 float rpmGoal = rpmHigh;
@@ -219,7 +219,7 @@ task intake()
 	while(true) {
 
 		/* Intake Power */
-		motor[chain] = 70 * (intakeBtn - outtakeBtn);
+		motor[chain] = 127 * (intakeBtn - outtakeBtn);
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false) {
@@ -282,7 +282,7 @@ void pidChange(int rpmGoal)
 	float pRight = KpR * rightError;
 
 	////// Integral //////
-	integralRight = integralRight + (rightError * deltaTime);
+	integralRight = integralRight + (rightError * deltaTime);1
 	integralLeft = integralLeft + (leftError * deltaTime);
 	if( ((integralRight > 0) && (rightError < 0)) || ((integralRight < 0) && (rightError > 0)) )
 		integralRight = (rightError * deltaTime);

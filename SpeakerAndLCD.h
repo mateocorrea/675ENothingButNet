@@ -74,6 +74,9 @@ task LCD()
 						song = 0;
 				}
 
+			} else if (screen == name) {
+				SensorValue[laser] = !SensorValue[laser];
+				wait1Msec(50);
 			} else {
 				chosenAuto = screen;
 				if(chosenAuto > 5) {
