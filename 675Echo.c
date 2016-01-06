@@ -3,7 +3,7 @@
 #pragma config(Sensor, dgtl1,  brakePistons,   sensorDigitalOut)
 #pragma config(Sensor, dgtl2,  lockPistons,    sensorDigitalOut)
 #pragma config(Sensor, dgtl3,  deployerPiston, sensorDigitalOut)
-#pragma config(Sensor, dgtl4,  launcherLimitSwitch, sensorTouch)
+#pragma config(Sensor, dgtl4,  laser,          sensorDigitalOut)
 #pragma config(Sensor, dgtl5,  ,               sensorDigitalOut)
 #pragma config(Sensor, dgtl6,  ,               sensorDigitalOut)
 #pragma config(Sensor, dgtl7,  yellowLED,      sensorDigitalOut)
@@ -44,6 +44,7 @@ void progSkills();
 
 void pre_auton()
 {
+    SensorValue[laser] = 1;
 	bStopTasksBetweenModes = false;
 	SensorType[in1] = sensorNone;
   	wait1Msec(1000);
@@ -54,6 +55,7 @@ void pre_auton()
 
 task autonomous()
 {
+    SensorValue[laser] = 0;
 	init();
 	startTask(flyWheelPower);
 	runAuto(chosenAuto);
