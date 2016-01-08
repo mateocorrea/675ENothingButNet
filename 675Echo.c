@@ -108,7 +108,7 @@ void redShoot()
 	flyWheelOn = true;
 	wait1Msec(2000);
 	motor[roller] = 100;
-	for(int x = 0; x < 200; x++)
+	for(int x = 0; x < 10; x++)
 	{
 		motor[chain] = 127;
 		wait1Msec(carry);
@@ -120,7 +120,26 @@ void redShoot()
 
 void redSide()
 {
-	redShoot();
+	int carry = 300;
+	int separation = 1000;
+
+	flyWheelOn = true;
+	wait1Msec(2000);
+	motor[roller] = 100;
+	for(int x = 0; x < 8; x++)
+	{
+		motor[chain] = 127;
+		wait1Msec(carry);
+		motor[chain] = 0;
+		wait1Msec(separation);
+	}
+	flyWheelOn = false;
+	drivePower(-127, -127);
+	wait1Msec(3000);
+	drivePower(100, -100);
+	wait1Msec(1000);
+	drivePower(0,0);
+
 }
 
 void blueBot()

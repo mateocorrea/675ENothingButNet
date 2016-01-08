@@ -17,9 +17,9 @@
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
-int rpmLow = 108 0;
+int rpmLow = 1080;
 int rpmMid = 1200;
-int rpmHigh = 1670;
+int rpmHigh = 1630;
 float rpmGoal = rpmHigh;
 int lowSpeed = 37;
 int midSpeed = 43;
@@ -282,7 +282,7 @@ void pidChange(int rpmGoal)
 	float pRight = KpR * rightError;
 
 	////// Integral //////
-	integralRight = integralRight + (rightError * deltaTime);1
+	integralRight = integralRight + (rightError * deltaTime);
 	integralLeft = integralLeft + (leftError * deltaTime);
 	if( ((integralRight > 0) && (rightError < 0)) || ((integralRight < 0) && (rightError > 0)) )
 		integralRight = (rightError * deltaTime);
