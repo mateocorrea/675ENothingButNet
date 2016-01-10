@@ -58,11 +58,26 @@ task autonomous()
     SensorValue[laser] = 0;
 	init();
 	startTask(flyWheelPower);
+	int carry = 340;
+	int separation = 2500;
+
+	flyWheelOn = true;
+	wait1Msec(2000);
+	motor[roller] = 100;
+	for(int x = 0; x < 10; x++)
+	{
+		motor[chain] = 127;
+		wait1Msec(carry);
+		motor[chain] = 0;
+		wait1Msec(separation);
+	}
+	flyWheelOn = false;
 	runAuto(chosenAuto);
 }
 
 task usercontrol()
 {
+	SensorValue[laser] = 0;
 	clearDebugStream();
 	if(getTaskState(LCD) == taskStateStopped)
 		startTask(LCD);
