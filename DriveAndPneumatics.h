@@ -9,8 +9,11 @@
 bool braking = false;
 bool cubicMapping = false;
 bool lastRampBtn = false;
+bool autoBrake = true;
 int threshold = 12;
 int liftCount = 0;
+int stillTime = 0;
+int autoBrakeTime = 1500;
 
 int mapped(int x);
 task drive();
@@ -25,8 +28,12 @@ void deploy();
 
 task drive()
 {
-	while(true)
+	int lastTime = nSysTime;
+	while(true) {
+		stillTime += nSysTime - lastTime;
+		lastTime = nSysTime;
 		drivePower(vexRT(Ch3), vexRT(Ch2));
+	}
 }
 
 task pneumatics()
@@ -39,19 +46,13 @@ task pneumatics()
 	{
 		/* Ramp */
 		if(rampBtn == 1 && rampBtn2 == 1 && lastRampBtn == false) {
-			if(liftCount == 0)
-			{
+			if(liftCount == 0) {
 				deploy();
-
 				liftCount++;
-			}
-			else if(liftCount == 1)
-			{
+			} else if(liftCount == 1) {
 				releaseLift();
 				liftCount++;
-
-			}
-			else {
+			} else {
 				lockLift();
 				liftCount = 0;
 			}
@@ -60,6 +61,7 @@ task pneumatics()
 			lastRampBtn = false;
 		}
 
+		/* Brakes */
 		if(brakeBtn == 1 && lastBrakeBtn == false) {
 			if(braking)
 				releaseBrake();
@@ -69,9 +71,10 @@ task pneumatics()
 		} else if (brakeBtn == 0) {
 			lastBrakeBtn = false;
 		}
-
 		if((abs(vexRT[Ch2]) > threshold) || (abs(vexRT[Ch3]) > threshold))
 			releaseBrake();
+		if(stillTime > autoBrakeTime)
+			actuateBrake();
 	}
 }
 
@@ -138,6 +141,8 @@ void drivePower(int left, int right)
 		left = 0;
 	if(abs(right) < threshold)
 		right = 0;
+	if((abs(right) >= threshold) || (abs(left) >= threshold))
+		stillTime = 0;
     if (cubicMapping) {
         left = mapped(left);
         right = mapped(right);
