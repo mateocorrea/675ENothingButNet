@@ -147,17 +147,23 @@ task flyWheelPower() {
 }
 
 task flyWheelControl() {
+	int flyWheelOnOffTime = 0;
+	int lastTime = nSysTime;
+	bool justSwitchedFlywheel = false;
 	initFlyWheel();
 	while(true) {
 
 		// Flywheel On/Off //
-		if(flyWheelBtn == 1 && lastFlyWheelBtn == false) {
-			flyWheelOn = !flyWheelOn;
-			if((flyWheelOn == true) && (rpmMode == true))
-				justChangedToRPM = true;
-			lastFlyWheelBtn = true;
-			} else if (flyWheelBtn == 0) {
-			lastFlyWheelBtn = false;
+		if(flyWheelBtn == 1) {
+			flyWheelOnOffTime += nSysTime - lastTime;
+		} else {
+			flyWheelOnOffTime = 0;
+			justSwitchedFlywheel = false;
+		}
+		if((flyWheelOnOffTime > 3000) && (!justSwitchedFlywheel))
+		{
+			flyWheelOn = !flyWheel;
+			justSwitchedFlywheel = true;
 		}
 
 		// Flywheel speed selection //
@@ -211,6 +217,8 @@ task flyWheelControl() {
 			} else if (intakeBtn == 0) {
 			lastIntakeBtn = false;
 		}
+
+		lastTime = nSysTime;
 	}
 }
 
