@@ -73,7 +73,7 @@ task pneumatics()
 		}
 		if((abs(vexRT[Ch2]) > threshold) || (abs(vexRT[Ch3]) > threshold))
 			releaseBrake();
-		if(stillTime > autoBrakeTime)
+		if((stillTime > autoBrakeTime) && (autoBrake == true))
 			actuateBrake();
 	}
 }
