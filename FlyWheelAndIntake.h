@@ -21,8 +21,8 @@ int rpmLow = 1080;
 int rpmMid = 1200;
 int rpmHigh = 1616;
 float rpmGoal = rpmHigh;
-int lowSpeed = 37;
-int midSpeed = 43;
+int lowSpeed = 40;
+int midSpeed = 50;
 int highSpeed = 85;
 int flyWheelSpeed = highSpeed;
 /////////////////////////////////////////////////////////
@@ -98,13 +98,9 @@ float KpMid = 0.01150000;
 float KiMid = 0.01220000;
 float KdMid = 0.002100000;
 /////////////////////////////////////////////////////////
-
-float KpHighRS = 0.018000000;//.008
-float KiHighRS = 0.0122;//.0007
-float KdHighRS  = 0.0025900;/* .009//.00155
-float KpHighRS = 0.100419000;
-float KiHighRS = 0.000001200;//KpHighRS / 125.0;
-float KdHighRS = 0.450000000;//KpHighRS / 2354.0; */
+float KpHighRS = 0.018000000;
+float KiHighRS = 0.0122;
+float KdHighRS  = 0.0025900;
 float KpHighLS = KpHighRS;
 float KiHighLS = KiHighRS;
 float KdHighLS = KdHighRS;
@@ -120,27 +116,14 @@ task flyWheelPower() {
 	while(true)
 	{
 		if(flyWheelOn) {
-			if(!rpmMode) {
-				if((flyWheelSpeed == highSpeed) && (SensorValue[greenLED] == 1))
-					turnOn(green);
-				if((flyWheelSpeed == midSpeed) && (SensorValue[yellowLED] == 1))
-					turnOn(yellow);
-				if((flyWheelSpeed == lowSpeed) && (SensorValue[redLED] == 1))
-					turnOn(red);
-				flySpeedLeft = flyWheelSpeed + powerBias;
-				flySpeedRight = flyWheelSpeed + powerBias;
-			} else {
-				if(justChangedToRPM) {
-					slowStart();
-					justChangedToRPM = false;
-				}
-				wait1Msec(encoderTimer);
-				setPIDConstants();
-				pidChange(round(rpmGoal + powerBias*2.5));
-			}
+			if(flySpeedLeft == 0)
+				slowStart();
+			wait1Msec(encoderTimer);
+			setPIDConstants();
+			pidChange(rpmGoal);
 			normalizeFlyPower();
 			flyWheelMotors(flySpeedLeft, flySpeedRight);
-			} else {
+		} else {
 			flyWheelMotors(0,0);
 		}
 	}
@@ -168,53 +151,42 @@ task flyWheelControl() {
 
 		// Flywheel speed selection //
 		if(speedBtn && !lastSpeedBtn) {
-			if(flyWheelSpeed == lowSpeed) {
-				flyWheelSpeed = midSpeed;
+			if(rpmGoal == rpmlow) {
+				flySpeedLeft = midSpeed;
+				flySpeedRight = midSpeed;
 				rpmGoal = rpmMid;
-				turnOn(yellow);
-			} else if (flyWheelSpeed == midSpeed) {
-				flyWheelSpeed = highSpeed;
+			} else if (rpmGoal == rpmMid) {
 				flySpeedLeft = highSpeed; // to speed up recovery
 				flySpeedRight = highSpeed; // to speed up recovery
 				rpmGoal = rpmHigh;
-				turnOn(green);
 			} else {
-				flyWheelSpeed = lowSpeed;
+				flySpeedLeft = lowSpeed;
+				flySpeedRight = lowSpeed;
 				rpmGoal = rpmLow;
-				turnOn(red);
 			}
 			lastSpeedBtn = true;
 		} else if ( speedBtn == 0 ) {
 			lastSpeedBtn = false;
 		}
 
-		if(modeBtn == 1 && lastModeBtn == false) {
-			rpmMode = !rpmMode;
-			if(rpmMode == true)
-				justChangedToRPM = true;
-			lastModeBtn = true;
-			} else if (modeBtn == 0) {
-			lastModeBtn = false;
-		}
-
 		if(raiseBtn == 1 && lastRaiseBtn == false) {
-			powerBias += 2;
+			powerBias += 5;
 			lastRaiseBtn = true;
-			} else if (raiseBtn == 0) {
+		} else if (raiseBtn == 0) {
 			lastRaiseBtn = false;
 		}
 
 		if(lowerBtn == 1 && lastLowerBtn == false) {
-			powerBias -= 2;
+			powerBias -= 5;
 			lastLowerBtn = true;
-			} else if (lowerBtn == 0) {
+		} else if (lowerBtn == 0) {
 			lastLowerBtn = false;
 		}
 
 		if(intakeBtn && !lastIntakeBtn) {
 			initialTime = nSysTime;
 			lastIntakeBtn = true;
-			} else if (intakeBtn == 0) {
+		} else if (intakeBtn == 0) {
 			lastIntakeBtn = false;
 		}
 
@@ -261,14 +233,6 @@ void flyWheelMotors(float left, float right)
 {
 	int l = round(left);
 	int r = round(right);
-	if(l < 0)
-		l *= -1;
-	if(r < 0)
-		r *= -1;
-	if(l > maxPower)
-		l = maxPower;
-	if(r > maxPower)
-		r = maxPower;
 	motor[topRightLauncher] = r;
 	motor[topLeftLauncher] = l;
 	motor[bottomRightLauncher] = r;
@@ -371,14 +335,14 @@ void setPIDConstants()
 			KdL = KdLowShooting;
 			KdR = KdLowShooting;
 		}
-		} else if(rpmGoal == rpmMid) {
+	} else if(rpmGoal == rpmMid) {
 		KpL = KpMid;
 		KpR = KpMid;
 		KiL = KiMid;
 		KiR = KiMid;
 		KdL = KdMid;
 		KdR = KdMid;
-		} else {
+	} else {
 		KpL = KpHighL;
 		KpR = KpHighR;
 		KiL = KiHighL;
@@ -399,6 +363,10 @@ void setPIDConstants()
 
 void normalizeFlyPower()
 {
+	if(flySpeedLeft < 0)
+		flySpeedLeft *= -1;
+	if(flySpeedRight < 0)
+		flySpeedRight *= -1;
 	if(flySpeedLeft < minPower)
 		flySpeedLeft = minPower;
 	if(flySpeedRight < minPower)
@@ -412,11 +380,11 @@ void normalizeFlyPower()
 void slowStart()
 {
 	initialTime = nSysTime;
-	flyWheelMotors(20.0, 20.0);
+	flyWheelMotors(15.0, 20.0);
 	wait1Msec(100);
-	flyWheelMotors(40.0, 40.0);
+	flyWheelMotors(30.0, 40.0);
 	wait1Msec(100);
-	flyWheelMotors(60.0, 60.0);
+	flyWheelMotors(45.0, 60.0);
 }
 
 void initFlyWheel()
