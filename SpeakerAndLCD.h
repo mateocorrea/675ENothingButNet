@@ -128,24 +128,18 @@ task LCD()
 			displayLCDCenteredString(1, "Selected");
 		}
 		if(rpmMode) {
-			if(SensorValue[greenLED] == 1 && (flyWheelSpeed == highSpeed))
-			{
+			if(SensorValue[greenLED] == 1 && (rpmGoal == rpmHigh))
 				turnOn(green);
-			} else {
+			else
 				SensorValue[greenLED] = 1;
-			}
-			if(SensorValue[yellowLED] == 1 && (flyWheelSpeed == midSpeed))
-			{
+			if(SensorValue[yellowLED] == 1 && (rpmGoal == rpmMid))
 				turnOn(yellow);
-			} else {
+			else
 				SensorValue[yellowLED] = 1;
-			}
-			if(SensorValue[redLED] == 1 && (flyWheelSpeed == lowSpeed))
-			{
+			if(SensorValue[redLED] == 1 && (rpmGoal == rpmLow))
 				turnOn(red);
-			} else {
+			else
 				SensorValue[redLED] = 1;
-			}
 			wait1Msec(100);
 			holdTime += 100;
 		}
