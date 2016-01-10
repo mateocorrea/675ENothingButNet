@@ -8,6 +8,7 @@ void playSong(int song);
 const int NaturalNotes[7]    = { 14080, 15804, 8372, 9397, 10548, 11175, 12544 }; /* A9, B9, C9, D9, E9, F9, G9 */
 const int AccidentalNotes[7] = { 14917,     0, 8870, 9956,     0, 11840, 13290 }; /* A#9, x, C#9, D#9, x, F#9, G#9  */
 
+bool lastLazerBtn = false;
 int redShootNum = 0;
 int autoTwo = 1;
 int autoThree = 2;
@@ -75,17 +76,19 @@ task LCD()
 				}
 
 			} else if (screen == name) {
-				SensorValue[laser] = !SensorValue[laser];
-				wait1Msec(50);
+				if(lastLazerBtn == false) {
+					SensorValue[laser] = !SensorValue[laser];
+					lastLazerBtn = true;
+				} 
 			} else {
 				chosenAuto = screen;
 				if(chosenAuto > 5) {
 					chosenAuto = 0;
 				}
 			}
-
-
 		}
+		if(nLCDButtons != 2)
+			lastLazerBtn = false;
 		while(nLCDButtons != 0) {}
 
 		clearLCDLine(0);
