@@ -78,12 +78,11 @@ void FwMotorSetLeft( int value )
 {
 	motor[topRightLauncher] = value;
     motor[bottomRightLauncher] = value;
-
 }
 void FwMotorSetRight( int value )
 {
 	motor[topLeftLauncher] = value;
-    motor[bottomLeftLauncher] = value;
+  motor[bottomLeftLauncher] = value;
 
 }
 
@@ -226,8 +225,8 @@ task FwControlTask()
     fw_controller *fw = &flywheel;
 
     // Set the gain
-    fw->gain_left = 0.00025;
-    fw->gain_right = 0.00025;
+    fw->gain_left = 0.00030;//0.00025;
+    fw->gain_right = fw->gain_left;
 
     // We are using Speed geared motors
     // Set the encoder ticks per revolution
@@ -281,8 +280,9 @@ task tbh()
     while(1)
         {
         // Different speeds set by buttons
+        // (flywheel, velocity, predicted drive)
         if( vexRT[ Btn8L ] == 1 )
-            FwVelocitySet( &flywheel, 144, 0.55 );
+            FwVelocitySet( &flywheel, 149, 0.55 );
         if( vexRT[ Btn8U ] == 1 )
             FwVelocitySet( &flywheel, 120, 0.38 );
         if( vexRT[ Btn8R ] == 1 )

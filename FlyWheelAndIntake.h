@@ -23,7 +23,7 @@ int rpmHigh = 1616;
 float rpmGoal = rpmHigh;
 int lowSpeed = 40;
 int midSpeed = 50;
-int highSpeed = 85;
+int highSpeed = 70;
 int flyWheelSpeed = highSpeed;
 /////////////////////////////////////////////////////////
 bool lastModeBtn = false;
@@ -116,8 +116,8 @@ task flyWheelPower() {
 	while(true)
 	{
 		if(flyWheelOn) {
-			if(flySpeedLeft == 0)
-				slowStart();
+			/*if(flySpeedLeft == 0)
+				slowStart();*/
 			wait1Msec(encoderTimer);
 			setPIDConstants();
 			pidChange(rpmGoal);
@@ -145,13 +145,13 @@ task flyWheelControl() {
 		}
 		if((flyWheelOnOffTime > 3000) && (!justSwitchedFlywheel))
 		{
-			flyWheelOn = !flyWheel;
+			flyWheelOn = !flyWheelOn;
 			justSwitchedFlywheel = true;
 		}
 
 		// Flywheel speed selection //
 		if(speedBtn && !lastSpeedBtn) {
-			if(rpmGoal == rpmlow) {
+			if(rpmGoal == rpmLow) {
 				flySpeedLeft = midSpeed;
 				flySpeedRight = midSpeed;
 				rpmGoal = rpmMid;
@@ -380,11 +380,11 @@ void normalizeFlyPower()
 void slowStart()
 {
 	initialTime = nSysTime;
-	flyWheelMotors(15.0, 20.0);
+	flyWheelMotors(15.0, 15.0);
 	wait1Msec(100);
-	flyWheelMotors(30.0, 40.0);
+	flyWheelMotors(30.0, 30.0);
 	wait1Msec(100);
-	flyWheelMotors(45.0, 60.0);
+	flyWheelMotors(45.0, 45.0);
 }
 
 void initFlyWheel()

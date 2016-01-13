@@ -31,8 +31,11 @@
 void init();
 #include "cool.c"
 #include "FlyWheelAndIntake.h"
+#include "jpearmanTBH.h"
 #include "SpeakerAndLCD.h"
 #include "DriveAndPneumatics.h"
+
+bool usePID = true;
 
 void runAuto(int chosen);
 void redShoot();
@@ -45,12 +48,12 @@ void progSkills();
 void pre_auton()
 {
     SensorValue[laser] = 1;
-	bStopTasksBetweenModes = false;
-	SensorType[in1] = sensorNone;
+		bStopTasksBetweenModes = false;
+		SensorType[in1] = sensorNone;
   	wait1Msec(1000);
   	SensorType[in1] = sensorGyro;
   	wait1Msec(1000);
-	startTask(LCD);
+		startTask(LCD);
 }
 
 task autonomous()
@@ -66,12 +69,17 @@ task usercontrol()
 	clearDebugStream();
 	if(getTaskState(LCD) == taskStateStopped)
 		startTask(LCD);
-	if(getTaskState(flyWheelPower) == taskStateStopped)
-		startTask(flyWheelPower);
+	if(usePID) {
+		if(getTaskState(flyWheelPower) == taskStateStopped)
+			startTask(flyWheelPower);
+		if(getTaskState(flyWheelControl) == taskStateStopped)
+			startTask(flyWheelControl);
+	} else {
+		if(getTaskState(tbh) == taskStateStopped)
+			startTask(tbh);
+	}
 	if(getTaskState(drive) == taskStateStopped)
 		startTask(drive);
-	if(getTaskState(flyWheelControl) == taskStateStopped)
-		startTask(flyWheelControl);
 	if(getTaskState(pneumatics) == taskStateStopped)
 		startTask(pneumatics);
 	if(getTaskState(speaker) == taskStateStopped)
