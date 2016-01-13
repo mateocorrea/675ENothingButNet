@@ -296,7 +296,7 @@ int voltageCorrection(int rpm)
 	int sum = (batteryValues * averageBattery) + flyBat;
 	batteryValues++;
 	averageBattery = sum / batteryValues;
-	if(batteryValues == 500)
+	if(batteryValues == 2000)
 		batteryValues = 100;
 	if(rpm == rpmHigh)
 		return rpm + (-0.122 * averageBattery + 176.03);
