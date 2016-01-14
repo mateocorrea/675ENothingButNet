@@ -19,34 +19,35 @@
 /////////////////////////////////////////////////////////
 int rpmLow = 1080;
 int rpmMid = 1200;
-int rpmHigh = 1616;
+int rpmHigh = 1600;
 float rpmGoal = rpmHigh;
+float rpmLeft = 0.0;
+float rpmRight = 0.0;
+float averageLeftError = 0.0;
+float averageRightError = 0.0;
+float flySpeedLeft = 0.0;
+float flySpeedRight = 0.0;
 int lowSpeed = 40;
 int midSpeed = 50;
 int highSpeed = 70;
 int flyWheelSpeed = highSpeed;
 /////////////////////////////////////////////////////////
-bool lastModeBtn = false;
 bool lastRaiseBtn = false;
 bool lastLowerBtn = false;
 bool lastSpeedBtn = false;
-bool lastFlyWheelBtn = false;
 bool lastRollerBtn = false;
 bool lastIntakeBtn = false;
 bool flyWheelOn = false;
 bool rollerOn = true;
 bool rpmMode = true;
-bool justChangedToRPM = false;
 float launcherRatio = 10.2;
-float rpmLeft = 0.0;
-float rpmRight = 0.0;
-float flySpeedLeft = 0.0;
-float flySpeedRight = 0.0;
 float oldLeftError = 0.0;
 float oldRightError = 0.0;
 float integralRight = 0.0;
 float integralLeft = 0.0;
 float lastTime = 0;
+int flyWheelOnOffTime = 0;
+int lastFlyWheelTime = 0;
 int maxPower = 118;
 int minPower = 35;
 int encoderTimer = 25;
@@ -54,9 +55,10 @@ int ticksPerTurnSpeed = 372;
 int batteryValues = 0;
 int averageBattery = 0;
 int rightValues = 0;
-int averageRight = 0;
+
+
 int leftValues = 0;
-int averageLeft = 0;
+
 int powerBias = 0;
 int red = 0;
 int green = 1;
@@ -71,7 +73,7 @@ void initFlyWheel();
 void turnOn(int color);
 void flyWheelMotors(float left, float right);
 void pidChange(int rpmGoal);
-void averageRPMS(float left, float right);
+void averageRPMError(float left, float right);
 void normalizeFlyPower();
 void setPIDConstants();
 void slowStart();
@@ -98,9 +100,15 @@ float KpMid = 0.01150000;
 float KiMid = 0.01220000;
 float KdMid = 0.002100000;
 /////////////////////////////////////////////////////////
-float KpHighRS = 0.018000000;
-float KiHighRS = 0.0122;
-float KdHighRS  = 0.0025900;
+float KpHighRS = 0.030000000;
+float KiHighRS = 0.0015;
+float KdHighRS  = 0.012;//0.0025900;
+
+/*
+float KpHighRS = 0.030000000;
+float KiHighRS = 0.0008;
+float KdHighRS  = 0.012;//0.0025900;
+*/
 float KpHighLS = KpHighRS;
 float KiHighLS = KiHighRS;
 float KdHighLS = KdHighRS;
@@ -120,7 +128,7 @@ task flyWheelPower() {
 				slowStart();*/
 			wait1Msec(encoderTimer);
 			setPIDConstants();
-			pidChange(rpmGoal);
+			pidChange(rpmGoal + powerBias);
 			normalizeFlyPower();
 			flyWheelMotors(flySpeedLeft, flySpeedRight);
 		} else {
@@ -130,15 +138,14 @@ task flyWheelPower() {
 }
 
 task flyWheelControl() {
-	int flyWheelOnOffTime = 0;
-	int lastTime = nSysTime;
+	lastFlyWheelTime = nSysTime;
 	bool justSwitchedFlywheel = false;
 	initFlyWheel();
 	while(true) {
 
 		// Flywheel On/Off //
 		if(flyWheelBtn == 1) {
-			flyWheelOnOffTime += nSysTime - lastTime;
+			flyWheelOnOffTime += nSysTime - lastFlyWheelTime;
 		} else {
 			flyWheelOnOffTime = 0;
 			justSwitchedFlywheel = false;
@@ -190,7 +197,7 @@ task flyWheelControl() {
 			lastIntakeBtn = false;
 		}
 
-		lastTime = nSysTime;
+		lastFlyWheelTime = nSysTime;
 	}
 }
 
@@ -245,9 +252,10 @@ void pidChange(int rpmGoal)
 	float factor = ( ( launcherRatio * 60000 ) / deltaTime ) / ticksPerTurnSpeed;
 	rpmLeft = abs(flyEncLeft * factor);
 	rpmRight = abs(flyEncRight * factor);
-	//averageRPMS(rpmLeft, rpmRight);
 	float leftError = voltageCorrection(rpmGoal) - rpmLeft;
 	float rightError = voltageCorrection(rpmGoal) - rpmRight;
+	if(vexRT[Btn6U] && !vexRT[Btn8U])
+		averageRPMError(abs(leftError), abs(rightError));
 
 	////// Proportional /////
 	float pLeft = KpL * leftError;
@@ -298,23 +306,20 @@ int voltageCorrection(int rpm)
 	averageBattery = sum / batteryValues;
 	if(batteryValues == 2000)
 		batteryValues = 100;
-	if(rpm == rpmHigh)
+	/*if(rpm == rpmHigh)
 		return rpm + (-0.122 * averageBattery + 176.03);
-	else
+	else*/
 		return rpm;
 }
 
-void averageRPMS(float left, float right)
+void averageRPMError(float left, float right)
 {
-	int rightSum = (rightValues * averageRight) + right;
-	rightValues++;
-	averageRight = rightSum / rightValues++;
-	int leftSum = (leftValues * averageLeft) + left;
-	leftValues++;
-	averageLeft = leftSum / leftValues++;
-	clearDebugStream();
-	writeDebugStreamLine("Average Right: %f", averageRight);
-	writeDebugStreamLine("Average Left: %f", averageLeft);
+	float rightSum = (rightValues * averageRightError) + right;
+	rightValues = rightValues + 1.0;
+	averageRightError = rightSum / rightValues;
+	float leftSum = (leftValues * averageLeftError) + left;
+	leftValues = leftValues + 1.0;
+	averageLeftError = leftSum / leftValues;
 }
 
 void setPIDConstants()
