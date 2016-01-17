@@ -100,9 +100,9 @@ float KpMid = 0.01150000;
 float KiMid = 0.01220000;
 float KdMid = 0.002100000;
 /////////////////////////////////////////////////////////
-float KpHighRS = 0.030000000;
-float KiHighRS = 0.0015;
-float KdHighRS  = 0.012;//0.0025900;
+float KpHighRS = 0.0007900000;
+float KiHighRS = 0.00083;
+float KdHighRS  = 0.009000;//0.0025900;
 
 /*
 float KpHighRS = 0.030000000;
