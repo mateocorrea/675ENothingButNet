@@ -13,7 +13,8 @@ bool autoBrake = true;
 int threshold = 12;
 int liftCount = 0;
 int stillTime = 0;
-int autoBrakeTime = 1500;
+int autoBrakeTime = 3000;
+int breakPower = 10;
 
 int mapped(int x);
 task drive();
@@ -107,30 +108,77 @@ void releaseBrake()
 	braking = false;
 }
 
-void turn(int degrees)
+
+void gyroTurn(int goal){
+    float gyroKp = 0.10;
+    float gyroKd = 0.5;
+    
+    int gyroError;
+    int gyroLastError
+    int gyroDerivative
+    int maxPower = 105;
+    int allowableError = 20;
+    
+    while(!(gyro < goal + allowableError) && !(gyro > goal - allowableError)){
+        
+        // Proportional
+        gyroError = (goal - gyro);
+        
+        // Derivative
+        gyroDerivative = gyroError - gyroLastError;
+        GyroLast_error = GyroError;
+        
+        // PID
+        int pidDrive = round(((gyroKp * gyroError) + (gyroKd * gyroDerivative)));
+        pidDrive = (abs(pidDrive) > maxPower) ? maxPower : pidDrive; // limit to a maxPower
+        
+        drivePower(-pidDrive, pidDrive)
+    }
+    int brake = (pidDrive > 0) ? brakePower : -brakePower;
+    drivePower(brake, -brake);
+    wait1Msec(brakeTime);
+    drivePower(0, 0);
+    
+}
+
+void driveDistance(int goal)
 {
-  //While the absolute value of the gyro is less than the desired rotation - 100...
-  while(abs(SensorValue[in8]) < degrees - 100)
-  {
-    drivePower(-90, 90);
-  }
-  //Brief brake to eliminate some drift
-  drivePower(5, -5);
-  wait1Msec(100);
-  //Second while loop to move more slowly toward the goal
-  while(abs(SensorValue[in8]) != degrees)
-  {
-    if(abs(SensorValue[in8]) > degrees)
-    {
-      drivePower(30, -30);
+    float driveKp = 0.10;
+    float driveKd = 0.5;
+    
+    int leftDriveError;
+    int leftDriveLastError;
+    int leftDriveDerivative;
+    int rightDriveError;
+    int rightDriveLastError;
+    int rightDriveLastError;
+    int maxPower = 105;
+    int allowableError = 20;
+    
+    leftDrive = 0;
+    rightDrive = 0;
+    
+    while((!(leftDrive < goal + allowableError) && !(leftDrive > goal - allowableError)) && (!(rightDrive < goal + allowableError) && !(rightDrive > goal - allowableError))){
+        
+        // Proportional
+        leftDriveError = (goal - leftDrive);
+        rightDriveError = (goal - rightDrive);
+        
+        // Derivative
+        leftDriveDerivative = leftDriveError - leftDriveLastError;
+        rightDriveDerivative = rightDriveError - rightDriveLastError;
+        leftDriveLastError = leftDriveError;
+        rightDriveLastError = rightDriveError;
+        
+        // PID
+        int leftPidDrive = round(((driveKp * leftDriveError) + (driveKd * leftDriveDerivative)));
+        int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
+        leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
+        rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
+        
+        drivePower(leftPidDrive, rightPidDrive)
     }
-    else
-    {
-      drivePower(-30, 30);
-    }
-  }
-  //Stop
-  drivePower(0,0);
+    driveBrake();
 }
 
 
@@ -151,6 +199,12 @@ void drivePower(int left, int right)
 	motor[rightfront] = right;
 	motor[leftback] = left;
 	motor[leftfront] = left;
+}
+
+void driveBrake() {
+    drivePower(brakePower, brakePower);
+    wait1Msec(brakeTime);
+    drivePower(0, 0);
 }
 
 int mapped(int x)
