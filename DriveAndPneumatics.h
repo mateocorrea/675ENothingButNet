@@ -1,6 +1,9 @@
 #define lock SensorValue[lockPistons]
 #define deployer SensorValue[deployerPiston]
 #define brake SensorValue[brakePistons]
+#define gyro SensorValue[gyroSensor]
+#define leftDrive nMotorEncoder[leftfront]
+#define rightDrive nMotorEncoder[rightfront]
 
 #define rampBtn vexRT[Btn7D]
 #define rampBtn2 vexRT[Btn7L]
@@ -14,13 +17,14 @@ int threshold = 12;
 int liftCount = 0;
 int stillTime = 0;
 int autoBrakeTime = 3000;
-int breakPower = 10;
+int brakePower = 10;
+int brakeTime = 20;
 
 int mapped(int x);
 task drive();
 task pneumatics();
 void drivePower(int left, int right);
-void turn(int degrees);
+void driveBrake();
 void releaseBrake();
 void actuateBrake();
 void releaseLift();
@@ -112,71 +116,72 @@ void releaseBrake()
 void gyroTurn(int goal){
     float gyroKp = 0.10;
     float gyroKd = 0.5;
-    
+
     int gyroError;
-    int gyroLastError
-    int gyroDerivative
+    int gyroLastError;
+    int gyroDerivative;
     int maxPower = 105;
     int allowableError = 20;
-    
+    int pidDrive;
+
     while(!(gyro < goal + allowableError) && !(gyro > goal - allowableError)){
-        
+
         // Proportional
         gyroError = (goal - gyro);
-        
+
         // Derivative
         gyroDerivative = gyroError - gyroLastError;
-        GyroLast_error = GyroError;
-        
+        gyroLastError = gyroError;
+
         // PID
-        int pidDrive = round(((gyroKp * gyroError) + (gyroKd * gyroDerivative)));
+        pidDrive = round(((gyroKp * gyroError) + (gyroKd * gyroDerivative)));
         pidDrive = (abs(pidDrive) > maxPower) ? maxPower : pidDrive; // limit to a maxPower
-        
-        drivePower(-pidDrive, pidDrive)
+
+        drivePower(-pidDrive, pidDrive);
     }
-    int brake = (pidDrive > 0) ? brakePower : -brakePower;
-    drivePower(brake, -brake);
+    int tempBrakePower = (pidDrive > 0) ? brakePower : -brakePower;
+    drivePower(tempBrakePower, -tempBrakePower);
     wait1Msec(brakeTime);
     drivePower(0, 0);
-    
+
 }
 
 void driveDistance(int goal)
 {
     float driveKp = 0.10;
     float driveKd = 0.5;
-    
+
     int leftDriveError;
     int leftDriveLastError;
     int leftDriveDerivative;
     int rightDriveError;
     int rightDriveLastError;
-    int rightDriveLastError;
+    int rightDriveDerivative;
     int maxPower = 105;
     int allowableError = 20;
-    
+
     leftDrive = 0;
     rightDrive = 0;
-    
-    while((!(leftDrive < goal + allowableError) && !(leftDrive > goal - allowableError)) && (!(rightDrive < goal + allowableError) && !(rightDrive > goal - allowableError))){
-        
+
+    while((!(abs(leftDrive) < abs(goal) + allowableError) && !(abs(leftDrive) > abs(goal) - allowableError)) && (!(abs(rightDrive) < abs(goal) + allowableError) && !(abs(rightDrive) > abs(goal) - allowableError))){
+
         // Proportional
         leftDriveError = (goal - leftDrive);
         rightDriveError = (goal - rightDrive);
-        
+
         // Derivative
         leftDriveDerivative = leftDriveError - leftDriveLastError;
         rightDriveDerivative = rightDriveError - rightDriveLastError;
         leftDriveLastError = leftDriveError;
         rightDriveLastError = rightDriveError;
-        
+
         // PID
         int leftPidDrive = round(((driveKp * leftDriveError) + (driveKd * leftDriveDerivative)));
         int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
         leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
         rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
-        
-        drivePower(leftPidDrive, rightPidDrive)
+
+        drivePower(leftPidDrive, rightPidDrive);
     }
     driveBrake();
 }

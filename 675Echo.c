@@ -1,4 +1,5 @@
 #pragma config(I2C_Usage, I2C1, i2cSensors)
+#pragma config(Sensor, in1,    gyroSensor,     sensorGyro)
 #pragma config(Sensor, in4,    flyBattery,     sensorAnalog)
 #pragma config(Sensor, dgtl1,  brakePistons,   sensorDigitalOut)
 #pragma config(Sensor, dgtl2,  lockPistons,    sensorDigitalOut)
@@ -94,6 +95,7 @@ void runAuto(int chosen) {
     flyWheelOn = true;
     motor[roller] = 127;
     wait1Msec(2000);
+    redSide();
 	if(chosen == 0)
 		redShoot();
 	else if(chosen == 1)
@@ -128,15 +130,16 @@ void redSide()
     wait1Msec(initialShootTime);
     motor[chain] = 0;
     rpmGoal = 1375;
-    driveDistance(-1000);
+    driveDistance(-10000);
+    writeDebugStreamLine("finished driving backward");
     gyroTurn(-450);
-    driveDistance(-500);
+    driveDistance(-5000);
     gyroTurn(900);
     motor[chain] = 30;
-    driveDistance(300);
+    driveDistance(3000);
     wait1Msec(3000);
     motor[chain] = 0;
-    driveDistance(-400);
+    driveDistance(-4000);
     gyroTurn(-300);
     motor[chain] = 127;
 }

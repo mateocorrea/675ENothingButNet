@@ -17,9 +17,9 @@
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
-int rpmLow = 1080;
+int rpmLow = 1070;
 int rpmMid = 1200;
-int rpmHigh = 1600;
+int rpmHigh = 1700;
 float rpmGoal = rpmHigh;
 float rpmLeft = 0.0;
 float rpmRight = 0.0;
@@ -89,20 +89,24 @@ float KiR = 1.0;
 float KdL = 1.0;
 float KdR = 1.0;
 /////////////////////////////////////////////////////////
-float KpLow = 0.000900500;
-float KiLow = 0.000000200;
-float KdLow = 0.005000000;
-float KpLowShooting = 0.01152500;
-float KiLowShooting = 0.00000000;
-float KdLowShooting = 0.92000000;
+float KpLow = 0.095;
+float KiLow = 0.0005000;
+float KdLow = 0.007;
+float KpLowShooting = KpLow;
+float KiLowShooting = KiLow;
+float KdLowShooting = KdLow;
 /////////////////////////////////////////////////////////
 float KpMid = 0.01150000;
 float KiMid = 0.01220000;
 float KdMid = 0.002100000;
 /////////////////////////////////////////////////////////
-float KpHighRS = 0.0007900000;
-float KiHighRS = 0.00083;
-float KdHighRS  = 0.009000;//0.0025900;
+/*float KpHighRS = 0.018000000;//.008
+float KiHighRS = 0.0122;//.0007
+float KdHighRS  = 0.0025900;// .009//.00155*/
+float KpHighRS = 1.0;//.008
+float KiHighRS = 0.0;//.0007
+float KdHighRS  = 0.000;// .009//.00155
+float oldFilter = 0.0;
 
 /*
 float KpHighRS = 0.030000000;
@@ -282,8 +286,10 @@ void pidChange(int rpmGoal)
 	float rightChange = pRight + iRight + dRight;
 
 	// Adjust Speed //
-	flySpeedLeft += leftChange;
-	flySpeedRight += rightChange;
+	/*flySpeedLeft += leftChange;
+	flySpeedRight += rightChange;*/
+	flySpeedLeft = flySpeedLeft * oldFilter + ((1.0 - oldFilter) * leftChange);
+	flySpeedRight = flySpeedRight * oldFilter + ((1.0 - oldFilter) * rightChange);
 
 	//writeDebugStreamLine("%f", leftChange);
 	//writeDebugStreamLine("%f", rightChange);
