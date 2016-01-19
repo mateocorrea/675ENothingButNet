@@ -28,7 +28,6 @@
 
 #pragma platform(VEX)
 #pragma competitionControl(Competition)
-void init();
 #include "cool.c"
 #include "FlyWheelAndIntake.h"
 #include "jpearmanTBH.h"
@@ -45,6 +44,8 @@ void blueSide();
 void defense();
 void progSkills();
 
+int initialShootTime = 1500;
+
 void pre_auton()
 {
     SensorValue[laser] = 1;
@@ -59,7 +60,6 @@ void pre_auton()
 task autonomous()
 {
     SensorValue[laser] = 0;
-	init();
 	runAuto(chosenAuto);
 }
 
@@ -89,11 +89,11 @@ task usercontrol()
 }
 
 
-void init()
-{
-}
-
 void runAuto(int chosen) {
+    startTask(flyWheelPower);
+    flyWheelOn = true;
+    motor[roller] = 127;
+    wait1Msec(2000);
 	if(chosen == 0)
 		redShoot();
 	else if(chosen == 1)
@@ -112,10 +112,6 @@ void redShoot()
 {
 	int carry = 340;
 	int separation = 2500;
-
-	flyWheelOn = true;
-	wait1Msec(2000);
-	motor[roller] = 100;
 	for(int x = 0; x < 10; x++)
 	{
 		motor[chain] = 127;
@@ -128,26 +124,21 @@ void redShoot()
 
 void redSide()
 {
-	int carry = 300;
-	int separation = 1000;
-
-	flyWheelOn = true;
-	wait1Msec(2000);
-	motor[roller] = 100;
-	for(int x = 0; x < 8; x++)
-	{
-		motor[chain] = 127;
-		wait1Msec(carry);
-		motor[chain] = 0;
-		wait1Msec(separation);
-	}
-	flyWheelOn = false;
-	drivePower(-127, -127);
-	wait1Msec(3000);
-	drivePower(100, -100);
-	wait1Msec(1000);
-	drivePower(0,0);
-
+    motor[chain] = 127;
+    wait1Msec(initialShootTime);
+    motor[chain] = 0;
+    rpmGoal = 1375;
+    driveDistance(-1000);
+    gyroTurn(-450);
+    driveDistance(-500);
+    gyroTurn(900);
+    motor[chain] = 30;
+    driveDistance(300);
+    wait1Msec(3000);
+    motor[chain] = 0;
+    driveDistance(-400);
+    gyroTurn(-300);
+    motor[chain] = 127;
 }
 
 void blueBot()
