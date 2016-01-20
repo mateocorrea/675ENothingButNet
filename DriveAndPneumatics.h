@@ -24,7 +24,7 @@ int mapped(int x);
 task drive();
 task pneumatics();
 void drivePower(int left, int right);
-void driveBrake();
+void driveBrake(int direction);
 void releaseBrake();
 void actuateBrake();
 void releaseLift();
@@ -163,11 +163,11 @@ void driveDistance(int goal)
     leftDrive = 0;
     rightDrive = 0;
 
-    while((!(abs(leftDrive) < abs(goal) + allowableError) && !(abs(leftDrive) > abs(goal) - allowableError)) && (!(abs(rightDrive) < abs(goal) + allowableError) && !(abs(rightDrive) > abs(goal) - allowableError))){
+    while(!(abs(leftDrive) > abs(goal) - allowableError) || !(abs(rightDrive) > abs(goal) - allowableError)){
 
         // Proportional
-        leftDriveError = (goal - leftDrive);
-        rightDriveError = (goal - rightDrive);
+        leftDriveError = (abs(goal) - abs(leftDrive));
+        rightDriveError = (abs(goal) - abs(rightDrive));
 
         // Derivative
         leftDriveDerivative = leftDriveError - leftDriveLastError;
@@ -180,10 +180,18 @@ void driveDistance(int goal)
         int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
         leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
         rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
-
+        
+        if(goal < 0) {
+            leftPidDrive *= -1;
+            rightPidDrive *= -1;
+        }
         drivePower(leftPidDrive, rightPidDrive);
     }
-    driveBrake();
+    driveBrake(goal);
+
+    // check for overshoot
+    
+    
 }
 
 
@@ -206,8 +214,12 @@ void drivePower(int left, int right)
 	motor[leftfront] = left;
 }
 
-void driveBrake() {
-    drivePower(brakePower, brakePower);
+// if direction < 0, should brake by moving motors forward
+void driveBrake(int direction) {
+    if(direction < 0)
+        drivePower(brakePower, brakePower);
+    else
+        drivePower(-brakePower, -brakePower);
     wait1Msec(brakeTime);
     drivePower(0, 0);
 }
