@@ -39,6 +39,8 @@ bool lastRollerBtn = false;
 bool lastIntakeBtn = false;
 bool flyWheelOn = false;
 bool rollerOn = true;
+bool redoSpeed = true;
+float oldFilter = 0.0;
 bool rpmMode = true;
 float launcherRatio = 10.2;
 float oldLeftError = 0.0;
@@ -106,7 +108,6 @@ float KdHighRS  = 0.0025900;// .009//.00155*/
 float KpHighRS = 1.0;//.008
 float KiHighRS = 0.0;//.0007
 float KdHighRS  = 0.000;// .009//.00155
-float oldFilter = 0.0;
 
 /*
 float KpHighRS = 0.030000000;
@@ -286,10 +287,15 @@ void pidChange(int rpmGoal)
 	float rightChange = pRight + iRight + dRight;
 
 	// Adjust Speed //
-	/*flySpeedLeft += leftChange;
-	flySpeedRight += rightChange;*/
-	flySpeedLeft = flySpeedLeft * oldFilter + ((1.0 - oldFilter) * leftChange);
-	flySpeedRight = flySpeedRight * oldFilter + ((1.0 - oldFilter) * rightChange);
+    
+    if(redoSpeed) {
+        flySpeedLeft = flySpeedLeft * oldFilter + ((1.0 - oldFilter) * leftChange);
+        flySpeedRight = flySpeedRight * oldFilter + ((1.0 - oldFilter) * rightChange);
+    } else {
+        flySpeedLeft += leftChange;
+        flySpeedRight += rightChange;
+    }
+	
 
 	//writeDebugStreamLine("%f", leftChange);
 	//writeDebugStreamLine("%f", rightChange);
