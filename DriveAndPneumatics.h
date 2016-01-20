@@ -124,7 +124,7 @@ void gyroTurn(int goal){
     int allowableError = 20;
     int pidDrive;
 
-    while(!(gyro < goal + allowableError) && !(gyro > goal - allowableError)){
+    while(!(gyro > goal - allowableError)){
 
         // Proportional
         gyroError = (goal - gyro);
@@ -180,7 +180,7 @@ void driveDistance(int goal)
         int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
         leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
         rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
-        
+
         if(goal < 0) {
             leftPidDrive *= -1;
             rightPidDrive *= -1;
@@ -190,8 +190,8 @@ void driveDistance(int goal)
     driveBrake(goal);
 
     // check for overshoot
-    
-    
+
+
 }
 
 

@@ -45,7 +45,7 @@ void blueSide();
 void defense();
 void progSkills();
 
-int initialShootTime = 1500;
+int initialShootTime = 3000;
 
 void pre_auton()
 {
@@ -126,20 +126,20 @@ void redShoot()
 
 void redSide()
 {
-    motor[chain] = 127;
+    motor[chain] = 55;
     wait1Msec(initialShootTime);
     motor[chain] = 0;
     rpmGoal = 1375;
-    driveDistance(-10000);
+    driveDistance(-500);
     writeDebugStreamLine("finished driving backward");
-    gyroTurn(-450);
-    driveDistance(-5000);
+    gyroTurn(450);
+    driveDistance(-500);
     gyroTurn(900);
     motor[chain] = 30;
-    driveDistance(3000);
+    driveDistance(300);
     wait1Msec(3000);
     motor[chain] = 0;
-    driveDistance(-4000);
+    driveDistance(-400);
     gyroTurn(-300);
     motor[chain] = 127;
 }

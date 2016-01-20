@@ -17,9 +17,9 @@
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
-int rpmLow = 1070;
+int rpmLow = 1275;
 int rpmMid = 1200;
-int rpmHigh = 1700;
+int rpmHigh = 1690;
 float rpmGoal = rpmHigh;
 float rpmLeft = 0.0;
 float rpmRight = 0.0;
@@ -91,28 +91,25 @@ float KiR = 1.0;
 float KdL = 1.0;
 float KdR = 1.0;
 /////////////////////////////////////////////////////////
-float KpLow = 0.095;
-float KiLow = 0.0005000;
-float KdLow = 0.007;
+float KpLow = 0.15;
+float KiLow = 0.000000;
+float KdLow = 0.000;
 float KpLowShooting = KpLow;
 float KiLowShooting = KiLow;
 float KdLowShooting = KdLow;
 /////////////////////////////////////////////////////////
-float KpMid = 0.01150000;
-float KiMid = 0.01220000;
-float KdMid = 0.002100000;
+float KpMid = 0.7;
+float KiMid = 0.0000;
+float KdMid = 0.00;
 /////////////////////////////////////////////////////////
-/*float KpHighRS = 0.018000000;//.008
-float KiHighRS = 0.0122;//.0007
-float KdHighRS  = 0.0025900;// .009//.00155*/
-float KpHighRS = 1.0;//.008
-float KiHighRS = 0.0;//.0007
-float KdHighRS  = 0.000;// .009//.00155
+float KpHighRS = 0.056000000;//.008
+float KiHighRS = 0.00302;//.0007
+float KdHighRS  = 0.000025000;// .009//.00155
 
-/*
-float KpHighRS = 0.030000000;
-float KiHighRS = 0.0008;
-float KdHighRS  = 0.012;//0.0025900;
+/* GOOD VALUES
+float KpHighRS = 0.048000000; OR 32
+float KiHighRS = 0.00202;
+float KdHighRS  = 0.00002500;
 */
 float KpHighLS = KpHighRS;
 float KiHighLS = KiHighRS;
@@ -287,15 +284,15 @@ void pidChange(int rpmGoal)
 	float rightChange = pRight + iRight + dRight;
 
 	// Adjust Speed //
-    
-    if(redoSpeed) {
+
+    if(rpmGoal == rpmLow) {
         flySpeedLeft = flySpeedLeft * oldFilter + ((1.0 - oldFilter) * leftChange);
         flySpeedRight = flySpeedRight * oldFilter + ((1.0 - oldFilter) * rightChange);
     } else {
         flySpeedLeft += leftChange;
         flySpeedRight += rightChange;
     }
-	
+
 
 	//writeDebugStreamLine("%f", leftChange);
 	//writeDebugStreamLine("%f", rightChange);
@@ -321,7 +318,7 @@ int voltageCorrection(int rpm)
 	/*if(rpm == rpmHigh)
 		return rpm + (-0.122 * averageBattery + 176.03);
 	else*/
-		return rpm;
+	return rpm;
 }
 
 void averageRPMError(float left, float right)
@@ -380,10 +377,12 @@ void setPIDConstants()
 
 void normalizeFlyPower()
 {
-	if(flySpeedLeft < 0)
-		flySpeedLeft *= -1;
-	if(flySpeedRight < 0)
-		flySpeedRight *= -1;
+	/*if(rpmGoal == rpmHigh) {
+		if((flySpeedLeft < 0) || (flySpeedRight < 0)) {
+			flySpeedLeft = abs(flySpeedLeft);
+			flySpeedRight = abs(flySpeedRight);
+		}
+	}*/
 	if(flySpeedLeft < minPower)
 		flySpeedLeft = minPower;
 	if(flySpeedRight < minPower)
