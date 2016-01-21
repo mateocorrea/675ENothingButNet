@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////
 int rpmLow = 1275;
 int rpmMid = 1200;
-int rpmHigh = 1690;
+int rpmHigh = 1670;
 float rpmGoal = rpmHigh;
 float rpmLeft = 0.0;
 float rpmRight = 0.0;

@@ -79,7 +79,7 @@ task LCD()
 				if(lastLazerBtn == false) {
 					SensorValue[laser] = !SensorValue[laser];
 					lastLazerBtn = true;
-				} 
+				}
 			} else {
 				chosenAuto = screen;
 				if(chosenAuto > 5) {
@@ -107,9 +107,11 @@ task LCD()
 		} else if(screen == autoSix) {
 			displayLCDCenteredString(0, "Prog Skills");
 		} else if(screen == battery) {
-			displayLCDString(0, 0, "Primary: ");
-			sprintf(mainBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0,'V');
-			displayNextLCDString(mainBattery);
+			//displayLCDString(0, 0, "Primary: ");
+			//sprintf(mainBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0,'V');
+			//displayNextLCDString(mainBattery);
+			displayLCDString(0, 0, "Gyro: ");
+			displayNextLCDNumber(SensorValue[gyroSensor]);
 
 			displayLCDString(1, 0, "PowerExp: ");
 			displayNextLCDNumber(flyBattery);

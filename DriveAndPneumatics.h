@@ -17,8 +17,8 @@ int threshold = 12;
 int liftCount = 0;
 int stillTime = 0;
 int autoBrakeTime = 3000;
-int brakePower = 10;
-int brakeTime = 20;
+int brakePower = 25;
+int brakeTime = 35;
 
 int mapped(int x);
 task drive();
@@ -113,43 +113,114 @@ void releaseBrake()
 }
 
 
-void gyroTurn(int goal){
-    float gyroKp = 0.10;
-    float gyroKd = 0.5;
+/*void gyroTurn(int goal){
+    float gyroKp = 0.6;
+    float gyroKd = 0.2;
 
     int gyroError;
     int gyroLastError;
     int gyroDerivative;
-    int maxPower = 105;
-    int allowableError = 20;
+    int maxPower = 115;
+    int allowableError = 0;
     int pidDrive;
-
-    while(!(gyro > goal - allowableError)){
-
-        // Proportional
-        gyroError = (goal - gyro);
-
+    while(true){
+    		// Proportional
+        gyroError = abs(goal - gyro);
         // Derivative
         gyroDerivative = gyroError - gyroLastError;
         gyroLastError = gyroError;
-
         // PID
         pidDrive = round(((gyroKp * gyroError) + (gyroKd * gyroDerivative)));
         pidDrive = (abs(pidDrive) > maxPower) ? maxPower : pidDrive; // limit to a maxPower
-
-        drivePower(-pidDrive, pidDrive);
+    		if(goal > 0)
+    		{
+    			if(gyro > goal - allowableError)
+    				break;
+    			drivePower(-pidDrive, pidDrive);
+    		}
+    		else
+    		{
+    			if(gyro < goal + allowableError)
+    				break;
+    			drivePower(pidDrive, -pidDrive);
+    		}
     }
-    int tempBrakePower = (pidDrive > 0) ? brakePower : -brakePower;
+    int tempBrakePower = (goal > 0) ? brakePower : -brakePower;
     drivePower(tempBrakePower, -tempBrakePower);
     wait1Msec(brakeTime);
     drivePower(0, 0);
 
+}*/
+
+/*void gyroTurn(int goal){
+    float gyroKp = 0.6;
+    float gyroKd = 0.0;
+
+    int gyroError;
+    int gyroLastError;
+    int gyroDerivative;
+    int maxPower = 115;
+    int pidDrive;
+    SensorValue[gyro] = 0;
+
+    while(abs(SensorValue[gyro]) < abs(goal))
+    {
+    	// Proportional
+        gyroError = abs(goal) - abs(gyro);
+        // Derivative
+        gyroDerivative = gyroError - gyroLastError;
+        gyroLastError = gyroError;
+        // PID
+        pidDrive = round(((gyroKp * gyroError) + (gyroKd * gyroDerivative)));
+        pidDrive = (abs(pidDrive) > maxPower) ? maxPower : pidDrive; // limit to a maxPower
+        //pidDrive = 99;
+    		if(goal > 0)
+    		{
+    			drivePower(-pidDrive, pidDrive);
+    		}
+    		else
+    		{
+    			drivePower(pidDrive, -pidDrive);
+    		}
+    		wait1Msec(5);
+    }
+    if(goal > 0)
+    	drivePower(brakePower, -brakePower);
+   	else
+   		drivePower(-brakePower, brakePower);
+
+    wait1Msec(brakeTime);
+    drivePower(0, 0);
+
+}*/
+
+void gyroTurn(int goal)
+{
+	gyro = 0;
+	while(abs(gyro) < abs(goal))
+  {
+  	int difference = abs(goal) - abs(gyro);
+  	int power = difference / 2;
+  	if(goal > 0) {
+  		drivePower(-power, power);
+  	} else {
+  		drivePower(power, -power);
+  	}
+  }
+
+  if(goal > 0) {
+  		drivePower(brakePower, -brakePower);
+  } else {
+  		drivePower(-brakePower, brakePower);
+  }
+  wait1Msec(brakeTime);
+  drivePower(0,0);
 }
 
 void driveDistance(int goal)
 {
-    float driveKp = 0.10;
-    float driveKd = 0.5;
+    float driveKp = 0.35;
+    float driveKd = 0.0;
 
     int leftDriveError;
     int leftDriveLastError;
@@ -158,12 +229,15 @@ void driveDistance(int goal)
     int rightDriveLastError;
     int rightDriveDerivative;
     int maxPower = 105;
-    int allowableError = 20;
+    int allowableError = 0;
 
     leftDrive = 0;
     rightDrive = 0;
+    clearTimer(T1);
 
     while(!(abs(leftDrive) > abs(goal) - allowableError) || !(abs(rightDrive) > abs(goal) - allowableError)){
+    		if(time1[T1] > abs(goal) * 3)
+    			break;
 
         // Proportional
         leftDriveError = (abs(goal) - abs(leftDrive));

@@ -45,7 +45,9 @@ void blueSide();
 void defense();
 void progSkills();
 
-int initialShootTime = 3000;
+int initialShootTime = 2900;
+int autoShootSpeed = 65;
+int sideShot = 1440;
 
 void pre_auton()
 {
@@ -67,6 +69,7 @@ task autonomous()
 task usercontrol()
 {
 	SensorValue[laser] = 0;
+	rpmGoal = rpmHigh;
 	clearDebugStream();
 	if(getTaskState(LCD) == taskStateStopped)
 		startTask(LCD);
@@ -93,9 +96,9 @@ task usercontrol()
 void runAuto(int chosen) {
     startTask(flyWheelPower);
     flyWheelOn = true;
+    SensorType[in1] = sensorNone;
     motor[roller] = 127;
     wait1Msec(2000);
-    redSide();
 	if(chosen == 0)
 		redShoot();
 	else if(chosen == 1)
@@ -126,22 +129,32 @@ void redShoot()
 
 void redSide()
 {
-    motor[chain] = 55;
+
+  	SensorType[in1] = sensorGyro;
+    motor[chain] = autoShootSpeed;
     wait1Msec(initialShootTime);
     motor[chain] = 0;
-    rpmGoal = 1375;
-    driveDistance(-500);
-    writeDebugStreamLine("finished driving backward");
-    gyroTurn(450);
-    driveDistance(-500);
-    gyroTurn(900);
-    motor[chain] = 30;
-    driveDistance(300);
-    wait1Msec(3000);
+    //motor[roller] = 0;
+    rpmGoal = sideShot;
+    driveDistance(-1500);
+    gyroTurn(358); // turn towards pile
+    wait1Msec(500);
+    driveDistance(1070); // go to pile
+    //motor[roller] = 127;
+    motor[chain] = 70;
+    wait1Msec(800);
     motor[chain] = 0;
-    driveDistance(-400);
-    gyroTurn(-300);
-    motor[chain] = 127;
+    /*motor[chain] = 0;
+    driveDistance(-250);
+    wait1Msec(500);
+    driveDistance(290);
+    motor[chain] = 35;
+    wait1Msec(500);*/
+    driveDistance(-250);
+    wait1Msec(500);
+    gyroTurn(-300); // turn to goal
+    motor[chain] = autoShootSpeed; // shooot the second pile
+    wait1Msec(4000);
 }
 
 void blueBot()
@@ -151,7 +164,31 @@ void blueBot()
 
 void blueSide()
 {
-	redShoot();
+	SensorType[in1] = sensorGyro;
+    motor[chain] = autoShootSpeed;
+    wait1Msec(initialShootTime);
+    motor[chain] = 0;
+    //motor[roller] = 0;
+    rpmGoal = sideShot;
+    driveDistance(-1500);
+    gyroTurn(-358); // turn towards pile
+    wait1Msec(500);
+    driveDistance(1070); // go to pile
+    //motor[roller] = 127;
+    motor[chain] = 70;
+    wait1Msec(800);
+    motor[chain] = 0;
+    /*motor[chain] = 0;
+    driveDistance(-250);
+    wait1Msec(500);
+    driveDistance(290);
+    motor[chain] = 35;
+    wait1Msec(500);*/
+    driveDistance(-250);
+    wait1Msec(500);
+    gyroTurn(300); // turn to goal
+    motor[chain] = autoShootSpeed; // shooot the second pile
+    wait1Msec(4000);
 }
 
 void defense()
