@@ -99,6 +99,7 @@ void runAuto(int chosen) {
     SensorType[in1] = sensorNone;
     motor[roller] = 127;
     wait1Msec(2000);
+    SensorType[in1] = sensorGyro;
 	if(chosen == 0)
 		redShoot();
 	else if(chosen == 1)
@@ -130,12 +131,12 @@ void redShoot()
 void redSide()
 {
 
-  	SensorType[in1] = sensorGyro;
-    motor[chain] = autoShootSpeed;
-    wait1Msec(initialShootTime);
-    motor[chain] = 0;
+  	SensorType[in1] = sensorGyro; // reset the gyro
+    motor[chain] = autoShootSpeed; // set the speed of the chain to auto speed
+    wait1Msec(initialShootTime); // shoot the balls/
+    motor[chain] = 0; // stop the chain
     //motor[roller] = 0;
-    rpmGoal = sideShot;
+    rpmGoal = sideShot; // set up the rpm for the side pile shot
     driveDistance(-1500);
     gyroTurn(358); // turn towards pile
     wait1Msec(500);
@@ -164,7 +165,6 @@ void blueBot()
 
 void blueSide()
 {
-	SensorType[in1] = sensorGyro;
     motor[chain] = autoShootSpeed;
     wait1Msec(initialShootTime);
     motor[chain] = 0;
@@ -198,7 +198,27 @@ void defense()
 
 void progSkills()
 {
-	while(true){
-		redShoot();
+    clearTimer(T1);
+    motor[chain] = autoShootSpeed;
+	while(time1[T1] < 25000){
 	}
+    motor[chain] = 0;
+    gyroTurn(-1200);
+    driveDistance(2000);
+    gyroTurn(400);
+    motor[chain] = autoShootSpeed;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

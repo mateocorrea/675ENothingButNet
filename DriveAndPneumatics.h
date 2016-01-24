@@ -236,8 +236,8 @@ void driveDistance(int goal)
     clearTimer(T1);
 
     while(!(abs(leftDrive) > abs(goal) - allowableError) || !(abs(rightDrive) > abs(goal) - allowableError)){
-    		if(time1[T1] > abs(goal) * 3)
-    			break;
+        if(time1[T1] > abs(goal) * 3)
+            break;
 
         // Proportional
         leftDriveError = (abs(goal) - abs(leftDrive));
