@@ -45,8 +45,9 @@ void blueSide();
 void defense();
 void progSkills();
 
+int warmupTime = 1500;
 int initialShootTime = 2900;
-int autoShootSpeed = 65;
+int autoShootSpeed = 72;
 int sideShot = 1440;
 
 void pre_auton()
@@ -98,7 +99,7 @@ void runAuto(int chosen) {
     flyWheelOn = true;
     SensorType[in1] = sensorNone;
     motor[roller] = 127;
-    wait1Msec(2000);
+    wait1Msec(warmupTime);
     SensorType[in1] = sensorGyro;
 	if(chosen == 0)
 		redShoot();
@@ -200,25 +201,19 @@ void progSkills()
 {
     clearTimer(T1);
     motor[chain] = autoShootSpeed;
-	while(time1[T1] < 25000){
+	while(time1[T1] < 17500){
 	}
     motor[chain] = 0;
-    gyroTurn(-1200);
-    driveDistance(2000);
-    gyroTurn(400);
+    driveDistance(-200); // move away from
+    wait1Msec(200);
+    gyroTurn(-1134);
+    driveDistance(2300);
+    drivePower(100, 100);
+    wait1Msec(800);
+    drivePower(0,0);
+    wait1Msec(500);
+    driveDistance(-350); // set up position to shoot
+    wait1Msec(500);
+    gyroTurn(385); // turn to goal
     motor[chain] = autoShootSpeed;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
