@@ -14,6 +14,7 @@
 #define rollerBtn vexRT[Btn8R]
 #define rollerOutBtn vexRT[Btn8D]
 #define raiseBtn vexRT[Btn8L]
+#define intakeSpeedBtn vexRT[Btn8U]
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
@@ -57,6 +58,7 @@ int ticksPerTurnSpeed = 372;
 int batteryValues = 0;
 int averageBattery = 0;
 int rightValues = 0;
+int intakeSpeed = 127;
 
 
 int leftValues = 0;
@@ -142,6 +144,7 @@ task flyWheelPower() {
 task flyWheelControl() {
 	lastFlyWheelTime = nSysTime;
 	bool justSwitchedFlywheel = false;
+	bool lastIntakeSpeedBtn = false;
 	initFlyWheel();
 	while(true) {
 
@@ -153,6 +156,18 @@ task flyWheelControl() {
             flyWheelOn = !flyWheelOn;
             justSwitchedFlywheel = true;
         }
+
+    if(intakeSpeedBtn && !lastIntakeSpeedBtn)
+    {
+    	intakeSpeed -= 5;
+    	if(intakeSpeed < 57)
+    		intakeSpeed = 127;
+    	lastIntakeSpeedBtn = true;
+    } else if (intakeSpeedBtn == 0) {
+    	lastIntakeSpeedBtn = false;
+ 		}
+
+
 
 		// Flywheel speed selection //
 		if(speedBtn && !lastSpeedBtn) {
@@ -204,7 +219,7 @@ task intake()
 	while(true) {
 
 		/* Intake Power */
-		motor[chain] = 127 * (intakeBtn - outtakeBtn);
+		motor[chain] = intakeSpeed * (intakeBtn - outtakeBtn);
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false) {
