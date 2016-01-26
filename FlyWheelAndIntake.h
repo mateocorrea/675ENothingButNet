@@ -145,18 +145,14 @@ task flyWheelControl() {
 	initFlyWheel();
 	while(true) {
 
-		// Flywheel On/Off //
-		if(flyWheelBtn == 1) {
-			flyWheelOnOffTime += nSysTime - lastFlyWheelTime;
-		} else {
-			flyWheelOnOffTime = 0;
-			justSwitchedFlywheel = false;
-		}
-		if((flyWheelOnOffTime > 3000) && (!justSwitchedFlywheel))
-		{
-			flyWheelOn = !flyWheelOn;
-			justSwitchedFlywheel = true;
-		}
+        if(!flyWheelBtn) {
+            clearTimer(T2);
+            justSwitchedFlywheel = false;
+        }
+        if((time1[T2] >= 2000) && !justSwitchedFlywheel) {
+            flyWheelOn = !flyWheelOn;
+            justSwitchedFlywheel = true;
+        }
 
 		// Flywheel speed selection //
 		if(speedBtn && !lastSpeedBtn) {
