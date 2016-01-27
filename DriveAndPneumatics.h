@@ -20,6 +20,8 @@ int autoBrakeTime = 3000;
 int brakePower = 25;
 int brakeTime = 35;
 
+void encoderTurn(int goal);
+
 int mapped(int x);
 task drive();
 task pneumatics();
@@ -266,6 +268,61 @@ void driveDistance(int goal)
     // check for overshoot
 
 
+}
+
+void encoderTurn(int goal)
+{
+    float driveKp = 0.35;
+    float driveKd = 0.0;
+
+    int leftDriveError;
+    int leftDriveLastError;
+    int leftDriveDerivative;
+    int rightDriveError;
+    int rightDriveLastError;
+    int rightDriveDerivative;
+    int maxPower = 105;
+    int allowableError = 0;
+
+    leftDrive = 0;
+    rightDrive = 0;
+    clearTimer(T1);
+
+    while(!(abs(leftDrive) > abs(goal) - allowableError) || !(abs(rightDrive) > abs(goal) - allowableError)){
+        if(time1[T1] > abs(goal) * 3)
+            break;
+
+        // Proportional
+        leftDriveError = (abs(goal) - abs(leftDrive));
+        rightDriveError = (abs(goal) - abs(rightDrive));
+
+        // Derivative
+        leftDriveDerivative = leftDriveError - leftDriveLastError;
+        rightDriveDerivative = rightDriveError - rightDriveLastError;
+        leftDriveLastError = leftDriveError;
+        rightDriveLastError = rightDriveError;
+
+        // PID
+        int leftPidDrive = round(((driveKp * leftDriveError) + (driveKd * leftDriveDerivative)));
+        int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
+        leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
+        rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
+
+        if(goal < 0) {
+            rightPidDrive *= -1;
+        } else {
+        		leftPidDrive *= -1;
+        }
+
+        drivePower(leftPidDrive, rightPidDrive);
+    }
+    if(goal > 0) {
+  		drivePower(brakePower, -brakePower);
+	  } else {
+	  		drivePower(-brakePower, brakePower);
+	  }
+	  wait1Msec(brakeTime);
+	  drivePower(0,0);
 }
 
 

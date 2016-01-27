@@ -166,12 +166,16 @@ void blueBot()
 
 void blueSide()
 {
+
+		/*
+		GYRO VERSION
     motor[chain] = autoShootSpeed;
     wait1Msec(initialShootTime);
     motor[chain] = 0;
     //motor[roller] = 0;
     rpmGoal = sideShot;
     driveDistance(-1500);
+    wait1Msec(500);
     gyroTurn(-358); // turn towards pile
     wait1Msec(500);
     driveDistance(1070); // go to pile
@@ -179,17 +183,32 @@ void blueSide()
     motor[chain] = 70;
     wait1Msec(800);
     motor[chain] = 0;
-    /*motor[chain] = 0;
     driveDistance(-250);
     wait1Msec(500);
-    driveDistance(290);
-    motor[chain] = 35;
-    wait1Msec(500);*/
-    driveDistance(-250);
-    wait1Msec(500);
-    gyroTurn(300); // turn to goal
+    gyroTurn(240); // turn to goal
     motor[chain] = autoShootSpeed; // shooot the second pile
     wait1Msec(4000);
+    */
+    motor[chain] = autoShootSpeed;
+    wait1Msec(initialShootTime);
+    motor[chain] = 0;
+    //motor[roller] = 0;
+    rpmGoal = sideShot;
+    driveDistance(-1500);
+    wait1Msec(500);
+    encoderTurn(-358); // turn towards pile
+    wait1Msec(500);
+    driveDistance(1070); // go to pile
+    //motor[roller] = 127;
+    motor[chain] = 70;
+    wait1Msec(800);
+    motor[chain] = 0;
+    driveDistance(-250);
+    wait1Msec(500);
+    encoderTurn(240); // turn to goal
+    motor[chain] = autoShootSpeed; // shooot the second pile
+    wait1Msec(4000);
+
 }
 
 void defense()
@@ -214,6 +233,6 @@ void progSkills()
     wait1Msec(500);
     driveDistance(-350); // set up position to shoot
     wait1Msec(500);
-    gyroTurn(385); // turn to goal
+    gyroTurn(380); // turn to goal
     motor[chain] = autoShootSpeed;
 }
