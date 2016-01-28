@@ -272,7 +272,7 @@ void driveDistance(int goal)
 
 void encoderTurn(int goal)
 {
-    float driveKp = 0.35;
+    float driveKp = 0.38;
     float driveKd = 0.0;
 
     int leftDriveError;

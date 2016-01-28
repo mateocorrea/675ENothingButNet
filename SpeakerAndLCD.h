@@ -5,6 +5,14 @@ void PlayMario();
 void PlayJingleBells();
 void playSong(int song);
 
+void runAuto(int chosen);
+void redShoot();
+void redSide();
+void blueBot();
+void blueSide();
+void defense();
+void progSkills();
+
 const int NaturalNotes[7]    = { 14080, 15804, 8372, 9397, 10548, 11175, 12544 }; /* A9, B9, C9, D9, E9, F9, G9 */
 const int AccidentalNotes[7] = { 14917,     0, 8870, 9956,     0, 11840, 13290 }; /* A#9, x, C#9, D#9, x, F#9, G#9  */
 
@@ -23,6 +31,11 @@ int chosenAuto = redShootNum;
 int holdTime = 1500;
 
 
+int warmupTime = 1500;
+int initialShootTime = 2900;
+int autoShootSpeed = 72;
+int sideShot = 1460;
+
 
 task LCD()
 {
@@ -39,6 +52,8 @@ task LCD()
 	string mainBattery, backupBattery;
 	while(true)
 	{
+
+
 		int flyBattery = SensorValue[in4];
 
 		if(flyBattery < 900) {
@@ -80,10 +95,19 @@ task LCD()
 					SensorValue[laser] = !SensorValue[laser];
 					lastLazerBtn = true;
 				}
+			} else if(screen == battery) {
+
 			} else {
 				chosenAuto = screen;
 				if(chosenAuto > 5) {
 					chosenAuto = 0;
+				}
+				if(userControl) {
+					stopTask(intake);
+					wait1Msec(2000);
+					runAuto(chosenAuto);
+					startTask(drive);
+					startTask(intake);
 				}
 			}
 		}
@@ -216,4 +240,151 @@ void playSong(int song)
 		PlayMario();
 	else
 		PlayJingleBells();
+}
+
+void runAuto(int chosen) {
+   startTask(flyWheelPower);
+   stopTask(drive);
+   rpmGoal = rpmHigh;
+    flyWheelOn = true;
+    SensorType[in1] = sensorNone;
+    motor[roller] = 127;
+    wait1Msec(warmupTime);
+    SensorType[in1] = sensorGyro;
+	if(chosen == 0)
+		redShoot();
+	else if(chosen == 1)
+		redSide();
+	else if(chosen == 2)
+		blueBot();
+	else if(chosen == 3)
+		blueSide();
+	else if(chosen == 4)
+		defense();
+	else
+		progSkills();
+}
+
+void redShoot()
+{
+	int carry = 340;
+	int separation = 2500;
+	for(int x = 0; x < 10; x++)
+	{
+		motor[chain] = 127;
+		wait1Msec(carry);
+		motor[chain] = 0;
+		wait1Msec(separation);
+	}
+	flyWheelOn = false;
+}
+
+void redSide()
+{
+
+  	SensorType[in1] = sensorGyro; // reset the gyro
+    motor[chain] = autoShootSpeed; // set the speed of the chain to auto speed
+    wait1Msec(initialShootTime); // shoot the balls/
+    motor[chain] = 0; // stop the chain
+    //motor[roller] = 0;
+    rpmGoal = sideShot; // set up the rpm for the side pile shot
+    driveDistance(-1500);
+    encoderTurn(235);
+    //gyroTurn(358); // turn towards pile
+    wait1Msec(500);
+    driveDistance(1070); // go to pile
+    //motor[roller] = 127;
+    motor[chain] = 70;
+    wait1Msec(800);
+    motor[chain] = 0;
+    /*motor[chain] = 0;
+    driveDistance(-250);
+    wait1Msec(500);
+    driveDistance(290);
+    motor[chain] = 35;
+    wait1Msec(500);*/
+    driveDistance(-250);
+    wait1Msec(500);
+    //gyroTurn(-300); // turn to goal
+    encoderTurn(-223);
+    motor[chain] = autoShootSpeed; // shooot the second pile
+    wait1Msec(4000);
+}
+
+void blueBot()
+{
+	redShoot();
+}
+
+void blueSide()
+{
+
+		/*
+		GYRO VERSION
+    motor[chain] = autoShootSpeed;
+    wait1Msec(initialShootTime);
+    motor[chain] = 0;
+    //motor[roller] = 0;
+    rpmGoal = sideShot;
+    driveDistance(-1500);
+    wait1Msec(500);
+    gyroTurn(-358); // turn towards pile
+    wait1Msec(500);
+    driveDistance(1070); // go to pile
+    //motor[roller] = 127;
+    motor[chain] = 70;
+    wait1Msec(800);
+    motor[chain] = 0;
+    driveDistance(-250);
+    wait1Msec(500);
+    gyroTurn(240); // turn to goal
+    motor[chain] = autoShootSpeed; // shooot the second pile
+    wait1Msec(4000);
+    */
+    motor[chain] = autoShootSpeed;
+    wait1Msec(initialShootTime);
+    motor[chain] = 0;
+    //motor[roller] = 0;
+    rpmGoal = sideShot;
+    driveDistance(-1470);
+    wait1Msec(500);
+    encoderTurn(-235); // turn towards pile
+    wait1Msec(500);
+    driveDistance(1070); // go to pile
+    //motor[roller] = 127;
+    motor[chain] = 70;
+    wait1Msec(800);
+    motor[chain] = 0;
+    driveDistance(-250);
+    wait1Msec(500);
+    encoderTurn(223); // turn to goal
+    motor[chain] = autoShootSpeed; // shooot the second pile
+    wait1Msec(4000);
+
+}
+
+void defense()
+{
+	redShoot();
+}
+
+void progSkills()
+{
+    clearTimer(T1);
+    motor[chain] = autoShootSpeed;
+	while(time1[T1] < 17500){
+	}
+    motor[chain] = 0;
+    driveDistance(-200); // move away from
+    wait1Msec(200);
+    gyroTurn(-1134);
+    driveDistance(2300);
+    drivePower(100, 100);
+    wait1Msec(800);
+    drivePower(0,0);
+    wait1Msec(500);
+    driveDistance(-350); // set up position to shoot
+    wait1Msec(500);
+    gyroTurn(380); // turn to goal
+    motor[chain] = autoShootSpeed;
 }

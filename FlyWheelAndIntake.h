@@ -157,7 +157,7 @@ task flyWheelControl() {
             justSwitchedFlywheel = true;
         }
 
-    if(intakeSpeedBtn && !lastIntakeSpeedBtn)
+    /*if(intakeSpeedBtn && !lastIntakeSpeedBtn)
     {
     	intakeSpeed -= 5;
     	if(intakeSpeed < 57)
@@ -165,7 +165,7 @@ task flyWheelControl() {
     	lastIntakeSpeedBtn = true;
     } else if (intakeSpeedBtn == 0) {
     	lastIntakeSpeedBtn = false;
- 		}
+ 		}*/
 
 
 
@@ -219,6 +219,10 @@ task intake()
 	while(true) {
 
 		/* Intake Power */
+		if(rpmGoal == rpmHigh)
+			intakeSpeed = 72;
+		else
+			intakeSpeed = 127;
 		motor[chain] = intakeSpeed * (intakeBtn - outtakeBtn);
 
 		/* Roller Power */
