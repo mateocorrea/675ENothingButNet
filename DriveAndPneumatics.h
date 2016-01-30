@@ -200,23 +200,23 @@ void gyroTurn(int goal)
 {
 	gyro = 0;
 	while(abs(gyro) < abs(goal))
-  {
-  	int difference = abs(goal) - abs(gyro);
-  	int power = difference / 2;
-  	if(goal > 0) {
-  		drivePower(-power, power);
-  	} else {
-  		drivePower(power, -power);
-  	}
-  }
+    {
+        int difference = abs(goal) - abs(gyro);
+        int power = difference / 2;
+        if(goal > 0) {
+            drivePower(-power, power);
+        } else {
+            drivePower(power, -power);
+        }
+    }
 
-  if(goal > 0) {
-  		drivePower(brakePower, -brakePower);
-  } else {
+    if(goal > 0) {
+        drivePower(brakePower, -brakePower);
+    } else {
   		drivePower(-brakePower, brakePower);
-  }
-  wait1Msec(brakeTime);
-  drivePower(0,0);
+    }
+    wait1Msec(brakeTime);
+    drivePower(0,0);
 }
 
 void driveDistance(int goal)
@@ -359,3 +359,18 @@ int mapped(int x)
 {
     return round(0.0001*x*x*x - 0.0095*x*x + 0.4605*x - 0.6284);
 }
+
+
+task straightControl() {
+    while(true) {
+        //check if both the motors are running on max power
+        // if leaning, then make sure to correct itself
+    }
+}
+
+
+
+
+
+
+
