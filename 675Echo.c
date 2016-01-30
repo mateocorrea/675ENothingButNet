@@ -31,11 +31,10 @@ bool userControl = false;
 #pragma competitionControl(Competition)
 #include "cool.c"
 #include "FlyWheelAndIntake.h"
-#include "jpearmanTBH.h"
 #include "DriveAndPneumatics.h"
+#include "Autonomous.h"
 #include "SpeakerAndLCD.h"
 
-bool usePID = true;
 
 void pre_auton()
 {
@@ -62,15 +61,10 @@ task usercontrol()
 	clearDebugStream();
 	if(getTaskState(LCD) == taskStateStopped)
 		startTask(LCD);
-	if(usePID) {
-		if(getTaskState(flyWheelPower) == taskStateStopped)
-			startTask(flyWheelPower);
-		if(getTaskState(flyWheelControl) == taskStateStopped)
-			startTask(flyWheelControl);
-	} else {
-		if(getTaskState(tbh) == taskStateStopped)
-			startTask(tbh);
-	}
+    if(getTaskState(flyWheelPower) == taskStateStopped)
+        startTask(flyWheelPower);
+    if(getTaskState(flyWheelControl) == taskStateStopped)
+        startTask(flyWheelControl);
 	if(getTaskState(drive) == taskStateStopped)
 		startTask(drive);
 	if(getTaskState(pneumatics) == taskStateStopped)
