@@ -35,7 +35,6 @@ bool userControl = false;
 #include "Autonomous.h"
 #include "SpeakerAndLCD.h"
 
-
 void pre_auton()
 {
     SensorValue[laser] = 1;

@@ -59,6 +59,7 @@ int batteryValues = 0;
 int averageBattery = 0;
 int rightValues = 0;
 int intakeSpeed = 127;
+bool manualControl = false;
 
 
 int leftValues = 0;
@@ -157,15 +158,16 @@ task flyWheelControl() {
             justSwitchedFlywheel = true;
         }
 
-    /*if(intakeSpeedBtn && !lastIntakeSpeedBtn)
+    if(intakeSpeedBtn && !lastIntakeSpeedBtn)
     {
-    	intakeSpeed -= 5;
-    	if(intakeSpeed < 57)
-    		intakeSpeed = 127;
+    	//intakeSpeed -= 5;
+    	//if(intakeSpeed < 57)
+    		//intakeSpeed = 127;
+    	manualControl = !manualControl;
     	lastIntakeSpeedBtn = true;
     } else if (intakeSpeedBtn == 0) {
     	lastIntakeSpeedBtn = false;
- 		}*/
+ 		}
 
 
 
@@ -306,6 +308,22 @@ void pidChange(int rpmGoal)
     } else {
         flySpeedLeft += leftChange;
         flySpeedRight += rightChange;
+    }
+
+    if(manualControl == true)
+    {
+    	if(rpmGoal == rpmHigh)
+    	{
+    		flySpeedLeft = 85 + (powerBias/5);
+    		flySpeedRight = 85 + (powerBias/5);
+    	} else if(rpmGoal == rpmMid)
+    	{
+    		flySpeedLeft = 60;
+    		flySpeedRight = 60;
+    	} else {
+    		flySpeedLeft = 40;
+    		flySpeedRight = 40;
+    	}
     }
 
 

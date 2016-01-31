@@ -12,7 +12,7 @@
 bool braking = false;
 bool cubicMapping = false;
 bool lastRampBtn = false;
-bool autoBrake = true;
+bool autoBrake = false;
 int threshold = 12;
 int liftCount = 0;
 int stillTime = 0;
@@ -367,10 +367,3 @@ task straightControl() {
         // if leaning, then make sure to correct itself
     }
 }
-
-
-
-
-
-
-

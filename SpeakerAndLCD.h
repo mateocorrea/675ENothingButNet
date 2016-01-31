@@ -94,11 +94,11 @@ task LCD()
 					chosenAuto = 0;
 				}
 				if(userControl) {
-					stopTask(intake);
+					/*stopTask(intake);
 					wait1Msec(2000);
 					runAuto(chosenAuto);
 					startTask(drive);
-					startTask(intake);
+					startTask(intake);*/
 				}
 			}
 		}
@@ -232,4 +232,3 @@ void playSong(int song)
 	else
 		PlayJingleBells();
 }
-
