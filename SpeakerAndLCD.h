@@ -1,7 +1,7 @@
 task LCD();
 task speaker();
 void PlayTune(string music);
-void PlayMario();
+void playMario();
 void PlayJingleBells();
 void playSong(int song);
 
@@ -198,7 +198,7 @@ void PlayTune(string music)
   } while (c);
 }
 
-void PlayMario()
+void playMario()
 {
 	string Mario1 = "5AA.A.FA6C-.5C-";
 	string Mario2 = "5F.C.4A.5DEdD.";
@@ -228,7 +228,7 @@ void PlayJingleBells()
 void playSong(int song)
 {
 	if(song == 0)
-		PlayMario();
+		playMario();
 	else
 		PlayJingleBells();
 }
