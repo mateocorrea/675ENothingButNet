@@ -38,12 +38,12 @@ bool userControl = false;
 void pre_auton()
 {
     SensorValue[laser] = 1;
-		bStopTasksBetweenModes = false;
-		SensorType[in1] = sensorNone;
+    bStopTasksBetweenModes = false;
+    SensorType[in1] = sensorNone;
   	wait1Msec(1000);
   	SensorType[in1] = sensorGyro;
   	wait1Msec(1000);
-		startTask(LCD);
+    startTask(LCD);
 }
 
 task autonomous()
@@ -54,6 +54,7 @@ task autonomous()
 
 task usercontrol()
 {
+    stopTask(autonomous);
 	SensorValue[laser] = 0;
 	userControl = true;
 	rpmGoal = rpmHigh;
