@@ -2,7 +2,8 @@ bool useGyroTurn = false;
 int warmupTime = 1500;
 int initialShootTime = 2900;
 int autoShootSpeed = 72;
-int sideShot = 1460;
+int outsideShot = 1460;
+int insideShot = 1460;
 
 void runAuto(int chosen);
 void redShoot();
@@ -16,6 +17,7 @@ void runAuto(int chosen) {
 
     /* Start tasks needed in autonomous and disable unnecessary ones */
     startTask(flyWheelPower);
+    startTask(calculateAccelBiases);
     stopTask(drive);
 
     /* Warm-up the flywheel and reset the gyro meanwhile */
@@ -25,10 +27,19 @@ void runAuto(int chosen) {
     motor[roller] = 127;
     wait1Msec(warmupTime);
     SensorType[in1] = sensorGyro;
+    
+    if(chosen != progSkills) {
+        /* Set the chain speed and shoot for (initialShootTime) seconds */
+        motor[chain] = autoShootSpeed;
+        wait1Msec(initialShootTime);
+        
+        /* Stop shooting & set the flywheel rpm to the next rpm */
+        motor[chain] = 0;
+        rpmGoal = (chosen % 2 == 0) ? insideShot : outsideShot;
+        stopTask(calculateAccelBiases);
+    }
 
     /* Run the selected autonomous program */
-    redSide();
-    /*wait1Msec(10000);
     if(chosen == 0)
         redShoot();
     else if(chosen == 1)
@@ -40,19 +51,11 @@ void runAuto(int chosen) {
     else if(chosen == 4)
         defense();
     else
-        progSkills();*/
+        progSkills();
 }
 
 void redShoot()
 {
-    /* Set the chain speed and shoot for (initialShootTime) seconds */
-    motor[chain] = autoShootSpeed;
-    wait1Msec(initialShootTime);
-
-    /* Stop shooting & set the flywheel rpm to the sideshot rpm */
-    motor[chain] = 0;
-    rpmGoal = sideShot;
-
     /* Turn on intake & turn towards the pile of balls */
     motor[chain] = 70;
     if(useGyroTurn)
@@ -78,15 +81,6 @@ void redShoot()
 
 void redSide()
 {
-		useGyroTurn = false;
-    /* Set the chain speed and shoot for (initialShootTime) seconds */
-    motor[chain] = autoShootSpeed;
-    wait1Msec(initialShootTime);
-
-    /* Stop shooting & set the flywheel rpm to the sideshot rpm */
-    motor[chain] = 0;
-    rpmGoal = sideShot;
-
     /* Drive away from tile and turn towards the pile of balls */
     driveDistance(-1500);
     wait1Msec(500);
@@ -116,14 +110,6 @@ void redSide()
 
 void blueBot()
 {
-    /* Set the chain speed and shoot for (initialShootTime) seconds */
-    motor[chain] = autoShootSpeed;
-    wait1Msec(initialShootTime);
-
-    /* Stop shooting & set the flywheel rpm to the sideshot rpm */
-    motor[chain] = 0;
-    rpmGoal = sideShot;
-
     /* Turn on intake & turn towards the pile of balls */
     motor[chain] = 70;
     if(useGyroTurn)
@@ -149,15 +135,6 @@ void blueBot()
 
 void blueSide()
 {
-		useGyroTurn = false;
-    /* Set the chain speed and shoot for (initialShootTime) seconds */
-    motor[chain] = autoShootSpeed;
-    wait1Msec(initialShootTime);
-
-    /* Stop shooting & set the flywheel rpm to the sideshot rpm */
-    motor[chain] = 0;
-    rpmGoal = sideShot;
-
     /* Drive away from tile and turn towards the pile of balls */
     driveDistance(-1470);
     wait1Msec(500);
