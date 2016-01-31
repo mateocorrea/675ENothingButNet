@@ -4,6 +4,11 @@
 #define gyro SensorValue[gyroSensor]
 #define leftDrive nMotorEncoder[leftfront]
 #define rightDrive nMotorEncoder[rightfront]
+#define accelX SensorValue[accelerometerX]
+#define accelY SensorValue[accelerometerY]
+
+#define leftVertStick vexRT[Ch3]
+#define rightVertStick vexRT[Ch2]
 
 #define rampBtn vexRT[Btn7D]
 #define rampBtn2 vexRT[Btn7L]
@@ -13,17 +18,20 @@ bool braking = false;
 bool cubicMapping = false;
 bool lastRampBtn = false;
 bool autoBrake = false;
-int threshold = 12;
+const int X = 0;
+const int Y = 1;
+int threshold = 15;
 int liftCount = 0;
 int stillTime = 0;
 int autoBrakeTime = 3000;
 int brakePower = 25;
 int brakeTime = 35;
-
-void encoderTurn(int goal);
+int accelXBias = 0;
+int accelYBias = 0;
 
 int mapped(int x);
 task drive();
+task calculateAccelBiases();
 task pneumatics();
 void drivePower(int left, int right);
 void driveBrake(int direction);
@@ -32,6 +40,9 @@ void actuateBrake();
 void releaseLift();
 void lockLift();
 void deploy();
+void encoderTurn(int goal);
+void automaticBrakingSystem();
+
 
 task drive()
 {
@@ -48,9 +59,7 @@ task pneumatics()
 	bool lastBrakeBtn = false;
 	deployer = 0;
 	lockLift();
-	actuateBrake();
-	while(true)
-	{
+	while(true) {
 		/* Ramp */
 		if(rampBtn == 1 && rampBtn2 == 1 && lastRampBtn == false) {
 			if(liftCount == 0) {
@@ -78,17 +87,15 @@ task pneumatics()
 		} else if (brakeBtn == 0) {
 			lastBrakeBtn = false;
 		}
-		if((abs(vexRT[Ch2]) > threshold) || (abs(vexRT[Ch3]) > threshold))
-			releaseBrake();
-		if((stillTime > autoBrakeTime) && (autoBrake == true))
-			actuateBrake();
+        
+        automaticBrakingSystem();
 	}
 }
 
 void deploy()
 {
 	deployer = 1;
-	wait1Msec(500);
+	wait1Msec(400);
 	deployer = 0;
 }
 
@@ -256,11 +263,10 @@ void driveDistance(int goal)
         int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
         leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
         rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
-
-        if(goal < 0) {
-            leftPidDrive *= -1;
-            rightPidDrive *= -1;
-        }
+        
+        leftPidDrive = (goal < 0) ? -leftPidDrive : leftPidDrive;
+        rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
+        
         drivePower(leftPidDrive, rightPidDrive);
     }
     driveBrake(goal);
@@ -307,38 +313,33 @@ void encoderTurn(int goal)
         int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
         leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
         rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
-
-        if(goal < 0) {
-            rightPidDrive *= -1;
-        } else {
-        		leftPidDrive *= -1;
-        }
+        
+        rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
+        leftPidDrive = (goal < 0) ? leftPidDrive : -leftPidDrive;
 
         drivePower(leftPidDrive, rightPidDrive);
     }
+    
     if(goal > 0) {
   		drivePower(brakePower, -brakePower);
-	  } else {
-	  		drivePower(-brakePower, brakePower);
-	  }
-	  wait1Msec(brakeTime);
-	  drivePower(0,0);
+    } else {
+        drivePower(-brakePower, brakePower);
+    }
+    wait1Msec(brakeTime);
+    drivePower(0,0);
 }
 
 
 void drivePower(int left, int right)
 {
-
-	if(abs(left) < threshold)
-		left = 0;
-	if(abs(right) < threshold)
-		right = 0;
-	if((abs(right) >= threshold) || (abs(left) >= threshold))
-		stillTime = 0;
-    if (cubicMapping) {
-        left = mapped(left);
-        right = mapped(right);
-    }
+    left = (abs(left) < threshold) ? 0 : left;
+    right = (abs(right) < threshold) ? 0 : right;
+    
+    stillTime = ((abs(right) >= threshold) || (abs(left) >= threshold)) ? 0 : stillTime;
+    
+    left = (cubicMapping) ? (mapped(left)) : left;
+    right = (cubicMapping) ? (mapped(right)) : right;
+    
 	motor[rightback] = right;
 	motor[rightfront] = right;
 	motor[leftback] = left;
@@ -358,6 +359,57 @@ void driveBrake(int direction) {
 int mapped(int x)
 {
     return round(0.0001*x*x*x - 0.0095*x*x + 0.4605*x - 0.6284);
+}
+
+void automaticBrakingSystem() {
+    if((abs(vexRT[Ch2]) >= threshold) || (abs(vexRT[Ch3]) >= threshold))
+        releaseBrake();
+    if((stillTime > autoBrakeTime) && (autoBrake == true))
+        actuateBrake();
+    if((abs(leftVertStick) < threshold) && (abs(rightVertStick) < threshold))
+    {
+        if((accelX > tolerableAccel(X)) || (accelY > tolerableAccel(Y)))
+            actuateBrake();
+    }
+}
+
+int tolerableAccel(int direction)
+{
+    int allowableX = 5;
+    int allowableY = 5;
+    
+    if(direction == X) {
+        if(accelX > accelXBias)
+            return accelXBias + allowableX;
+        else
+            return accelXBias - allowableX;
+    } else {
+        if(accelX > accelYBias)
+            return accelYBias + allowableY;
+        else
+            return accelYBias - allowableY;
+    }
+}
+
+task calculateAccelBiases()
+{
+    int xValues = 0;
+    int yValues = 0;
+    int xSum = 0;
+    int ySum = 0;
+    
+    while(true) {
+        xSum = (xValues * accelXBias) + accelX;
+        ySum = (yValues * accelYBias) + accelY;
+        
+        accelXBias = round((xSum * 1.0) / (xValues+1));
+        accelYBias = round((ySum * 1.0) / (yValues+1));
+        
+        xValues = (xValues >= 2000) ? 1000 : (xValues+1);
+        yValues = (yValues >= 2000) ? 1000 : (yValues+1);
+  
+        wait1Msec(10);
+    }
 }
 
 
