@@ -2,15 +2,12 @@
 #define flyEncRight nMotorEncoder[topRightLauncher]
 #define driveEncRight nMotorEncoder[rightfront]
 #define driveEncLeft nMotorEncoder[leftfront]
-#define intakeSensor SensorValue[intakeTouchSensor]
-#define shootSensor SensorValue[launcherLimitSwitch]
 
 #define speedBtn vexRT[Btn5D]
 #define intakeBtn vexRT[Btn6U]
 #define outtakeBtn vexRT[Btn6D]
 #define flyWheelBtn vexRT[Btn7U]
 #define lowerBtn vexRT[Btn7R]
-#define modeBtn vexRT[Btn8U]
 #define rollerBtn vexRT[Btn8R]
 #define rollerOutBtn vexRT[Btn8D]
 #define raiseBtn vexRT[Btn8L]
@@ -41,29 +38,28 @@ bool lastIntakeBtn = false;
 bool flyWheelOn = false;
 bool rollerOn = true;
 bool redoSpeed = true;
-float oldFilter = 0.0;
 bool rpmMode = true;
+bool manualControl = false;
 float launcherRatio = 10.2;
 float oldLeftError = 0.0;
 float oldRightError = 0.0;
 float integralRight = 0.0;
 float integralLeft = 0.0;
 float lastTime = 0;
+float oldFilter = 0.0;
 int flyWheelOnOffTime = 0;
 int lastFlyWheelTime = 0;
-int maxPower = 118;
-int minPower = 35;
+const int MAX_POWER = 120;
+const int MIN_POWER = 35;
+int maxPower = MAX_POWER;
+int minPower = MIN_POWER;
 int encoderTimer = 25;
 int ticksPerTurnSpeed = 372;
 int batteryValues = 0;
 int averageBattery = 0;
+int leftValues = 0;
 int rightValues = 0;
 int intakeSpeed = 127;
-bool manualControl = false;
-
-
-int leftValues = 0;
-
 int powerBias = 0;
 int red = 0;
 int green = 1;
@@ -126,11 +122,8 @@ float KdHighR = KdHighRS;
 /////////////////////////////////////////////////////////
 
 task flyWheelPower() {
-	while(true)
-	{
+	while(true) {
 		if(flyWheelOn) {
-			/*if(flySpeedLeft == 0)
-				slowStart();*/
 			wait1Msec(encoderTimer);
 			setPIDConstants();
 			pidChange(rpmGoal + powerBias);
@@ -153,21 +146,23 @@ task flyWheelControl() {
             clearTimer(T2);
             justSwitchedFlywheel = false;
         }
-        if((time1[T2] >= 2000) && !justSwitchedFlywheel) {
+        if((time1[T2] >= 1000) && !justSwitchedFlywheel) {
             flyWheelOn = !flyWheelOn;
             justSwitchedFlywheel = true;
+            if(flyWheelOn == true)
+                resetFlyWheel();
         }
 
-    if(intakeSpeedBtn && !lastIntakeSpeedBtn)
-    {
-    	//intakeSpeed -= 5;
-    	//if(intakeSpeed < 57)
-    		//intakeSpeed = 127;
-    	manualControl = !manualControl;
-    	lastIntakeSpeedBtn = true;
-    } else if (intakeSpeedBtn == 0) {
-    	lastIntakeSpeedBtn = false;
- 		}
+        /*if(intakeSpeedBtn && !lastIntakeSpeedBtn)
+        {
+            //intakeSpeed -= 5;
+            //if(intakeSpeed < 57)
+                //intakeSpeed = 127;
+            manualControl = !manualControl;
+            lastIntakeSpeedBtn = true;
+        } else if (intakeSpeedBtn == 0) {
+            lastIntakeSpeedBtn = false;
+ 		}*/
 
 
 
@@ -191,13 +186,13 @@ task flyWheelControl() {
 			lastSpeedBtn = false;
 		}
 
+        /* Power Bias */
 		if(raiseBtn == 1 && lastRaiseBtn == false) {
 			powerBias += 5;
 			lastRaiseBtn = true;
 		} else if (raiseBtn == 0) {
 			lastRaiseBtn = false;
 		}
-
 		if(lowerBtn == 1 && lastLowerBtn == false) {
 			powerBias -= 5;
 			lastLowerBtn = true;
@@ -205,6 +200,7 @@ task flyWheelControl() {
 			lastLowerBtn = false;
 		}
 
+        /* Reset time for Excel graph */
 		if(intakeBtn && !lastIntakeBtn) {
 			initialTime = nSysTime;
 			lastIntakeBtn = true;
@@ -219,25 +215,18 @@ task flyWheelControl() {
 task intake()
 {
 	while(true) {
-
 		/* Intake Power */
-		if(rpmGoal == rpmHigh)
-			intakeSpeed = 72;
-		else
-			intakeSpeed = 127;
+        intakeSpeed = (rpmGoal == rpmHigh) ? 72 : 127;
 		motor[chain] = intakeSpeed * (intakeBtn - outtakeBtn);
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false) {
 			rollerOn = !rollerOn;
 			lastRollerBtn = true;
-			} else if (rollerBtn == 0) {
+        } else if (rollerBtn == 0) {
 			lastRollerBtn = false;
 		}
-		if(rollerOutBtn)
-			motor[roller] = -127;
-		else
-			motor[roller] = 127 * rollerOn;
+        motor[roller] = (rollerOutBtn) ? -127 : (127 * rollerOn);
 	}
 }
 
@@ -245,13 +234,12 @@ void turnOn(int color) {
 	SensorValue[redLED] = 1;
 	SensorValue[greenLED] = 1;
 	SensorValue[yellowLED] = 1;
-
 	if(color == red) {
-		SensorValue[redLED] = 0;
-		} else if (color == green) {
-		SensorValue[greenLED] = 0;
-		} else if (color == yellow) {
-		SensorValue[yellowLED] = 0;
+        SensorValue[redLED] = 0;
+    } else if (color == green) {
+        SensorValue[greenLED] = 0;
+    } else if (color == yellow) {
+        SensorValue[yellowLED] = 0;
 	}
 }
 
@@ -301,16 +289,10 @@ void pidChange(int rpmGoal)
 	float rightChange = pRight + iRight + dRight;
 
 	// Adjust Speed //
+    flySpeedLeft = (rpmGoal == rpmLow) ? (flySpeedLeft * oldFilter + ((1.0 - oldFilter) * leftChange)) : flySpeedLeft + leftChange;
+    flySpeedRight = (rpmGoal == rpmLow) ? (flySpeedRight * oldFilter + ((1.0 - oldFilter) * rightChange)) : flySpeedRight + rightChange;
 
-    if(rpmGoal == rpmLow) {
-        flySpeedLeft = flySpeedLeft * oldFilter + ((1.0 - oldFilter) * leftChange);
-        flySpeedRight = flySpeedRight * oldFilter + ((1.0 - oldFilter) * rightChange);
-    } else {
-        flySpeedLeft += leftChange;
-        flySpeedRight += rightChange;
-    }
-
-    if(manualControl == true)
+    /*if(manualControl == true)
     {
     	if(rpmGoal == rpmHigh)
     	{
@@ -324,7 +306,7 @@ void pidChange(int rpmGoal)
     		flySpeedLeft = 40;
     		flySpeedRight = 40;
     	}
-    }
+    }*/
 
 
 	//writeDebugStreamLine("%f", leftChange);
@@ -410,12 +392,19 @@ void setPIDConstants()
 
 void normalizeFlyPower()
 {
-	/*if(rpmGoal == rpmHigh) {
-		if((flySpeedLeft < 0) || (flySpeedRight < 0)) {
-			flySpeedLeft = abs(flySpeedLeft);
-			flySpeedRight = abs(flySpeedRight);
-		}
-	}*/
+	if(rpmGoal == rpmLow) {
+        minPower = MIN_POWER;
+        maxPower = 70;
+    } else if (rpmGoal == rpmMid) {
+        minPower = 40;
+        maxPower = 100;
+    } else if (rpmGoal == rpmHigh) {
+        minPower = 65;
+        maxPower = MAX_POWER;
+    } else {
+        minPower = MIN_POWER;
+        maxPower = MAX_POWER;
+    }
 	if(flySpeedLeft < minPower)
 		flySpeedLeft = minPower;
 	if(flySpeedRight < minPower)
@@ -446,4 +435,11 @@ void initFlyWheel()
 	if(rpmGoal == rpmLow)
 		flyWheelSpeed = lowSpeed;
 	flyWheelOn = true;
+}
+
+void resetFlyWheel()
+{
+    rpmGoal = rpmHigh;
+    flyWheelSpeed = highSpeed;
+    powerBias = 0;
 }
