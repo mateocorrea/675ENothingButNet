@@ -47,7 +47,6 @@ float integralRight = 0.0;
 float integralLeft = 0.0;
 float lastTime = 0;
 float oldFilter = 0.0;
-int flyWheelOnOffTime = 0;
 int lastFlyWheelTime = 0;
 const int MAX_POWER = 120;
 const int MIN_POWER = 35;
@@ -78,6 +77,7 @@ void averageRPMError(float left, float right);
 void normalizeFlyPower();
 void setPIDConstants();
 void slowStart();
+void resetFlyWheel();
 /////////////////////////////////////////////////////////
 
 

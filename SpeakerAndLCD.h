@@ -181,7 +181,7 @@ void PlayTune(string music)
   char c;
 
   do {
-    c = StringGetChar(music, cursor);
+    c = stringGetChar(music, cursor);
     cursor++;
     while(bSoundActive) { } ; // wait for sound idle
     if (c>='0' && c<='9') {

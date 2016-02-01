@@ -27,12 +27,12 @@ void runAuto(int chosen) {
     motor[roller] = 127;
     wait1Msec(warmupTime);
     SensorType[in1] = sensorGyro;
-    
-    if(chosen != progSkills) {
+
+    if(chosen < 5) {
         /* Set the chain speed and shoot for (initialShootTime) seconds */
         motor[chain] = autoShootSpeed;
         wait1Msec(initialShootTime);
-        
+
         /* Stop shooting & set the flywheel rpm to the next rpm */
         motor[chain] = 0;
         rpmGoal = (chosen % 2 == 0) ? insideShot : outsideShot;

@@ -42,6 +42,7 @@ void lockLift();
 void deploy();
 void encoderTurn(int goal);
 void automaticBrakingSystem();
+int tolerableAccel(int direction);
 
 
 task drive()
@@ -87,7 +88,7 @@ task pneumatics()
 		} else if (brakeBtn == 0) {
 			lastBrakeBtn = false;
 		}
-        
+
         automaticBrakingSystem();
 	}
 }
@@ -263,10 +264,10 @@ void driveDistance(int goal)
         int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
         leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
         rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
-        
+
         leftPidDrive = (goal < 0) ? -leftPidDrive : leftPidDrive;
         rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
-        
+
         drivePower(leftPidDrive, rightPidDrive);
     }
     driveBrake(goal);
@@ -313,13 +314,13 @@ void encoderTurn(int goal)
         int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
         leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
         rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
-        
+
         rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
         leftPidDrive = (goal < 0) ? leftPidDrive : -leftPidDrive;
 
         drivePower(leftPidDrive, rightPidDrive);
     }
-    
+
     if(goal > 0) {
   		drivePower(brakePower, -brakePower);
     } else {
@@ -334,12 +335,12 @@ void drivePower(int left, int right)
 {
     left = (abs(left) < threshold) ? 0 : left;
     right = (abs(right) < threshold) ? 0 : right;
-    
+
     stillTime = ((abs(right) >= threshold) || (abs(left) >= threshold)) ? 0 : stillTime;
-    
+
     left = (cubicMapping) ? (mapped(left)) : left;
     right = (cubicMapping) ? (mapped(right)) : right;
-    
+
 	motor[rightback] = right;
 	motor[rightfront] = right;
 	motor[leftback] = left;
@@ -377,7 +378,7 @@ int tolerableAccel(int direction)
 {
     int allowableX = 5;
     int allowableY = 5;
-    
+
     if(direction == X) {
         if(accelX > accelXBias)
             return accelXBias + allowableX;
@@ -397,17 +398,17 @@ task calculateAccelBiases()
     int yValues = 0;
     int xSum = 0;
     int ySum = 0;
-    
+
     while(true) {
         xSum = (xValues * accelXBias) + accelX;
         ySum = (yValues * accelYBias) + accelY;
-        
+
         accelXBias = round((xSum * 1.0) / (xValues+1));
         accelYBias = round((ySum * 1.0) / (yValues+1));
-        
+
         xValues = (xValues >= 2000) ? 1000 : (xValues+1);
         yValues = (yValues >= 2000) ? 1000 : (yValues+1);
-  
+
         wait1Msec(10);
     }
 }
