@@ -17,7 +17,7 @@
 /////////////////////////////////////////////////////////
 int rpmLow = 1275;
 int rpmMid = 1200;
-int rpmHigh = 1650;
+int rpmHigh = 1600;
 float rpmGoal = rpmHigh;
 float rpmLeft = 0.0;
 float rpmRight = 0.0;
@@ -90,7 +90,7 @@ float KiR = 1.0;
 float KdL = 1.0;
 float KdR = 1.0;
 /////////////////////////////////////////////////////////
-float KpLow = 0.15;
+float KpLow = 0.024;
 float KiLow = 0.000000;
 float KdLow = 0.000;
 float KpLowShooting = KpLow;
@@ -101,15 +101,16 @@ float KpMid = 0.7;
 float KiMid = 0.0000;
 float KdMid = 0.00;
 /////////////////////////////////////////////////////////
-float KpHighRS = 0.056000000;//.008
-float KiHighRS = 0.00302;//.0007
-float KdHighRS  = 0.000025000;// .009//.00155
+float KpHighRS = 0.024000000;//.008
+float KiHighRS = 0.00202;//.0007
+float KdHighRS  = 0.000042000;// .009//.00155
 
-/* GOOD VALUES
-float KpHighRS = 0.048000000; OR 32
-float KiHighRS = 0.00202;
-float KdHighRS  = 0.00002500;
+/* good with 1575/1582
+float KpHighRS = 0.020000000;//.008
+float KiHighRS = 0.00202;//.0007
+float KdHighRS  = 0.000042000;// .009//.00155
 */
+
 float KpHighLS = KpHighRS;
 float KiHighLS = KiHighRS;
 float KdHighLS = KdHighRS;
@@ -216,7 +217,7 @@ task intake()
 {
 	while(true) {
 		/* Intake Power */
-        intakeSpeed = (rpmGoal == rpmHigh) ? 72 : 127;
+        intakeSpeed = (rpmGoal == rpmHigh) ? 127 : 127;
 		motor[chain] = intakeSpeed * (intakeBtn - outtakeBtn);
 
 		/* Roller Power */
@@ -289,8 +290,8 @@ void pidChange(int rpmGoal)
 	float rightChange = pRight + iRight + dRight;
 
 	// Adjust Speed //
-    flySpeedLeft = (rpmGoal == rpmLow) ? (flySpeedLeft * oldFilter + ((1.0 - oldFilter) * leftChange)) : flySpeedLeft + leftChange;
-    flySpeedRight = (rpmGoal == rpmLow) ? (flySpeedRight * oldFilter + ((1.0 - oldFilter) * rightChange)) : flySpeedRight + rightChange;
+    flySpeedLeft = (rpmGoal == 0) ? (flySpeedLeft * oldFilter + ((1.0 - oldFilter) * leftChange)) : flySpeedLeft + leftChange;
+    flySpeedRight = (rpmGoal == 0) ? (flySpeedRight * oldFilter + ((1.0 - oldFilter) * rightChange)) : flySpeedRight + rightChange;
 
     /*if(manualControl == true)
     {
