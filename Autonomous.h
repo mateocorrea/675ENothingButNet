@@ -1,7 +1,7 @@
 bool useGyroTurn = false;
 int warmupTime = 1500;
 int initialShootTime = 2900;
-int autoShootSpeed = 72;
+int autoShootSpeed = 127;
 int outsideShot = 1460;
 int insideShot = 1460;
 
@@ -183,7 +183,7 @@ void progSkills()
     /* Shoot the first batch of preloads for 17.5 seconds */
     clearTimer(T1);
     motor[chain] = autoShootSpeed;
-    while(time1[T1] < 60000){
+    while(time1[T1] < 25000){
     }
     motor[chain] = 0;
 

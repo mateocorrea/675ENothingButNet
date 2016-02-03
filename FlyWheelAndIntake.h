@@ -15,9 +15,9 @@
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
-int rpmLow = 1275;
+int rpmLow = 1000;
 int rpmMid = 1200;
-int rpmHigh = 1600;
+int rpmHigh = 1500;
 float rpmGoal = rpmHigh;
 float rpmLeft = 0.0;
 float rpmRight = 0.0;
@@ -92,20 +92,25 @@ float KiR = 1.0;
 float KdL = 1.0;
 float KdR = 1.0;
 /////////////////////////////////////////////////////////
-float KpLow = 0.000900500;
-float KiLow = 0.000000200;
-float KdLow = 0.005000000;
-float KpLowShooting = 0.01152500;
-float KiLowShooting = 0.00000000;
+float KpLow = 0.01192500;
+float KiLow = 0.00000900;
+float KdLow = 0.92000000;
+float KpLowShooting = 0.01292500;
+float KiLowShooting = 0.000000900;
 float KdLowShooting = 0.92000000;
 /////////////////////////////////////////////////////////
 float KpMid = 0.7;
 float KiMid = 0.0000;
 float KdMid = 0.00;
 /////////////////////////////////////////////////////////
-float KpHighRS = 0.024000000;//.008
+
+float KpHighRS = 0.021000000;//.008
 float KiHighRS = 0.00202;//.0007
 float KdHighRS  = 0.000042000;// .009//.00155
+/*
+float KpHighRS = 0.018000000;//.008
+float KiHighRS = 0.000200;//.00202
+float KdHighRS  = 0.004040000;// .009//.00155*/
 
 /* good with 1575/1582
 float KpHighRS = 0.020000000;//.008
