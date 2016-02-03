@@ -69,6 +69,7 @@ int initialTime = 0;
 int voltageCorrection(int rpm);
 task flyWheelControl();
 task flyWheelPower();
+task autoPIDTuner();
 task intake();
 void initFlyWheel();
 void turnOn(int color);
