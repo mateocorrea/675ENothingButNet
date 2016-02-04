@@ -17,7 +17,7 @@
 /////////////////////////////////////////////////////////
 int rpmLow = 1000;
 int rpmMid = 1200;
-int rpmHigh = 1500;
+int rpmHigh = 1410;
 float rpmGoal = rpmHigh;
 float rpmLeft = 0.0;
 float rpmRight = 0.0;
@@ -103,11 +103,24 @@ float KpMid = 0.7;
 float KiMid = 0.0000;
 float KdMid = 0.00;
 /////////////////////////////////////////////////////////
+float KpHighRS = 0.010000000;//.008
+float KiHighRS = 0.0024000;//.0007
+float KdHighRS  = 0.004800;// .009//.00155
 
+/* final mateo values
+float KpHighRS = 0.010600000;//.008
+float KiHighRS = 0.00240;//.0007
+float KdHighRS  = 0.0030000;// .009//.00155
+
+/*
+most bad shots shoot just a bit too strong, but every once in a while there is a short shot
+raise the d a little more to correct overshot, and eitehr raise the p or i to fix the every once in a while short shots
+/*
+BEST
 float KpHighRS = 0.021000000;//.008
 float KiHighRS = 0.00202;//.0007
-float KdHighRS  = 0.000042000;// .009//.00155
-/*
+float KdHighRS  = 0.0042000;// .009//.00155
+
 float KpHighRS = 0.018000000;//.008
 float KiHighRS = 0.000200;//.00202
 float KdHighRS  = 0.004040000;// .009//.00155*/

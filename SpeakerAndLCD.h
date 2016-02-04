@@ -21,7 +21,7 @@ int battery = 6;
 int name = 7;
 int music = 8;
 int screen = name;
-int chosenAuto = redShootNum;
+int chosenAuto = autoSix;
 int holdTime = 1500;
 
 
