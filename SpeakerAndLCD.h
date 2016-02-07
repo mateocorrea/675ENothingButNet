@@ -144,7 +144,6 @@ task LCD()
 		if((screen < 6) && (screen == chosenAuto)) {
 			displayLCDCenteredString(1, "Selected");
 		}
-		if(rpmMode) {
 			if(SensorValue[greenLED] == 1 && (rpmGoal == rpmHigh))
 				turnOn(green);
 			else
@@ -157,9 +156,6 @@ task LCD()
 				turnOn(red);
 			else
 				SensorValue[redLED] = 1;
-			wait1Msec(100);
-			holdTime += 100;
-		}
 		//Short delay for the LCD refresh rate
 		wait1Msec(100);
 		holdTime += 100;

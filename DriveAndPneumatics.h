@@ -415,8 +415,10 @@ task calculateAccelBiases()
 
 
 task straightControl() {
-    while(true) {
+	int qer = 0;
+    while(qer < 5) {
         //check if both the motors are running on max power
         // if leaning, then make sure to correct itself
+    		qer++;
     }
 }

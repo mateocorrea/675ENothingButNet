@@ -33,6 +33,7 @@ bool userControl = false;
 #pragma platform(VEX)
 #pragma competitionControl(Competition)
 #include "cool.c"
+#include "PID_Values.h"
 #include "FlyWheelAndIntake.h"
 #include "DriveAndPneumatics.h"
 #include "Autonomous.h"
@@ -57,10 +58,11 @@ task autonomous()
 
 task usercontrol()
 {
-    stopTask(autonomous);
+  stopTask(autonomous);
 	SensorValue[laser] = 0;
 	userControl = true;
-	rpmGoal = rpmHigh;
+	if(!manualControl)
+		rpmGoal = rpmHigh;
 	clearDebugStream();
 	if(getTaskState(LCD) == taskStateStopped)
 		startTask(LCD);
@@ -76,4 +78,5 @@ task usercontrol()
 		startTask(speaker);
 	if(getTaskState(intake) == taskStateStopped)
 		startTask(intake);
+	//startTask(autoPIDTuner);
 }

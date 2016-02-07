@@ -183,7 +183,7 @@ void progSkills()
     /* Shoot the first batch of preloads for 17.5 seconds */
     clearTimer(T1);
     motor[chain] = autoShootSpeed;
-    while(time1[T1] < 25000){
+    while(time1[T1] < 22000){
     }
     motor[chain] = 0;
 
