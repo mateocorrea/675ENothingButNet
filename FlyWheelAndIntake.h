@@ -82,6 +82,8 @@ void slowStart();
 void resetFlyWheel();
 int powerBias();
 void powerBias(int change);
+
+bool singleShotMode = false;
 /////////////////////////////////////////////////////////
 
 task flyWheelPower() {
@@ -90,7 +92,10 @@ task flyWheelPower() {
 		if(flyWheelOn) {
 			wait1Msec(encoderTimer);
 			setPIDConstants();
-			pidChange(rpmGoal + powerBias(rpmGoal));
+			if(singleShotMode)
+				minimalPIDChange(rpmGoal + powerBias());
+			else
+				pidChange(rpmGoal + powerBias());
 			normalizeFlyPower();
 			flyWheelMotors(flySpeedLeft, flySpeedRight);
 		} else {
@@ -151,13 +156,13 @@ task flyWheelControl() {
 
         /* Power Bias */
 		if(raiseBtn == 1 && lastRaiseBtn == false) {
-			powerBias(5);
+			powerBias(2);
 			lastRaiseBtn = true;
 		} else if (raiseBtn == 0) {
 			lastRaiseBtn = false;
 		}
 		if(lowerBtn == 1 && lastLowerBtn == false) {
-			powerBias(-5);
+			powerBias(-2);
 			lastLowerBtn = true;
 		} else if (lowerBtn == 0) {
 			lastLowerBtn = false;
@@ -230,8 +235,10 @@ void flyWheelMotors(float left, float right)
 void pidChange(int goal)
 {
 	float deltaTime = abs(nSysTime - lastTime);
-    if(rpmHigh < 400)
-        launcherRatio = 1;
+	if(deltaTime < 1)
+		deltaTime = 1;
+  if(rpmHigh < 400)
+      launcherRatio = 1;
 	float factor = ( ( launcherRatio * 60000 ) / deltaTime ) / ticksPerTurnSpeed;
 	rpmLeft = abs(flyEncLeft * factor);
 	rpmRight = abs(flyEncRight * factor);
@@ -379,18 +386,18 @@ void resetFlyWheel()
 
 int powerBias()
 {
-    if(power == rpmLow)
+    if(rpmGoal == rpmLow)
         return lowPowerBias;
-    if(power == rpmMid)
+    if(rpmGoal == rpmMid)
         return midPowerBias;
     return highPowerBias;
 }
 
 void powerBias(int change)
 {
-    if(power == rpmLow)
+    if(rpmGoal == rpmLow)
         lowPowerBias += change;
-    else if(power == rpmMid)
+    else if(rpmGoal == rpmMid)
         midPowerBias += change;
     else
         highPowerBias += change;
@@ -645,20 +652,20 @@ void minimalPIDChange(int goal)
     rpmRight = abs(flyEncRight * factor);
     float leftError = voltageCorrection(goal) - rpmLeft;
     float rightError = voltageCorrection(goal) - rpmRight;
-    
+
     KpL /= 4;
     KpR /= 4;
     KiL /= 4;
     KiR /= 4;
     KdL /= 4;
     KdR /= 4;
-    
+
     ////// Proportional /////
-    float pLeft = KpL * leftError;
-    float pRight = KpR * rightError;
-    
+    float pLeft = (KpL * pow(4, (abs(leftError)/20))) * leftError;
+    float pRight = (KpR * pow(4, (abs(leftError)/20))) * rightError;
+
     ////// Integral //////
-    averageRPMError(left, right);
+    averageRPMError(leftError, rightError);
     if(rightValues > 1000000) {
         rightValues = 100000;
         leftValues = 100000;
@@ -667,13 +674,13 @@ void minimalPIDChange(int goal)
     integralLeft = averageLeftError;
     float iLeft = KiL * integralLeft;
     float iRight = KiR * integralRight;
-    
+
     ////// Derivative /////
     float derivativeLeft = (leftError - oldLeftError) / deltaTime;
     float derivativeRight = (rightError - oldRightError) / deltaTime;
     float dLeft = KdL * derivativeLeft;
     float dRight = KdR * derivativeRight;
-    
+
     /* 4 cases: (over has negative errors) if error > olderror (could either be closer (if over the RPM) or farther (if under the RPM))
      BothOver RPMGoal: error > olderror (getting closer) --> should speed up a bit, and speeds up
      BothOver RPM: error < olderror (getting farther, going too fast) --> should slow down, and slows down
@@ -682,26 +689,25 @@ void minimalPIDChange(int goal)
      Error > 0 (below goal) & oldError < 0 (over goal) --> should speed up, and speeds up
      Error < 0 (above goal) & oldError > 0 (under goal) --> should slow down and slows down
      */
-    
-    
+
+
     // PID //
     float leftChange = pLeft + iLeft + dLeft;
     float rightChange = pRight + iRight + dRight;
-    
+
     // Adjust Speed //
-    flySpeedLeft += flySpeedLeft;
-    flySpeedRight += flySpeedRight;
-    
+    flySpeedLeft += leftChange;
+    flySpeedRight += rightChange;
+
     //writeDebugStreamLine("%f", leftChange);
     //writeDebugStreamLine("%f", rightChange);
-    
+
     // Reset the errors and the encoders
     oldLeftError = leftError;
     oldRightError = rightError;
     flyEncLeft = 0;
     flyEncRight = 0;
     clearTimer(T4);
-    
+
     //writeDebugStreamLine("%d, %f", nSysTime-initialTime, rpmLeft);
 }
-

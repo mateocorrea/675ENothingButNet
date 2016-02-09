@@ -33,6 +33,7 @@ int mapped(int x);
 task drive();
 task calculateAccelBiases();
 task pneumatics();
+task straightControl();
 void drivePower(int left, int right);
 void driveBrake(int direction);
 void releaseBrake();
@@ -43,6 +44,11 @@ void deploy();
 void encoderTurn(int goal);
 void automaticBrakingSystem();
 int tolerableAccel(int direction);
+
+float initialPosX = 0.0;
+float initialPosY = 0.0;
+float positionX = initialPosX;
+float positionY = initialPosY;
 
 
 task drive()
@@ -421,4 +427,17 @@ task straightControl() {
         // if leaning, then make sure to correct itself
     		qer++;
     }
+}
+
+task positionTracker() {
+	while(true) {
+
+		float speedX = 1.0;
+		float speedY = 1.0;
+		float speed = 1.0;
+		//float speed = pow( (pow(speedX,2)+pow(speedY,2)) , 0.5);
+
+		float deltaX = cos(gyro) * speed;
+		float deltaY = sin(gyro) * speed;
+	}
 }

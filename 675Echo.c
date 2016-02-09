@@ -33,7 +33,7 @@ bool userControl = false;
 #pragma platform(VEX)
 #pragma competitionControl(Competition)
 #include "cool.c"
-#include "PID_Values.h"
+#include "PID_ValuesMotorRPM.h"
 #include "FlyWheelAndIntake.h"
 #include "DriveAndPneumatics.h"
 #include "Autonomous.h"
@@ -52,13 +52,16 @@ void pre_auton()
 
 task autonomous()
 {
-    SensorValue[laser] = 0;
+  SensorValue[laser] = 0;
+  startTask(calculateAccelBiases);
 	runAuto(chosenAuto);
 }
 
 task usercontrol()
 {
   stopTask(autonomous);
+  if(getTaskState(calculateAccelBiases) == taskStateRunning)
+  	stopTask(calculateAccelBiases);
 	SensorValue[laser] = 0;
 	userControl = true;
 	if(!manualControl)

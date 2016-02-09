@@ -1,6 +1,6 @@
-int rpmLow = 90;
-int rpmMid = 110;
-int rpmHigh = 140;
+int rpmLow = 120;
+int rpmMid = 140;
+int rpmHigh = 160;
 
 //                 PID CONSTANTS                       //
 /////////////////////////////////////////////////////////
