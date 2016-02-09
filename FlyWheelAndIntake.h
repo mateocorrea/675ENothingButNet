@@ -674,6 +674,16 @@ void minimalPIDChange(int goal)
     float dLeft = KdL * derivativeLeft;
     float dRight = KdR * derivativeRight;
     
+    /* 4 cases: (over has negative errors) if error > olderror (could either be closer (if over the RPM) or farther (if under the RPM))
+     BothOver RPMGoal: error > olderror (getting closer) --> should speed up a bit, and speeds up
+     BothOver RPM: error < olderror (getting farther, going too fast) --> should slow down, and slows down
+     BothUnder RPM: error > olderror (getting farther because slowed down too much)--> should speed up, and speeds up
+     BothUnder RPM: error < olderror (getting closer because speeding up)--> should slow down, and slows down
+     Error > 0 (below goal) & oldError < 0 (over goal) --> should speed up, and speeds up
+     Error < 0 (above goal) & oldError > 0 (under goal) --> should slow down and slows down
+     */
+    
+    
     // PID //
     float leftChange = pLeft + iLeft + dLeft;
     float rightChange = pRight + iRight + dRight;
