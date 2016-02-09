@@ -1,4 +1,4 @@
-int rpmLow = 120;
+int rpmLow = 121;
 int rpmMid = 140;
 int rpmHigh = 160;
 
@@ -11,12 +11,12 @@ float KiR = 1.0;
 float KdL = 1.0;
 float KdR = 1.0;
 /////////////////////////////////////////////////////////
-float KpLow = 0.01192500;
-float KiLow = 0.00000900;
-float KdLow = 0.92000000;
 float KpLowShooting = 0.01292500;
 float KiLowShooting = 0.000000900;
-float KdLowShooting = 0.92000000;
+float KdLowShooting = 0.75000000;
+float KpLow = KpLowShooting;
+float KiLow = KiLowShooting;
+float KdLow = KdLowShooting;
 /////////////////////////////////////////////////////////
 float KpMid = 0.01240000;
 float KiMid = 0.00050;//0.00050;

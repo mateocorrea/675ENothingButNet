@@ -26,7 +26,7 @@ int lowSpeed = 40;
 int midSpeed = 55;
 int highSpeed = 70;
 /////////////////////////////////////////////////////////
-bool softBalls = true;
+bool softBalls = false;
 bool lastRaiseBtn = false;
 bool lastLowerBtn = false;
 bool lastSpeedBtn = false;
