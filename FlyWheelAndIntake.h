@@ -71,9 +71,9 @@ task flyWheelControl();
 task flyWheelPower();
 task autoPIDTuner();
 task intake();
-void initFlyWheel();
 void turnOn(int color);
 void flyWheelMotors(float left, float right);
+void minimalPIDChange(int goal);
 void pidChange(int goal);
 void averageRPMError(float left, float right);
 void normalizeFlyPower();
@@ -85,6 +85,7 @@ void powerBias(int change);
 /////////////////////////////////////////////////////////
 
 task flyWheelPower() {
+    resetFlyWheel();
 	while(true) {
 		if(flyWheelOn) {
 			wait1Msec(encoderTimer);
@@ -102,7 +103,6 @@ task flyWheelControl() {
 	lastFlyWheelTime = nSysTime;
 	bool justSwitchedFlywheel = false;
 	bool lastIntakeSpeedBtn = false;
-	initFlyWheel();
 	while(true) {
 
         if(!flyWheelBtn) {
@@ -179,7 +179,7 @@ task intake()
 {
 	while(true) {
 		/* Intake Power */
-        if(rpmGoal == rpmHigh)
+        if(rpmGoal != rpmMid)
         {
             intakeSpeed = (rpmGoal == rpmHigh) ? 127 : 127;
             motor[chain] = intakeSpeed * (intakeBtn - outtakeBtn);
@@ -634,3 +634,64 @@ task autoPIDTuner() {
     writeDebugStreamLine("%f", bestI);
     writeDebugStreamLine("%f", bestD);
   }
+
+void minimalPIDChange(int goal)
+{
+    float deltaTime = time1(T4);
+    if(rpmHigh < 400)
+        launcherRatio = 1;
+    float factor = ( ( launcherRatio * 60000 ) / deltaTime ) / ticksPerTurnSpeed;
+    rpmLeft = abs(flyEncLeft * factor);
+    rpmRight = abs(flyEncRight * factor);
+    float leftError = voltageCorrection(goal) - rpmLeft;
+    float rightError = voltageCorrection(goal) - rpmRight;
+    
+    KpL /= 4;
+    KpR /= 4;
+    KiL /= 4;
+    KiR /= 4;
+    KdL /= 4;
+    KdR /= 4;
+    
+    ////// Proportional /////
+    float pLeft = KpL * leftError;
+    float pRight = KpR * rightError;
+    
+    ////// Integral //////
+    averageRPMError(left, right);
+    if(rightValues > 1000000) {
+        rightValues = 100000;
+        leftValues = 100000;
+    }
+    integralRight = averageRightError;
+    integralLeft = averageLeftError;
+    float iLeft = KiL * integralLeft;
+    float iRight = KiR * integralRight;
+    
+    ////// Derivative /////
+    float derivativeLeft = (leftError - oldLeftError) / deltaTime;
+    float derivativeRight = (rightError - oldRightError) / deltaTime;
+    float dLeft = KdL * derivativeLeft;
+    float dRight = KdR * derivativeRight;
+    
+    // PID //
+    float leftChange = pLeft + iLeft + dLeft;
+    float rightChange = pRight + iRight + dRight;
+    
+    // Adjust Speed //
+    flySpeedLeft += flySpeedLeft;
+    flySpeedRight += flySpeedRight;
+    
+    //writeDebugStreamLine("%f", leftChange);
+    //writeDebugStreamLine("%f", rightChange);
+    
+    // Reset the errors and the encoders
+    oldLeftError = leftError;
+    oldRightError = rightError;
+    flyEncLeft = 0;
+    flyEncRight = 0;
+    clearTimer(T4);
+    
+    //writeDebugStreamLine("%d, %f", nSysTime-initialTime, rpmLeft);
+}
+
