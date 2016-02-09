@@ -25,7 +25,6 @@ float flySpeedRight = 0.0;
 int lowSpeed = 40;
 int midSpeed = 55;
 int highSpeed = 70;
-int flyWheelSpeed = highSpeed;
 /////////////////////////////////////////////////////////
 bool softBalls = true;
 bool lastRaiseBtn = false;
@@ -37,7 +36,7 @@ bool flyWheelOn = false;
 bool rollerOn = true;
 bool redoSpeed = true;
 //bool rpmMode = true;
-bool manualControl = true;
+bool manualControl = false;
 bool autoTuning = false;
 float launcherRatio = 10.2;
 float oldLeftError = 0.0;
@@ -58,11 +57,14 @@ int averageBattery = 0;
 int leftValues = 0;
 int rightValues = 0;
 int intakeSpeed = 127;
-int powerBias = 0;
+int lowPowerBias = 0;
+int midPowerBias = 0;
+int highPowerBias = 0;
 int red = 0;
 int green = 1;
 int yellow = 2;
 int initialTime = 0;
+
 /////////////////////////////////////////////////////////
 int voltageCorrection(int rpm);
 task flyWheelControl();
@@ -78,6 +80,8 @@ void normalizeFlyPower();
 void setPIDConstants();
 void slowStart();
 void resetFlyWheel();
+int powerBias();
+void powerBias(int change);
 /////////////////////////////////////////////////////////
 
 task flyWheelPower() {
@@ -85,7 +89,7 @@ task flyWheelPower() {
 		if(flyWheelOn) {
 			wait1Msec(encoderTimer);
 			setPIDConstants();
-			pidChange(rpmGoal + powerBias);
+			pidChange(rpmGoal + powerBias(rpmGoal));
 			normalizeFlyPower();
 			flyWheelMotors(flySpeedLeft, flySpeedRight);
 		} else {
@@ -147,13 +151,13 @@ task flyWheelControl() {
 
         /* Power Bias */
 		if(raiseBtn == 1 && lastRaiseBtn == false) {
-			powerBias += 5;
+			powerBias(5);
 			lastRaiseBtn = true;
 		} else if (raiseBtn == 0) {
 			lastRaiseBtn = false;
 		}
 		if(lowerBtn == 1 && lastLowerBtn == false) {
-			powerBias -= 5;
+			powerBias(-5);
 			lastLowerBtn = true;
 		} else if (lowerBtn == 0) {
 			lastLowerBtn = false;
@@ -268,12 +272,12 @@ void pidChange(int goal)
     {
     	if(rpmGoal == rpmHigh)
     	{
-    		flySpeedLeft = 85 + (powerBias/5);
-    		flySpeedRight = 85 + (powerBias/5);
+    		flySpeedLeft = 85 + (powerBias()/5);
+    		flySpeedRight = 85 + (powerBias()/5);
     	} else if(rpmGoal == rpmMid)
     	{
-    		flySpeedLeft = 55 + (powerBias/5);
-    		flySpeedRight = 55 + (powerBias/5);
+    		flySpeedLeft = 55 + (powerBias()/5);
+    		flySpeedRight = 55 + (powerBias()/5);
     	} else {
     		flySpeedLeft = 40;
     		flySpeedRight = 40;
@@ -353,24 +357,43 @@ void slowStart()
 	flyWheelMotors(45.0, 45.0);
 }
 
-void initFlyWheel()
-{
-	initialTime = nSysTime;
-	if(rpmGoal == rpmHigh)
-		flyWheelSpeed = highSpeed;
-	if(rpmGoal == rpmMid)
-		flyWheelSpeed = midSpeed;
-	if(rpmGoal == rpmLow)
-		flyWheelSpeed = lowSpeed;
-	flyWheelOn = true;
-}
-
 void resetFlyWheel()
 {
-		if(!((rpmGoal == rpmMid) || (rpmGoal == rpmLow)))
-    	rpmGoal = rpmHigh;
-    flyWheelSpeed = highSpeed;
-    powerBias = 0;
+	initialTime = nSysTime;
+    if (rpmGoal == rpmMid) {
+        flySpeedLeft = midSpeed;
+        flySpeedRight = midSpeed;
+    } else if(rpmGoal == rpmLow) {
+        flySpeedLeft = lowSpeed;
+        flySpeedRight = lowSpeed;
+    } else {
+        rpmGoal = rpmHigh;
+        flySpeedLeft = highSpeed;
+        flySpeedRight = highSpeed;
+    }
+    lowPowerBias = 0;
+    midPowerBias = 0;
+    highPowerBias = 0;
+    flyWheelOn = true;
+}
+
+int powerBias()
+{
+    if(power == rpmLow)
+        return lowPowerBias;
+    if(power == rpmMid)
+        return midPowerBias;
+    return highPowerBias;
+}
+
+void powerBias(int change)
+{
+    if(power == rpmLow)
+        lowPowerBias += change;
+    else if(power == rpmMid)
+        midPowerBias += change;
+    else
+        highPowerBias += change;
 }
 
 void setPIDConstants()
@@ -505,7 +528,7 @@ task autoPIDTuner() {
         while(time1[T3] < timeWithValues)
         {
             wait1Msec(encoderTimer);
-            pidChange(rpmGoal + powerBias);
+            pidChange(rpmGoal + powerBias());
             normalizeFlyPower();
             flyWheelMotors(flySpeedLeft, flySpeedRight);
             if(!resetError)
