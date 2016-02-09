@@ -175,16 +175,19 @@ task intake()
 {
 	while(true) {
 		/* Intake Power */
-    /*intakeSpeed = (rpmGoal == rpmHigh) ? 127 : 127;
-		motor[chain] = intakeSpeed * (intakeBtn - outtakeBtn);*/
-
-		if(intakeBtn)
-		{
-			motor[chain] = 127;
-			wait1Msec(120);
-			motor[chain] = 0;
-			wait1Msec(78);
-		}
+        if(rpmGoal == rpmHigh)
+        {
+            intakeSpeed = (rpmGoal == rpmHigh) ? 127 : 127;
+            motor[chain] = intakeSpeed * (intakeBtn - outtakeBtn);
+        } else {
+            if(intakeBtn)
+            {
+                motor[chain] = 127;
+                wait1Msec(120);
+                motor[chain] = 0;
+                wait1Msec(78);
+            }
+        }
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false) {
@@ -193,7 +196,7 @@ task intake()
         } else if (rollerBtn == 0) {
 			lastRollerBtn = false;
 		}
-    motor[roller] = (rollerOutBtn) ? -127 : (127 * rollerOn);
+        motor[roller] = (rollerOutBtn) ? -127 : (127 * rollerOn);
 	}
 }
 
@@ -223,6 +226,8 @@ void flyWheelMotors(float left, float right)
 void pidChange(int goal)
 {
 	float deltaTime = abs(nSysTime - lastTime);
+    if(rpmHigh < 400)
+        launcherRatio = 1;
 	float factor = ( ( launcherRatio * 60000 ) / deltaTime ) / ticksPerTurnSpeed;
 	rpmLeft = abs(flyEncLeft * factor);
 	rpmRight = abs(flyEncRight * factor);
