@@ -2,8 +2,8 @@ bool useGyroTurn = false;
 int warmupTime = 1500;
 int initialShootTime = 2900;
 int autoShootSpeed = 127;
-int outsideShot = 1460;
-int insideShot = 1460;
+int outsideShot = 140;
+int insideShot = 140;
 
 void runAuto(int chosen);
 void redShoot();

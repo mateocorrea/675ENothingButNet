@@ -1,4 +1,4 @@
-int rpmLow = 121;
+int rpmLow = 108;
 int rpmMid = 140;
 int rpmHigh = 160;
 

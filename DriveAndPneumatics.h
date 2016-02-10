@@ -431,13 +431,34 @@ task straightControl() {
 
 task positionTracker() {
 	while(true) {
+		float deltaTime = 25;
 
-		float speedX = 1.0;
-		float speedY = 1.0;
-		float speed = 1.0;
-		//float speed = pow( (pow(speedX,2)+pow(speedY,2)) , 0.5);
+		float trueAccelX = accelX;
+		float trueAccelY = accelY;
 
-		float deltaX = cos(gyro) * speed;
-		float deltaY = sin(gyro) * speed;
+		float speedX = trueAccelX * deltaTime;
+		float speedY = trueAccelY * deltaTime;
+		float speed = sqrt(pow(speedX,2) + pow(speedY,2));
+
+		float deltaX = (cos(gyro) * speed) * deltaTime;
+		float deltaY = (sin(gyro) * speed) * deltaTime;
+
+		positionX += deltaX;
+		positionY += deltaY;
 	}
+}
+
+void turnToGoal() {
+	float goalX = 0;
+	float goalY = 12;
+	float vectorX = positionX - goalX;
+	float vectorY = positionY - goalY;
+	float vectorMag = sqrt(pow(vectorX,2) + pow(vectorY, 2));
+
+	float theta = asin(vectorY/vectorMag);
+
+	while(gyro != theta) {
+		drivePower(90, -90);
+	}
+	drivePower(0, 0);
 }
