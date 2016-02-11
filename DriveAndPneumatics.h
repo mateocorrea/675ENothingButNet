@@ -430,15 +430,23 @@ task straightControl() {
 }
 
 task positionTracker() {
+		float conversionFactor = 3.0;
+		float oldSpeedX = 0.0;
+		float oldSpeedY = 0.0;
+		float oldAccelX = 0.0;
+		float oldAccelY = 0.0;
 	while(true) {
 		float deltaTime = 25;
 
-		float trueAccelX = accelX;
-		float trueAccelY = accelY;
+		float trueAccelX = accelX * conversionFactor;
+		float trueAccelY = accelY * conversionFactor;
 
-		float speedX = trueAccelX * deltaTime;
-		float speedY = trueAccelY * deltaTime;
+		float speedX = oldSpeedX + ((trueAccelX + oldAccelX)/2.0 * deltaTime/1000);
+		float speedY = oldSpeedY + ((trueAccelY + oldAccelY)/2.0 * deltaTime/1000);
 		float speed = sqrt(pow(speedX,2) + pow(speedY,2));
+
+		float trueSpeedX = cos(gyro) * speed;
+		float trueSpeedY = sin(gyro) * speed;
 
 		float deltaX = (cos(gyro) * speed) * deltaTime;
 		float deltaY = (sin(gyro) * speed) * deltaTime;

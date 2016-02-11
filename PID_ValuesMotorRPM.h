@@ -1,4 +1,4 @@
-int rpmLow = 108;
+int rpmLow = 116;
 int rpmMid = 140;
 int rpmHigh = 160;
 
@@ -11,9 +11,15 @@ float KiR = 1.0;
 float KdL = 1.0;
 float KdR = 1.0;
 /////////////////////////////////////////////////////////
-float KpLowShooting = 0.01292500;
-float KiLowShooting = 0.000000900;
-float KdLowShooting = 0.75000000;
+
+/*PID Tuner
+p = .0235;
+i = .000007
+d= .42
+*/
+float KpLowShooting = 0.0225043;
+float KiLowShooting = 0.0;//0.002103;
+float KdLowShooting = 0.0071;//0.7572413800000;
 float KpLow = KpLowShooting;
 float KiLow = KiLowShooting;
 float KdLow = KdLowShooting;

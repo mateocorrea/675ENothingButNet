@@ -494,25 +494,25 @@ void setPIDConstants()
 }
 
 task autoPIDTuner() {
-		rpmGoal = rpmMid;
+		rpmGoal = rpmLow;
     autoTuning = true;
     int timeWithValues = 3000;
 
-    float bestP = 0.0;
-    float bestI = 0.0;
+    float bestP = 0.035;
+    float bestI = 0.000007;
     float bestD = 0.0;
 
-    float pStep = 0.0010;
+    float pStep = 0.00010;
     float iStep = 0.000001;
-    float dStep = 0.000001;
+    float dStep = 0.0050000;
 
-    float minP = 0.009;
+    float minP = 0.022;
     float minI = 0.0;
-    float minD = 0.0;
+    float minD = 0.4;
 
-    float maxP = 0.04;
+    float maxP = 0.044;
     float maxI = 0.0004;
-    float maxD = 0.0004;
+    float maxD = 0.5;
 
 
     KpL = (minP == 0.0) ? pStep : minP;
@@ -523,12 +523,15 @@ task autoPIDTuner() {
     KdR = KdL;
 
     flyWheelOn = true;
-    rpmGoal = rpmHigh;
+    rpmGoal = rpmLow;
 
-    flyWheelMotors(80, 80);
+    flyWheelMotors(lowSpeed, lowSpeed);
     wait1Msec(2000);
     float bestError = 100000;
 
+    clearDebugStream();
+
+    /*
     while(KpL <= maxP) {
         clearTimer(T3);
         bool resetError = false;
@@ -556,9 +559,10 @@ task autoPIDTuner() {
         if(error < bestError)
         {
             bestP = KpL;
+            bestError = error;
         }
         KpL += pStep;
-        flyWheelMotors(80, 80);
+        flyWheelMotors(lowSpeed, lowSpeed);
         wait1Msec(2000);
     }
     writeDebugStreamLine("BEST P IS ");
@@ -566,74 +570,80 @@ task autoPIDTuner() {
     KpL = bestP;
 
     /*******************/
-   /* while(KiL <= maxI) {
+   /*while(KiL <= maxI) {
         clearTimer(T3);
         bool resetError = false;
         while(time1[T3] < timeWithValues)
         {
             wait1Msec(encoderTimer);
-            pidChange(rpmGoal + powerBias);
+            pidChange(rpmGoal + powerBias());
             normalizeFlyPower();
             flyWheelMotors(flySpeedLeft, flySpeedRight);
             if(!resetError)
             {
+                leftValues = 0;
+            		rightValues = 0;
                 averageLeftError = 0;
                 averageRightError = 0;
                 resetError = true;
             }
         }
 
-        float error = ((averageLeftError + averageRightError) / 2.0)
+        float error = ((averageLeftError + averageRightError) / 2.0);
 
-        writeDebugStreamLine("%f", KiL:);
-        writeDebugStreamLine("%f", error);
+        writeDebugStreamLine("KiL: %f", KiL);
+        writeDebugStreamLine("Error: %f", error);
 
         if(error < bestError)
         {
-            bestI = KpI;
+            bestI = KiL;
+            bestError = error;
         }
-        KpI += iStep;
-        flyWheelMotors(80, 80);
+        KiL += iStep;
+        flyWheelMotors(lowSpeed, lowSpeed);
         wait1Msec(2000);
     }
     writeDebugStreamLine("BEST I IS ");
     writeDebugStreamLine("%f", bestI);
     KiL = bestI;
     /*******************/
-/*
+
     while(KdL <= maxD) {
         clearTimer(T3);
         bool resetError = false;
         while(time1[T3] < timeWithValues)
         {
             wait1Msec(encoderTimer);
-            pidChange(rpmGoal + powerBias);
+            pidChange(rpmGoal + powerBias());
             normalizeFlyPower();
             flyWheelMotors(flySpeedLeft, flySpeedRight);
             if(!resetError)
             {
+                leftValues = 0;
+            		rightValues = 0;
                 averageLeftError = 0;
                 averageRightError = 0;
                 resetError = true;
             }
         }
 
-        float error = ((averageLeftError + averageRightError) / 2.0)
+        float error = ((averageLeftError + averageRightError) / 2.0);
 
-        writeDebugStreamLine("%f", KdL:);
-        writeDebugStreamLine("%f", error);
+        writeDebugStreamLine("KdL: %f", KdL);
+        writeDebugStreamLine("Error: %f", error);
 
         if(error < bestError)
         {
-            bestD = KpD;
+            bestD = KdL;
+            bestError = error;
         }
-        KpD += dStep;
-        flyWheelMotors(80, 80);
+        KdL += dStep;
+        flyWheelMotors(lowSpeed, lowSpeed);
         wait1Msec(2000);
     }
     writeDebugStreamLine("BEST D IS ");
     writeDebugStreamLine("%f", bestD);
-    KdL = bestD;*/
+    KdL = bestD;
 
     writeDebugStreamLine("****************************");
     writeDebugStreamLine("BEST COMBO IS");
