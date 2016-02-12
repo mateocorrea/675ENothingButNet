@@ -24,7 +24,7 @@ float flySpeedLeft = 0.0;
 float flySpeedRight = 0.0;
 int lowSpeed = 40;
 int midSpeed = 55;
-int highSpeed = 70;
+int highSpeed = 80;
 /////////////////////////////////////////////////////////
 bool softBalls = false;
 bool lastRaiseBtn = false;
@@ -279,15 +279,15 @@ void pidChange(int goal)
     {
     	if(rpmGoal == rpmHigh)
     	{
-    		flySpeedLeft = 85 + (powerBias()/5);
-    		flySpeedRight = 85 + (powerBias()/5);
+    		flySpeedLeft = highSpeed + (powerBias()/5);
+    		flySpeedRight = highSpeed + (powerBias()/5);
     	} else if(rpmGoal == rpmMid)
     	{
-    		flySpeedLeft = 55 + (powerBias()/5);
-    		flySpeedRight = 55 + (powerBias()/5);
+    		flySpeedLeft = midSpeed + (powerBias()/5);
+    		flySpeedRight = midSpeed + (powerBias()/5);
     	} else {
-    		flySpeedLeft = 40;
-    		flySpeedRight = 40;
+    		flySpeedLeft = lowSpeed;
+    		flySpeedRight = lowSpeed;
     	}
     }
 
@@ -367,6 +367,12 @@ void slowStart()
 void resetFlyWheel()
 {
 	initialTime = nSysTime;
+    if(softBalls)
+    {
+        lowSpeed = 45;
+        midSpeed = 55;
+        highSpeed = 85;
+    }
     if (rpmGoal == rpmMid) {
         flySpeedLeft = midSpeed;
         flySpeedRight = midSpeed;
