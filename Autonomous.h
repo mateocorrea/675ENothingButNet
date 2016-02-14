@@ -23,7 +23,7 @@ void runAuto(int chosen) {
 
     /* Warm-up the flywheel and reset the gyro meanwhile */
     rpmGoal = rpmHigh;
-    SensorType[in1] = sensorNone;
+    SensorType[in3] = sensorNone;
     motor[roller] = 127;
     wait1Msec(warmupTime);
     SensorType[in1] = sensorGyro;
