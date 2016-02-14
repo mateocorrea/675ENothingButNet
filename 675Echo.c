@@ -53,7 +53,6 @@ void pre_auton()
 task autonomous()
 {
   SensorValue[laser] = 0;
-  startTask(calculateAccelBiases);
 	runAuto(chosenAuto);
 }
 
@@ -64,15 +63,13 @@ task usercontrol()
   	stopTask(calculateAccelBiases);
 	SensorValue[laser] = 0;
 	userControl = true;
-	if(!manualControl)
-		rpmGoal = rpmHigh;
 	clearDebugStream();
 	if(getTaskState(LCD) == taskStateStopped)
 		startTask(LCD);
-  /* if(getTaskState(flyWheelPower) == taskStateStopped)
+   if(getTaskState(flyWheelPower) == taskStateStopped)
         startTask(flyWheelPower);
     if(getTaskState(flyWheelControl) == taskStateStopped)
-        startTask(flyWheelControl);*/
+        startTask(flyWheelControl);
 	if(getTaskState(drive) == taskStateStopped)
 		startTask(drive);
 	if(getTaskState(pneumatics) == taskStateStopped)
@@ -81,5 +78,5 @@ task usercontrol()
 		startTask(speaker);
 	if(getTaskState(intake) == taskStateStopped)
 		startTask(intake);
-	startTask(autoPIDTuner);
+	//startTask(autoPIDTuner);
 }
