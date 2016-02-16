@@ -2,6 +2,7 @@
 #define flyEncRight nMotorEncoder[topRightLauncher]
 #define driveEncRight nMotorEncoder[rightfront]
 #define driveEncLeft nMotorEncoder[leftfront]
+#define shotSwitch SensorValue[limitSwitch]
 
 #define speedBtn vexRT[Btn5D]
 #define intakeBtn vexRT[Btn6U]
@@ -65,6 +66,10 @@ int green = 1;
 int yellow = 2;
 int initialTime = 0;
 
+int lowShots = 0;
+int midShots = 0;
+int highShots = 0;
+
 /////////////////////////////////////////////////////////
 int voltageCorrection(int rpm);
 task flyWheelControl();
@@ -79,9 +84,13 @@ void averageRPMError(float left, float right);
 void normalizeFlyPower();
 void setPIDConstants();
 void slowStart();
+void slowStop();
 void resetFlyWheel();
 int powerBias();
 void powerBias(int change);
+task shotTracker();
+
+bool alreadyOff = false;
 
 bool singleShotMode = false;
 /////////////////////////////////////////////////////////
@@ -90,6 +99,7 @@ task flyWheelPower() {
     resetFlyWheel();
 	while(true) {
 		if(flyWheelOn) {
+            alreadyOff = false;
 			wait1Msec(encoderTimer);
 			setPIDConstants();
 			if(singleShotMode)
@@ -99,6 +109,10 @@ task flyWheelPower() {
 			normalizeFlyPower();
 			flyWheelMotors(flySpeedLeft, flySpeedRight);
 		} else {
+            if(!alreadyOff) {
+                slowStop();
+                alreadyOff = true;
+            }
 			flyWheelMotors(0,0);
 		}
 	}
@@ -500,8 +514,8 @@ void setPIDConstants()
 }
 
 task autoPIDTuner() {
-		rpmGoal = rpmLow;
-    autoTuning = true;
+    // kPl = tune(P, 129102, 31012, 1902);
+    rpmGoal = rpmLow;
     int timeWithValues = 3000;
 
     float bestP = 0.035;
@@ -537,7 +551,6 @@ task autoPIDTuner() {
 
     clearDebugStream();
 
-    /*
     while(KpL <= maxP) {
         clearTimer(T3);
         bool resetError = false;
@@ -549,8 +562,8 @@ task autoPIDTuner() {
             flyWheelMotors(flySpeedLeft, flySpeedRight);
             if(!resetError)
             {
-            		leftValues = 0;
-            		rightValues = 0;
+                leftValues = 0;
+                rightValues = 0;
                 averageLeftError = 0;
                 averageRightError = 0;
                 resetError = true;
@@ -576,7 +589,7 @@ task autoPIDTuner() {
     KpL = bestP;
 
     /*******************/
-   /*while(KiL <= maxI) {
+   while(KiL <= maxI) {
         clearTimer(T3);
         bool resetError = false;
         while(time1[T3] < timeWithValues)
@@ -726,4 +739,113 @@ void minimalPIDChange(int goal)
     clearTimer(T4);
 
     //writeDebugStreamLine("%d, %f", nSysTime-initialTime, rpmLeft);
+}
+
+task shotTracker()
+{
+    bool lastShotSwitch = false;
+    while(true)
+    {
+        if(shotSwitch && !lastShotSwitch) {
+            if(rpmGoal == rpmLow)
+                lowShots++;
+            else if(rpmGoal == rpmHigh)
+                highShots++;
+            else
+                midShots++;
+            lastShotSwitch = true;
+        } else if (!shotSwitch) {
+            lastShotSwitch = false;
+        }
+    }
+}
+
+float tune(int variable, float minimum, float maximum, float startStep, int speed, int iterations)
+{
+    rpmGoal = speed;
+    int timeWithValues = 3000;
+    float best = 0.0;
+    float step = startStep;
+    float min = minimum;
+    float max = maximum;
+    
+    KpL = bestP;
+    KpR = KpL;
+    KiL = bestI;
+    KiR = KiL;
+    KdL = bestD;
+    KdR = KdL;
+    if(variable == P) {
+        KpL = (minP == 0.0) ? step : min;
+        KpR = KpL;
+    } else if(variable == I) {
+        KiL = (minI == 0.0) ? iStep : minI;
+        KiR = KiL;
+    } else {
+        KdL = (minD == 0.0) ? dStep : minD;
+        KdR = KdL;
+    }
+    
+    flyWheelOn = true;
+    if(speed == rpmLow)
+        flyWheelMotors(lowSpeed, lowSpeed);
+    else if(speed == rpmMid)
+        flyWheelMotors(midSpeed, midSpeed);
+    else
+        flyWheelMotors(highSpeed, highSpeed):
+    wait1Msec(2000);
+    float bestError = 100000;
+    clearDebugStream();
+
+    for(int i = 0; i < iterations; i++)
+    {
+        writeDebugStreamLine("Iteration: %d", i);
+        while(KpL <= maxP) {
+            clearTimer(T3);
+            bool resetError = false;
+            while(time1[T3] < timeWithValues)
+            {
+                wait1Msec(encoderTimer);
+                pidChange(rpmGoal + powerBias());
+                normalizeFlyPower();
+                flyWheelMotors(flySpeedLeft, flySpeedRight);
+                if(!resetError)
+                {
+                    leftValues = 0;
+                    rightValues = 0;
+                    averageLeftError = 0;
+                    averageRightError = 0;
+                    resetError = true;
+                }
+            }
+            
+            float error = ((averageLeftError + averageRightError) / 2.0);
+            
+            writeDebugStreamLine("KpL: %f", KpL);
+            writeDebugStreamLine("error: %f", error);
+            
+            if(error < bestError)
+            {
+                bestP = KpL;
+                bestError = error;
+            }
+            if(variable == P) {
+                KpL = (minP == 0.0) ? step : min;
+                KpR = KpL;
+            } else if(variable == I) {
+                KiL = (minI == 0.0) ? iStep : minI;
+                KiR = KiL;
+            } else {
+                KdL = (minD == 0.0) ? dStep : minD;
+                KdR = KdL;
+            }
+            if(speed == rpmLow)
+                flyWheelMotors(lowSpeed, lowSpeed);
+            else if(speed == rpmMid)
+                flyWheelMotors(midSpeed, midSpeed);
+            else
+                flyWheelMotors(highSpeed, highSpeed):
+            wait1Msec(2000);
+        }
+    }
 }
