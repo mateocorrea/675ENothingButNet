@@ -50,6 +50,10 @@ float initialPosY = 0.0;
 float positionX = initialPosX;
 float positionY = initialPosY;
 
+float maxSpeed = 0.0;
+float distanceX = 0.0;
+float distanceY = 0.0;
+
 
 task drive()
 {
@@ -430,13 +434,14 @@ task straightControl() {
 }
 
 task positionTracker() {
-		float conversionFactor = 3.0;
-		float oldSpeedX = 0.0;
-		float oldSpeedY = 0.0;
-		float oldAccelX = 0.0;
-		float oldAccelY = 0.0;
+    float timeLapse = 25;
+    float conversionFactor = 3.0;
+    float oldSpeedX = 0.0;
+    float oldSpeedY = 0.0;
+    float oldAccelX = 0.0;
+    float oldAccelY = 0.0;
 	while(true) {
-		float deltaTime = 25;
+        float deltaTime = timeLapse;// FIX
 
 		float trueAccelX = accelX * conversionFactor;
 		float trueAccelY = accelY * conversionFactor;
@@ -444,15 +449,27 @@ task positionTracker() {
 		float speedX = oldSpeedX + ((trueAccelX + oldAccelX)/2.0 * deltaTime/1000);
 		float speedY = oldSpeedY + ((trueAccelY + oldAccelY)/2.0 * deltaTime/1000);
 		float speed = sqrt(pow(speedX,2) + pow(speedY,2));
+        
+        if(abs(speed) > maxSpeed)
+            maxSpeed = abs(speed);
 
 		float trueSpeedX = cos(gyro) * speed;
 		float trueSpeedY = sin(gyro) * speed;
 
-		float deltaX = (cos(gyro) * speed) * deltaTime;
-		float deltaY = (sin(gyro) * speed) * deltaTime;
+		float deltaX = ((trueSpeedX + oldSpeedX)/2.0) * (deltaTime/1000);
+        float deltaY = ((trueSpeedY + oldSpeedY)/2.0) * (deltaTime/1000);
 
 		positionX += deltaX;
 		positionY += deltaY;
+        distanceX += abs(deltaX);
+        distanceY += abs(deltaY);
+        
+        oldAccelX = trueAccelX;
+        oldAccelY = trueAccelY;
+        oldSpeedX = trueSpeedX;
+        oldSpeedY = trueSpeedY;
+        
+        wait1Msec(timeLapse);
 	}
 }
 
