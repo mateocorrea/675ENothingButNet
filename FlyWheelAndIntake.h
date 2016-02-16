@@ -16,7 +16,7 @@
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
-float rpmGoal = rpmMid;
+float rpmGoal = rpmHigh;
 float rpmLeft = 0.0;
 float rpmRight = 0.0;
 float averageLeftError = 0.0;
@@ -93,6 +93,7 @@ task shotTracker();
 bool alreadyOff = false;
 
 bool singleShotMode = false;
+bool startup = true;
 /////////////////////////////////////////////////////////
 
 task flyWheelPower() {
@@ -100,6 +101,9 @@ task flyWheelPower() {
 	while(true) {
 		if(flyWheelOn) {
             alreadyOff = false;
+			if(startup)
+				slowStart();
+			startup = false;
 			wait1Msec(encoderTimer);
 			setPIDConstants();
 			if(singleShotMode)
@@ -114,6 +118,7 @@ task flyWheelPower() {
                 alreadyOff = true;
             }
 			flyWheelMotors(0,0);
+			startup = true;
 		}
 	}
 }
@@ -376,6 +381,7 @@ void slowStart()
 	flyWheelMotors(30.0, 30.0);
 	wait1Msec(100);
 	flyWheelMotors(45.0, 45.0);
+	wait1Msec(100);
 }
 
 void resetFlyWheel()
@@ -402,6 +408,7 @@ void resetFlyWheel()
     midPowerBias = 0;
     highPowerBias = 0;
     flyWheelOn = true;
+    startup = true;
 }
 
 int powerBias()

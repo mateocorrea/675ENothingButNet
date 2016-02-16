@@ -1,8 +1,8 @@
 bool useGyroTurn = false;
-int warmupTime = 1500;
-int initialShootTime = 2900;
+int warmupTime = 2700;
+int initialShootTime = 1700;
 int autoShootSpeed = 127;
-int outsideShot = 140;
+int outsideShot = 136;
 int insideShot = 140;
 
 void runAuto(int chosen);
@@ -16,14 +16,14 @@ void progSkills();
 void runAuto(int chosen) {
 
     /* Start tasks needed in autonomous and disable unnecessary ones */
+    flyWheelOn = true;
     startTask(flyWheelPower);
     startTask(calculateAccelBiases);
     stopTask(drive);
 
     /* Warm-up the flywheel and reset the gyro meanwhile */
     rpmGoal = rpmHigh;
-    flyWheelOn = true;
-    SensorType[in1] = sensorNone;
+    SensorType[in3] = sensorNone;
     motor[roller] = 127;
     wait1Msec(warmupTime);
     SensorType[in1] = sensorGyro;
@@ -82,18 +82,28 @@ void redShoot()
 void redSide()
 {
     /* Drive away from tile and turn towards the pile of balls */
-    driveDistance(-1500);
-    wait1Msec(500);
+    driveDistance(-420);
+    wait1Msec(300);
     if(useGyroTurn)
-        gyroTurn(358);
+        gyroTurn(-150);
     else
-        encoderTurn(235);
-    wait1Msec(500);
+        encoderTurn(-265);
+    wait1Msec(300);
+    driveDistance(-710);
+    if(useGyroTurn)
+    	gyroTurn(400);
+   	else
+   		encoderTurn(390);
 
     /* Drive towards the piles and pick them up */
-    driveDistance(1080);
-    motor[chain] = 70;
-    wait1Msec(850);
+    driveDistance(212);
+    motor[chain] = 127;
+    wait1Msec(550);
+    drivePower(80,80);
+    wait1Msec(200);
+    drivePower(0,0);
+    motor[chain] = 127;
+    wait1Msec(200);
     motor[chain] = 0;
 
     /* Drive away from the wall and turn towards the goal */
@@ -102,7 +112,7 @@ void redSide()
     if(useGyroTurn)
         gyroTurn(-300);
     else
-        encoderTurn(-210);
+        encoderTurn(-205);
 
     /* Shoot the balls at the goal */
     motor[chain] = autoShootSpeed;
