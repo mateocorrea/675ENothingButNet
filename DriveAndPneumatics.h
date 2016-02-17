@@ -42,7 +42,7 @@ void releaseLift();
 void lockLift();
 void deploy();
 void encoderTurn(int goal);
-void automaticBrakingSystem();
+task automaticBrakingSystem();
 int tolerableAccel(int direction);
 
 float initialPosX = 0.0;
@@ -54,13 +54,13 @@ float maxSpeed = 0.0;
 float distanceX = 0.0;
 float distanceY = 0.0;
 
+bool firstBrakeCheck = true;
 
 task drive()
 {
 	int lastTime = nSysTime;
 	while(true) {
-		stillTime += nSysTime - lastTime;
-		lastTime = nSysTime;
+
 		drivePower(vexRT(Ch3), vexRT(Ch2));
 	}
 }
@@ -99,7 +99,6 @@ task pneumatics()
 			lastBrakeBtn = false;
 		}
 
-        automaticBrakingSystem();
 	}
 }
 
@@ -130,6 +129,7 @@ void releaseBrake()
 {
 	brake = 0;
 	braking = false;
+	firstBrakeCheck = true;
 }
 
 
@@ -346,7 +346,14 @@ void drivePower(int left, int right)
     left = (abs(left) < threshold) ? 0 : left;
     right = (abs(right) < threshold) ? 0 : right;
 
-    stillTime = ((abs(right) >= threshold) || (abs(left) >= threshold)) ? 0 : stillTime;
+    if((abs(right) >= threshold) || (abs(left) >= threshold))
+    	clearTimer(T4);
+
+    if((abs(vexRT[Ch2]) >= threshold) || (abs(vexRT[Ch3]) >= threshold))
+    {
+        releaseBrake();
+      	firstBrakeCheck == true;
+   	}
 
     left = (cubicMapping) ? (mapped(left)) : left;
     right = (cubicMapping) ? (mapped(right)) : right;
@@ -372,22 +379,25 @@ int mapped(int x)
     return round(0.0001*x*x*x - 0.0095*x*x + 0.4605*x - 0.6284);
 }
 
-void automaticBrakingSystem() {
-    if((abs(vexRT[Ch2]) >= threshold) || (abs(vexRT[Ch3]) >= threshold))
-        releaseBrake();
-    if((stillTime > autoBrakeTime) && (autoBrake == true))
+task automaticBrakingSystem() {
+	while(true) {
+		if(firstBrakeCheck)
+			wait1Msec(1200);
+    if((time1(T4) > autoBrakeTime) && (autoBrake == true))
         actuateBrake();
     if((abs(leftVertStick) < threshold) && (abs(rightVertStick) < threshold))
     {
-        if((accelX > tolerableAccel(X)) || (accelY > tolerableAccel(Y)))
+        if((abs(accelX) > abs(tolerableAccel(X))) || (abs(accelY) > abs(tolerableAccel(Y))))
             actuateBrake();
     }
+    firstBrakeCheck == false;
+  }
 }
 
 int tolerableAccel(int direction)
 {
-    int allowableX = 5;
-    int allowableY = 5;
+    int allowableX = 50;
+    int allowableY = 50;
 
     if(direction == X) {
         if(accelX > accelXBias)
@@ -449,7 +459,7 @@ task positionTracker() {
 		float speedX = oldSpeedX + ((trueAccelX + oldAccelX)/2.0 * deltaTime/1000);
 		float speedY = oldSpeedY + ((trueAccelY + oldAccelY)/2.0 * deltaTime/1000);
 		float speed = sqrt(pow(speedX,2) + pow(speedY,2));
-        
+
         if(abs(speed) > maxSpeed)
             maxSpeed = abs(speed);
 
@@ -463,12 +473,12 @@ task positionTracker() {
 		positionY += deltaY;
         distanceX += abs(deltaX);
         distanceY += abs(deltaY);
-        
+
         oldAccelX = trueAccelX;
         oldAccelY = trueAccelY;
         oldSpeedX = trueSpeedX;
         oldSpeedY = trueSpeedY;
-        
+
         wait1Msec(timeLapse);
 	}
 }

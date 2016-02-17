@@ -2,7 +2,7 @@
 #define flyEncRight nMotorEncoder[topRightLauncher]
 #define driveEncRight nMotorEncoder[rightfront]
 #define driveEncLeft nMotorEncoder[leftfront]
-#define shotSwitch SensorValue[limitSwitch]
+#define shotSwitch SensorValue[ballCounter]
 
 #define speedBtn vexRT[Btn5D]
 #define intakeBtn vexRT[Btn6U]
@@ -376,12 +376,24 @@ void normalizeFlyPower()
 void slowStart()
 {
 	initialTime = nSysTime;
-	flyWheelMotors(15.0, 15.0);
-	wait1Msec(100);
-	flyWheelMotors(30.0, 30.0);
-	wait1Msec(100);
-	flyWheelMotors(45.0, 45.0);
-	wait1Msec(100);
+	for(int i = 1; i < 46; i++)
+	{
+		flyWheelMotors(i * 1.0, i * 1.0);
+		wait1Msec(10);
+	}
+}
+
+void slowStop()
+{
+	int i = 45;
+	if(rpmGoal == rpmLow)
+		i = MIN_POWER;
+	while(i >= 0)
+	{
+		flyWheelMotors(i * 1.0, i * 1.0);
+		wait1Msec(10);
+		i--;
+	}
 }
 
 void resetFlyWheel()
@@ -767,7 +779,7 @@ task shotTracker()
     }
 }
 
-float tune(int variable, float minimum, float maximum, float startStep, int speed, int iterations)
+/*float tune(int variable, float minimum, float maximum, float startStep, int speed, int iterations)
 {
     rpmGoal = speed;
     int timeWithValues = 3000;
@@ -775,7 +787,7 @@ float tune(int variable, float minimum, float maximum, float startStep, int spee
     float step = startStep;
     float min = minimum;
     float max = maximum;
-    
+
     KpL = bestP;
     KpR = KpL;
     KiL = bestI;
@@ -792,7 +804,7 @@ float tune(int variable, float minimum, float maximum, float startStep, int spee
         KdL = (minD == 0.0) ? dStep : minD;
         KdR = KdL;
     }
-    
+
     flyWheelOn = true;
     if(speed == rpmLow)
         flyWheelMotors(lowSpeed, lowSpeed);
@@ -825,12 +837,12 @@ float tune(int variable, float minimum, float maximum, float startStep, int spee
                     resetError = true;
                 }
             }
-            
+
             float error = ((averageLeftError + averageRightError) / 2.0);
-            
+
             writeDebugStreamLine("KpL: %f", KpL);
             writeDebugStreamLine("error: %f", error);
-            
+
             if(error < bestError)
             {
                 bestP = KpL;
@@ -855,4 +867,4 @@ float tune(int variable, float minimum, float maximum, float startStep, int spee
             wait1Msec(2000);
         }
     }
-}
+}*/
