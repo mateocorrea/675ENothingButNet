@@ -202,7 +202,7 @@ task intake()
 {
 	while(true) {
 		/* Intake Power */
-        if(rpmGoal != rpmMid)
+        if(rpmGoal != 2)
         {
             intakeSpeed = (rpmGoal == rpmHigh) ? 127 : 127;
             motor[chain] = intakeSpeed * (intakeBtn - outtakeBtn);

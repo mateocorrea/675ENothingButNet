@@ -26,7 +26,7 @@ void runAuto(int chosen) {
     SensorType[in3] = sensorNone;
     motor[roller] = 127;
     wait1Msec(warmupTime);
-    SensorType[in1] = sensorGyro;
+    SensorType[in3] = sensorGyro;
 
     if(chosen < 5) {
         /* Set the chain speed and shoot for (initialShootTime) seconds */

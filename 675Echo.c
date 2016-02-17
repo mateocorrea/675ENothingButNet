@@ -90,6 +90,6 @@ task usercontrol()
 		startTask(speaker);
 	if(getTaskState(intake) == taskStateStopped)
 		startTask(intake);
-	if(getTaskState(automaticBrakingSystem) == taskStateStopped)
-		startTask(automaticBrakingSystem);
+	//if(getTaskState(automaticBrakingSystem) == taskStateStopped)
+		//startTask(automaticBrakingSystem);
 }
