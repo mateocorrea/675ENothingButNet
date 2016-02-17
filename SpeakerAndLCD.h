@@ -33,9 +33,8 @@ int holdTime = 1500;
 task LCD()
 {
 	int holdTime = 0;
-	bool switched = false;
-	bool lastPlay = false;
 	int song = 0;
+	int stat = 0;
 	/*
 	0:	No buttons pressed 						1:	Left button is pressed 							2:	Center button is pressed
 	3:	Left and Center buttons are pressed		4:	Right button is pressed 						5:	Left and Right buttons are pressed
@@ -54,20 +53,19 @@ task LCD()
 			while(bSoundActive){}
 		}
 
-		if(nLCDButtons == 0) {
+		if(nLCDButtons == 0) { //nothing pressed
 			holdTime = 0;
-		}
-		if(nLCDButtons == 4) {
+		}	else if(nLCDButtons == 4) { //right button pressed
 			screen++;
-			if(screen == 9) {
+			if(screen == 11) {
 				screen = 0;
 			}
-		} else if(nLCDButtons == 1) {
+		} else if(nLCDButtons == 1) { // left button
 			screen--;
 			if(screen < 0) {
-				screen = 8;
+				screen = 10;
 			}
-		} else if(nLCDButtons == 2) {
+		} else if(nLCDButtons == 2) { //center pressed
 			if(screen == music) {
 				int baseTime = nSysTime;
 				int time = 0;
@@ -90,7 +88,11 @@ task LCD()
 				}
 			} else if(screen == battery) {
 
-			} else {
+			} else if(screen == stats) {
+				stat++;
+				if(stat > 8)
+					stat = 0;
+			}	else {
 				chosenAuto = screen;
 				if(chosenAuto > 5) {
 					chosenAuto = 0;
@@ -141,6 +143,36 @@ task LCD()
 				displayLCDCenteredString(1, "Mario");
 			else
 				displayLCDCenteredString(1, "Jingle Bells");
+		} else if(screen == stats) {
+			displayLCDCenteredString(0, "Stats");
+			if(stat == 0) {
+				displayLCDString(1, 0, "Distance:");
+				displayNextLCDNumber(distanceX);
+			} else if (stat == 2) {
+				displayLCDString(1, 0, "AvgSpeed:");
+				displayNextLCDNumber(0);
+			} else if (stat == 2) {
+				displayLCDString(1, 0, "TopSpeed:");
+				displayNextLCDNumber(maxSpeed);
+			} else if (stat == 2) {
+				displayLCDString(1, 0, "LowShots:");
+				displayNextLCDNumber(lowShots);
+			} else if (stat == 2) {
+				displayLCDString(1, 0, "MidShots:");
+				displayNextLCDNumber(midShots);
+			} else if (stat == 2) {
+				displayLCDString(1, 0, "HighShots:");
+				displayNextLCDNumber(highShots);
+			} else if (stat == 2) {
+				displayLCDString(1, 0, "Collisions:");
+				displayNextLCDNumber(collisions);
+			} else if (stat == 2) {
+				displayLCDString(1, 0, "BrakesDep:");
+				displayNextLCDNumber(brakeCount);
+			}
+		} else if(screen == games) {
+			displayLCDCenteredString(0, "Games");
+			displayLCDCenteredString(1, "Coming Soon");
 		}
 
 		if((screen < 6) && (screen == chosenAuto)) {
