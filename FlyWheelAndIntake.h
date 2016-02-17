@@ -35,7 +35,6 @@ bool lastRollerBtn = false;
 bool lastIntakeBtn = false;
 bool flyWheelOn = false;
 bool rollerOn = true;
-bool redoSpeed = true;
 //bool rpmMode = true;
 bool manualControl = false;
 bool autoTuning = false;
@@ -126,7 +125,7 @@ task flyWheelPower() {
 task flyWheelControl() {
 	lastFlyWheelTime = nSysTime;
 	bool justSwitchedFlywheel = false;
-	bool lastIntakeSpeedBtn = false;
+	//bool lastIntakeSpeedBtn = false;
 	while(true) {
 
         if(!flyWheelBtn) {
@@ -149,7 +148,7 @@ task flyWheelControl() {
             lastIntakeSpeedBtn = true;
         } else if (intakeSpeedBtn == 0) {
             lastIntakeSpeedBtn = false;
- 		}*/
+ 				}*/
 
 
 
@@ -253,7 +252,7 @@ void flyWheelMotors(float left, float right)
 
 void pidChange(int goal)
 {
-	float deltaTime = abs(nSysTime - lastTime);
+	float deltaTime = ((nSysTime - lastTime) > 0) ? abs(nSysTime - lastTime) : encoderTimer;
 	if(deltaTime < 1)
 		deltaTime = 1;
   if(rpmHigh < 400)
