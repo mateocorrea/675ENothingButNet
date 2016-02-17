@@ -22,18 +22,18 @@ const int X = 0;
 const int Y = 1;
 int threshold = 15;
 int liftCount = 0;
-int stillTime = 0;
 int autoBrakeTime = 3000;
 int brakePower = 25;
 int brakeTime = 35;
 int accelXBias = 0;
 int accelYBias = 0;
+int collisions = 0.0;
+int brakeCount = 0.0;
 
 int mapped(int x);
 task drive();
 task calculateAccelBiases();
 task pneumatics();
-task straightControl();
 void drivePower(int left, int right);
 void driveBrake(int direction);
 void releaseBrake();
@@ -54,11 +54,8 @@ float maxSpeed = 0.0;
 float distanceX = 0.0;
 float distanceY = 0.0;
 
-bool firstBrakeCheck = true;
-
 task drive()
 {
-	int lastTime = nSysTime;
 	while(true) {
 
 		drivePower(vexRT(Ch3), vexRT(Ch2));
@@ -121,98 +118,18 @@ void releaseLift()
 
 void actuateBrake()
 {
-	brake = 1;
-	braking = true;
+	if(!braking) {
+		brake = 1;
+		braking = true;
+		brakeCount++;
+	}
 }
 
 void releaseBrake()
 {
 	brake = 0;
 	braking = false;
-	firstBrakeCheck = true;
 }
-
-
-/*void gyroTurn(int goal){
-    float gyroKp = 0.6;
-    float gyroKd = 0.2;
-
-    int gyroError;
-    int gyroLastError;
-    int gyroDerivative;
-    int maxPower = 115;
-    int allowableError = 0;
-    int pidDrive;
-    while(true){
-    		// Proportional
-        gyroError = abs(goal - gyro);
-        // Derivative
-        gyroDerivative = gyroError - gyroLastError;
-        gyroLastError = gyroError;
-        // PID
-        pidDrive = round(((gyroKp * gyroError) + (gyroKd * gyroDerivative)));
-        pidDrive = (abs(pidDrive) > maxPower) ? maxPower : pidDrive; // limit to a maxPower
-    		if(goal > 0)
-    		{
-    			if(gyro > goal - allowableError)
-    				break;
-    			drivePower(-pidDrive, pidDrive);
-    		}
-    		else
-    		{
-    			if(gyro < goal + allowableError)
-    				break;
-    			drivePower(pidDrive, -pidDrive);
-    		}
-    }
-    int tempBrakePower = (goal > 0) ? brakePower : -brakePower;
-    drivePower(tempBrakePower, -tempBrakePower);
-    wait1Msec(brakeTime);
-    drivePower(0, 0);
-
-}*/
-
-/*void gyroTurn(int goal){
-    float gyroKp = 0.6;
-    float gyroKd = 0.0;
-
-    int gyroError;
-    int gyroLastError;
-    int gyroDerivative;
-    int maxPower = 115;
-    int pidDrive;
-    SensorValue[gyro] = 0;
-
-    while(abs(SensorValue[gyro]) < abs(goal))
-    {
-    	// Proportional
-        gyroError = abs(goal) - abs(gyro);
-        // Derivative
-        gyroDerivative = gyroError - gyroLastError;
-        gyroLastError = gyroError;
-        // PID
-        pidDrive = round(((gyroKp * gyroError) + (gyroKd * gyroDerivative)));
-        pidDrive = (abs(pidDrive) > maxPower) ? maxPower : pidDrive; // limit to a maxPower
-        //pidDrive = 99;
-    		if(goal > 0)
-    		{
-    			drivePower(-pidDrive, pidDrive);
-    		}
-    		else
-    		{
-    			drivePower(pidDrive, -pidDrive);
-    		}
-    		wait1Msec(5);
-    }
-    if(goal > 0)
-    	drivePower(brakePower, -brakePower);
-   	else
-   		drivePower(-brakePower, brakePower);
-
-    wait1Msec(brakeTime);
-    drivePower(0, 0);
-
-}*/
 
 void gyroTurn(int goal)
 {
@@ -278,13 +195,12 @@ void driveDistance(int goal)
         leftPidDrive = (goal < 0) ? -leftPidDrive : leftPidDrive;
         rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
 
+
+
         drivePower(leftPidDrive, rightPidDrive);
     }
     driveBrake(goal);
-
     // check for overshoot
-
-
 }
 
 void encoderTurn(int goal)
@@ -343,20 +259,16 @@ void encoderTurn(int goal)
 
 void drivePower(int left, int right)
 {
-    left = (abs(left) < threshold) ? 0 : left;
-    right = (abs(right) < threshold) ? 0 : right;
+	left = (abs(left) < threshold) ? 0 : left;
+  right = (abs(right) < threshold) ? 0 : right;
 
-    if((abs(right) >= threshold) || (abs(left) >= threshold))
-    	clearTimer(T4);
+  if((right != 0) || (left != 0)) {
+  	clearTimer(T4);
+  	releaseBrake();
+  }
 
-    if((abs(vexRT[Ch2]) >= threshold) || (abs(vexRT[Ch3]) >= threshold))
-    {
-        releaseBrake();
-      	firstBrakeCheck == true;
-   	}
-
-    left = (cubicMapping) ? (mapped(left)) : left;
-    right = (cubicMapping) ? (mapped(right)) : right;
+  left = (cubicMapping) ? (mapped(left)) : left;
+  right = (cubicMapping) ? (mapped(right)) : right;
 
 	motor[rightback] = right;
 	motor[rightfront] = right;
@@ -381,16 +293,16 @@ int mapped(int x)
 
 task automaticBrakingSystem() {
 	while(true) {
-		if(firstBrakeCheck)
-			wait1Msec(1200);
-    if((time1(T4) > autoBrakeTime) && (autoBrake == true))
+    if((time1(T4) > autoBrakeTime) && (autoBrake == true)) {
         actuateBrake();
-    if((abs(leftVertStick) < threshold) && (abs(rightVertStick) < threshold))
-    {
-        if((abs(accelX) > abs(tolerableAccel(X))) || (abs(accelY) > abs(tolerableAccel(Y))))
-            actuateBrake();
     }
-    firstBrakeCheck == false;
+    if((abs(leftVertStick) < threshold) && (abs(rightVertStick) < threshold) && (time1(T4) > 1000))
+    {
+        if((abs(accelX) > abs(tolerableAccel(X))) || (abs(accelY) > abs(tolerableAccel(Y)))) {
+            actuateBrake();
+            collisions++;
+       	}
+    }
   }
 }
 
@@ -433,53 +345,46 @@ task calculateAccelBiases()
     }
 }
 
-
-task straightControl() {
-	int qer = 0;
-    while(qer < 5) {
-        //check if both the motors are running on max power
-        // if leaning, then make sure to correct itself
-    		qer++;
-    }
-}
-
 task positionTracker() {
-    float timeLapse = 25;
-    float conversionFactor = 3.0;
-    float oldSpeedX = 0.0;
-    float oldSpeedY = 0.0;
-    float oldAccelX = 0.0;
-    float oldAccelY = 0.0;
+	float timeLapse = 25;
+	float conversionFactor = 3.0;
+	float oldSpeedX = 0.0;
+	float oldSpeedY = 0.0;
+	float oldAccelX = 0.0;
+	float oldAccelY = 0.0;
+	int lastPosTime = 0;
 	while(true) {
-        float deltaTime = timeLapse;// FIX
 
-		float trueAccelX = accelX * conversionFactor;
-		float trueAccelY = accelY * conversionFactor;
+		float deltaTime = ((nSysTime - lastPosTime) > 0) ? abs(nSysTime - lastPosTime) : timeLapse;
+
+		float trueAccelX = (abs(accelX) > abs(tolerableAccel(X))) ? (accelX * conversionFactor) : 0;
+		float trueAccelY = (abs(accelY) > abs(tolerableAccel(Y))) ? (accelY * conversionFactor) : 0;
 
 		float speedX = oldSpeedX + ((trueAccelX + oldAccelX)/2.0 * deltaTime/1000);
 		float speedY = oldSpeedY + ((trueAccelY + oldAccelY)/2.0 * deltaTime/1000);
 		float speed = sqrt(pow(speedX,2) + pow(speedY,2));
 
-        if(abs(speed) > maxSpeed)
-            maxSpeed = abs(speed);
+		if(abs(speed) > maxSpeed)
+			maxSpeed = abs(speed);
 
 		float trueSpeedX = cos(gyro) * speed;
 		float trueSpeedY = sin(gyro) * speed;
 
 		float deltaX = ((trueSpeedX + oldSpeedX)/2.0) * (deltaTime/1000);
-        float deltaY = ((trueSpeedY + oldSpeedY)/2.0) * (deltaTime/1000);
+		float deltaY = ((trueSpeedY + oldSpeedY)/2.0) * (deltaTime/1000);
 
 		positionX += deltaX;
 		positionY += deltaY;
-        distanceX += abs(deltaX);
-        distanceY += abs(deltaY);
+		distanceX += abs(deltaX);
+		distanceY += abs(deltaY);
 
-        oldAccelX = trueAccelX;
-        oldAccelY = trueAccelY;
-        oldSpeedX = trueSpeedX;
-        oldSpeedY = trueSpeedY;
+		oldAccelX = trueAccelX;
+		oldAccelY = trueAccelY;
+		oldSpeedX = trueSpeedX;
+		oldSpeedY = trueSpeedY;
 
-        wait1Msec(timeLapse);
+		lastPosTime = nSysTime;
+		wait1Msec(timeLapse);
 	}
 }
 
