@@ -18,8 +18,8 @@ i = .000007
 d= .42
 */
 float KpLowShooting = 0.0225043;
-float KiLowShooting = 0.0007;//0.002103;
-float KdLowShooting = 0.0021;//0.7572413800000;
+float KiLowShooting = 0.002103;//0.002103;//0.0007
+float KdLowShooting = 0.7572413800000;//0.7572413800000;//0.0021
 float KpLow = KpLowShooting;
 float KiLow = KiLowShooting;
 float KdLow = KdLowShooting;

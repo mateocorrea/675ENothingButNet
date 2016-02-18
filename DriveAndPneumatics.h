@@ -44,6 +44,7 @@ void deploy();
 void encoderTurn(int goal);
 task automaticBrakingSystem();
 int tolerableAccel(int direction);
+void gyroTurnTo(int goal, int direction);
 
 float initialPosX = 0.0;
 float initialPosY = 0.0;
@@ -248,9 +249,9 @@ void encoderTurn(int goal)
     }
 
     if(goal > 0) {
-  		drivePower(brakePower, -brakePower);
+  		drivePower(brakePower+5, -brakePower-5);
     } else {
-        drivePower(-brakePower, brakePower);
+        drivePower(-brakePower-5, brakePower+5);
     }
     wait1Msec(brakeTime);
     drivePower(0,0);
@@ -401,4 +402,13 @@ void turnToGoal() {
 		drivePower(90, -90);
 	}
 	drivePower(0, 0);
+}
+
+void gyroTurnTo(int goal, int direction)
+{
+	int difference = goal - SensorValue[gyroSensor];
+	if(direction < 0)
+		gyroTurn(-difference);
+	else
+		gyroTurn(difference);
 }

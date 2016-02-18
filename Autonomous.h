@@ -2,7 +2,7 @@ bool useGyroTurn = false;
 int warmupTime = 2700;
 int initialShootTime = 1700;
 int autoShootSpeed = 127;
-int outsideShot = 136;
+int outsideShot = 130;
 int insideShot = 140;
 
 void runAuto(int chosen);
@@ -22,7 +22,7 @@ void runAuto(int chosen) {
     stopTask(drive);
 
     /* Warm-up the flywheel and reset the gyro meanwhile */
-    rpmGoal = rpmHigh;
+    rpmGoal = 156;
     SensorType[in3] = sensorNone;
     motor[roller] = 127;
     wait1Msec(warmupTime);
@@ -81,29 +81,38 @@ void redShoot()
 
 void redSide()
 {
+		motor[roller] = 0;
     /* Drive away from tile and turn towards the pile of balls */
     driveDistance(-420);
     wait1Msec(300);
     if(useGyroTurn)
         gyroTurn(-150);
     else
-        encoderTurn(-265);
+        encoderTurn(-240);
     wait1Msec(300);
-    driveDistance(-710);
+    driveDistance(-580);
+    wait1Msec(300);
     if(useGyroTurn)
     	gyroTurn(400);
    	else
-   		encoderTurn(390);
+   		encoderTurn(352);
 
     /* Drive towards the piles and pick them up */
-    driveDistance(212);
-    motor[chain] = 127;
-    wait1Msec(550);
-    drivePower(80,80);
+    driveDistance(335);
     wait1Msec(200);
-    drivePower(0,0);
+    motor[roller] = 127;
     motor[chain] = 127;
-    wait1Msec(200);
+    wait1Msec(600);
+    motor[roller] = 0;
+    wait1Msec(100);
+
+    drivePower(-80, -80);
+    wait1Msec(120);
+    motor[roller] = 127;
+    drivePower(100,100);
+   	wait1Msec(260);
+   	drivePower(0,0);
+   	wait1Msec(300);
     motor[chain] = 0;
 
     /* Drive away from the wall and turn towards the goal */
@@ -112,7 +121,7 @@ void redSide()
     if(useGyroTurn)
         gyroTurn(-300);
     else
-        encoderTurn(-205);
+        encoderTurn(-195);
 
     /* Shoot the balls at the goal */
     motor[chain] = autoShootSpeed;
