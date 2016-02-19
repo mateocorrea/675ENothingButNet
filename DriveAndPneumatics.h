@@ -223,7 +223,7 @@ void encoderTurn(int goal)
     clearTimer(T1);
 
     while(!(abs(leftDrive) > abs(goal) - allowableError) || !(abs(rightDrive) > abs(goal) - allowableError)){
-        if(time1[T1] > abs(goal) * 3)
+        if(time1[T1] > abs(goal) * 15)
             break;
 
         // Proportional
