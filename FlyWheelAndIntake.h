@@ -487,7 +487,7 @@ void setPIDConstants()
 			KiR = KiMidSoft;
 			KdL = KdMidSoft;
 			KdR = KdMidSoft;
-		} else {
+		} else if(rpmGoal == rpmHigh) {
 			KpL = KpHighLSoft;
 			KpR = KpHighRSoft;
 			KiL = KiHighLSoft;
@@ -503,7 +503,14 @@ void setPIDConstants()
 				KdL = KdHighLSSoft;
 				KdR = KdHighRSSoft;
 			}
-		}
+        } else { // EVERYTHING ELSE, INCLUDING SIDE SHOT FOR AUTONOMOUS THIS IS FOR SOFT BALLS RICHIE
+            KpL = KpHighLSoft;
+            KpR = KpHighRSoft;
+            KiL = KiHighLSoft;
+            KiR = KiHighRSoft;
+            KdL = KdHighLSoft;
+            KdR = KdHighRSoft;
+        }
 	}
 	else
 	{
@@ -529,8 +536,8 @@ void setPIDConstants()
 			KiL = KiMid;
 			KiR = KiMid;
 			KdL = KdMid;
-			KdR = KdMid;
-		} else {
+            KdR = KdMid;
+        } else if(rpmGoal == rpmHigh) {
 			KpL = KpHighL;
 			KpR = KpHighR;
 			KiL = KiHighL;
@@ -546,7 +553,14 @@ void setPIDConstants()
 				KdL = KdHighLS;
 				KdR = KdHighRS;
 			}
-		}
+        } else { // SIDE SHOTS IN AUTONOMOUS (FOR GOOD BALLS)
+            KpL = 0.02200000;
+            KpR = KpL:
+            KiL = 0.00003000;
+            KiR = KiL;
+            KdL = 0.00004000;
+            KdR = KdL;
+        }
 	}
 }
 
