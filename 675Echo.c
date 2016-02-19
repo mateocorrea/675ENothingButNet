@@ -54,7 +54,6 @@ void pre_auton()
 task autonomous()
 {
 	SensorValue[laser] = 0;
-	startTask(calculateAccelBiases);
 	runAuto(chosenAuto);
 }
 

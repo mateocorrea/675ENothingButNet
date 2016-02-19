@@ -16,13 +16,12 @@ void progSkills();
 void runAuto(int chosen) {
 
     /* Start tasks needed in autonomous and disable unnecessary ones */
-    flyWheelOn = true;
     startTask(flyWheelPower);
+    rpmGoal = 156;
     startTask(calculateAccelBiases);
     stopTask(drive);
 
     /* Warm-up the flywheel and reset the gyro meanwhile */
-    rpmGoal = 156;
     SensorType[in3] = sensorNone;
     motor[roller] = 127;
     wait1Msec(warmupTime);
@@ -81,7 +80,7 @@ void redShoot()
 
 void redSide()
 {
-		motor[roller] = 0;
+    motor[roller] = 0;
     /* Drive away from tile and turn towards the pile of balls */
     driveDistance(-420);
     wait1Msec(300);

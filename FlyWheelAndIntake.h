@@ -93,6 +93,7 @@ bool alreadyOff = false;
 
 bool singleShotMode = false;
 bool startup = true;
+int removableTime = 0;
 /////////////////////////////////////////////////////////
 
 task flyWheelPower() {
@@ -252,10 +253,11 @@ void flyWheelMotors(float left, float right)
 
 void pidChange(int goal)
 {
-	float deltaTime = ((nSysTime - lastTime) > 0) ? abs(nSysTime - lastTime) : encoderTimer;
+	float deltaTime = ((nSysTime - lastTime) > 0) ? abs(nSysTime - lastTime - removableTime) : encoderTimer;
+    removableTime = 0;
 	if(deltaTime < 1)
 		deltaTime = 1;
-  if(rpmHigh < 400)
+    if(rpmHigh < 400)
       launcherRatio = 1;
 	float factor = ( ( launcherRatio * 60000 ) / deltaTime ) / ticksPerTurnSpeed;
 	rpmLeft = abs(flyEncLeft * factor);
@@ -380,6 +382,23 @@ void slowStart()
 		flyWheelMotors(i * 1.0, i * 1.0);
 		wait1Msec(10);
 	}
+    if (rpmGoal == rpmMid) {
+        flySpeedLeft = midSpeed;
+        flySpeedRight = midSpeed;
+    } else if(rpmGoal == rpmLow) {
+        flySpeedLeft = lowSpeed;
+        flySpeedRight = lowSpeed;
+    } else {
+        rpmGoal = rpmHigh;
+        flySpeedLeft = highSpeed;
+        flySpeedRight = highSpeed;
+    }
+    flyWheelMotors(flySpeedLeft, flySpeedRight);
+    wait1Msec(50);
+    flyEncLeft = 0;
+    flyEncRight = 0;
+    
+    removableTime = 500;
 }
 
 void slowStop()
