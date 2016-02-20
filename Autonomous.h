@@ -1,9 +1,9 @@
 bool useGyroTurn = false;
-int warmupTime = 2700;
+int warmupTime = 1500;
 int initialShootTime = 1700;
 int autoShootSpeed = 127;
 int outsideShot = 130;
-int insideShot = 140;
+int insideShot = 130;
 
 void runAuto(int chosen);
 void redShoot();
@@ -87,21 +87,22 @@ void redSide()
     if(useGyroTurn)
         gyroTurn(-150);
     else
-        encoderTurn(-240);
+        encoderTurn(-230);
     wait1Msec(300);
-    driveDistance(-580);
+    driveDistance(-590);
     wait1Msec(300);
     if(useGyroTurn)
     	gyroTurn(400);
    	else
-   		encoderTurn(352);
+   		encoderTurn(335);
 
     /* Drive towards the piles and pick them up */
-    driveDistance(335);
-    wait1Msec(200);
+    driveDistance(330);
+    wait1Msec(100);
     motor[roller] = 127;
+    wait1Msec(500);
     motor[chain] = 127;
-    wait1Msec(600);
+    wait1Msec(300);
     motor[roller] = 0;
     wait1Msec(100);
 
@@ -118,11 +119,12 @@ void redSide()
     driveDistance(-250);
     wait1Msec(500);
     if(useGyroTurn)
-        gyroTurn(-300);
+        gyroTurn(-271);
     else
-        encoderTurn(-195);
+        encoderTurn(-188);
 
     /* Shoot the balls at the goal */
+
     motor[chain] = autoShootSpeed;
 }
 
@@ -148,6 +150,8 @@ void blueBot()
         encoderTurn(-183); // turn to goal
 
     /* Shoot the balls at the goal */
+    motor [chain]= -127
+    wait1Msec (500);
     motor[chain] = autoShootSpeed;
 }
 
