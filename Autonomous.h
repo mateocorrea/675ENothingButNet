@@ -1,9 +1,16 @@
 bool useGyroTurn = false;
-int warmupTime = 1500;
+int warmupTime = 3200;
 int initialShootTime = 1700;
 int autoShootSpeed = 127;
 int outsideShot = 130;
 int insideShot = 130;
+
+int redShootNum = 0;
+int autoTwo = 1;
+int autoThree = 2;
+int autoFour = 3;
+int autoFive = 4;
+int autoSix = 5;
 
 void runAuto(int chosen);
 void redShoot();
@@ -25,12 +32,19 @@ void runAuto(int chosen) {
     SensorType[in3] = sensorNone;
     motor[roller] = 127;
     wait1Msec(warmupTime);
+    if(chosen == autoThree) //blue bot
+    {
+    	wait1Msec(warmupTime);
+    	wait1Msec(warmupTime);
+    }
     SensorType[in3] = sensorGyro;
 
     if(chosen < 5) {
         /* Set the chain speed and shoot for (initialShootTime) seconds */
         motor[chain] = autoShootSpeed;
         wait1Msec(initialShootTime);
+        if(chosen == autoThree) //blue bot
+        	wait1Msec(1000);
 
         /* Stop shooting & set the flywheel rpm to the next rpm */
         motor[chain] = 0;
@@ -115,8 +129,12 @@ void redSide()
    	wait1Msec(300);
     motor[chain] = 0;
 
+
+
     /* Drive away from the wall and turn towards the goal */
     driveDistance(-250);
+
+    /*
     wait1Msec(500);
     if(useGyroTurn)
         gyroTurn(-271);
@@ -125,34 +143,11 @@ void redSide()
 
     /* Shoot the balls at the goal */
 
-    motor[chain] = autoShootSpeed;
+   // motor[chain] = autoShootSpeed
 }
 
 void blueBot()
 {
-    /* Turn on intake & turn towards the pile of balls */
-    motor[chain] = 70;
-    if(useGyroTurn)
-        gyroTurn(100);
-    else
-        encoderTurn(85); // turn towards pile
-    wait1Msec(500);
-
-    /* Drive towards the piles and pick them up */
-    driveDistance(500);
-    wait1Msec(400);
-    motor[chain] = 0;
-
-    /* Turn towards the goal */
-    if(useGyroTurn)
-        gyroTurn(-200);
-    else
-        encoderTurn(-183); // turn to goal
-
-    /* Shoot the balls at the goal */
-    motor [chain]= -127;
-    wait1Msec (500);
-    motor[chain] = autoShootSpeed;
 }
 
 void blueSide()
@@ -186,16 +181,7 @@ void blueSide()
 
 void defense()
 {
-    int carry = 340;
-    int separation = 2500;
-    for(int x = 0; x < 10; x++)
-    {
-        motor[chain] = 127;
-        wait1Msec(carry);
-        motor[chain] = 0;
-        wait1Msec(separation);
-    }
-    flyWheelOn = false;
+    driveDistance(2000);
 }
 
 void progSkills()
