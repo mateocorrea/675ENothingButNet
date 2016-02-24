@@ -51,6 +51,7 @@ void pre_auton()
 }
 task autonomous()
 {
+	userControl = false;
 	SensorValue[laser] = 0;
 	competitionMode = true;
 	runAuto(chosenAuto);
