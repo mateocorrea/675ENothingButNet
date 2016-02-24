@@ -140,18 +140,6 @@ task flyWheelControl() {
                 resetFlyWheel();
         }
 
-        /*if(intakeSpeedBtn && !lastIntakeSpeedBtn)
-        {
-            //intakeSpeed -= 5;
-            //if(intakeSpeed < 57)
-                //intakeSpeed = 127;
-            manualControl = !manualControl;
-            lastIntakeSpeedBtn = true;
-        } else if (intakeSpeedBtn == 0) {
-            lastIntakeSpeedBtn = false;
- 				}*/
-
-
 
 		// Flywheel speed selection //
 		if(speedBtn && !lastSpeedBtn) {
@@ -240,7 +228,6 @@ void turnOn(int color) {
         SensorValue[yellowLED] = 0;
 	}
 }
-
 void flyWheelMotors(float left, float right)
 {
 	int l = round(left);
@@ -250,7 +237,6 @@ void flyWheelMotors(float left, float right)
 	motor[bottomRightLauncher] = r;
 	motor[bottomLeftLauncher] = l;
 }
-
 void pidChange(int goal)
 {
 	float deltaTime = ((nSysTime - lastTime) > 0) ? abs(nSysTime - lastTime - removableTime) : encoderTimer;
@@ -563,7 +549,6 @@ void setPIDConstants()
         }
 	}
 }
-
 task autoPIDTuner() {
     // kPl = tune(P, 129102, 31012, 1902);
     rpmGoal = rpmLow;
@@ -721,7 +706,6 @@ task autoPIDTuner() {
     writeDebugStreamLine("%f", bestI);
     writeDebugStreamLine("%f", bestD);
   }
-
 void minimalPIDChange(int goal)
 {
     float deltaTime = time1(T4);
@@ -760,16 +744,6 @@ void minimalPIDChange(int goal)
     float derivativeRight = (rightError - oldRightError) / deltaTime;
     float dLeft = KdL * derivativeLeft;
     float dRight = KdR * derivativeRight;
-
-    /* 4 cases: (over has negative errors) if error > olderror (could either be closer (if over the RPM) or farther (if under the RPM))
-     BothOver RPMGoal: error > olderror (getting closer) --> should speed up a bit, and speeds up
-     BothOver RPM: error < olderror (getting farther, going too fast) --> should slow down, and slows down
-     BothUnder RPM: error > olderror (getting farther because slowed down too much)--> should speed up, and speeds up
-     BothUnder RPM: error < olderror (getting closer because speeding up)--> should slow down, and slows down
-     Error > 0 (below goal) & oldError < 0 (over goal) --> should speed up, and speeds up
-     Error < 0 (above goal) & oldError > 0 (under goal) --> should slow down and slows down
-     */
-
 
     // PID //
     float leftChange = pLeft + iLeft + dLeft;
