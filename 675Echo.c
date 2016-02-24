@@ -71,8 +71,8 @@ task usercontrol()
 
 	if(getTaskState(LCD) == taskStateStopped)
 		startTask(LCD);
-	if(getTaskState(calculateAccelBiases) == taskStateStopped)
-		startTask(calculateAccelBiases);
+	/*if(getTaskState(calculateAccelBiases) == taskStateStopped)
+		startTask(calculateAccelBiases);*/
 	if(autoTuning) {
 		startTask(autoPIDTuner);
 	} else {
