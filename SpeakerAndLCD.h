@@ -4,6 +4,7 @@ void PlayTune(string music);
 void playMario();
 void PlayJingleBells();
 void playSong(int song);
+void playDeathMarch();
 
 
 
@@ -11,21 +12,22 @@ const int NaturalNotes[7]    = { 14080, 15804, 8372, 9397, 10548, 11175, 12544 }
 const int AccidentalNotes[7] = { 14917,     0, 8870, 9956,     0, 11840, 13290 }; /* A#9, x, C#9, D#9, x, F#9, G#9  */
 
 bool lastLazerBtn = false;
-int redShootNum = 0;
-int autoTwo = 1;
-int autoThree = 2;
-int autoFour = 3;
-int autoFive = 4;
-int autoSix = 5;
 int battery = 6;
 int name = 7;
 int music = 8;
 int games = 9;
 int stats = 10;
+int bias = 11;
 int screen = name;
 int chosenAuto = autoTwo;
-int holdTime = 1500;
+int holdSwitch = 1000;
 
+int autoPage = 0;
+
+int biasScreen = 0;
+int lowBiasScreen = 0;
+int midBiasScreen = 1;
+int highBiasScreen = 2;
 
 
 
@@ -57,30 +59,50 @@ task LCD()
 			holdTime = 0;
 		}	else if(nLCDButtons == 4) { //right button pressed
 			screen++;
-			if(screen == 11) {
+			if(screen == 12)
 				screen = 0;
-			}
+			if((screen > 0) && (screen < 6))
+				screen = 6;
 		} else if(nLCDButtons == 1) { // left button
 			screen--;
-			if(screen < 0) {
-				screen = 10;
-			}
+			if(screen < 0)
+				screen = 11;
 		} else if(nLCDButtons == 2) { //center pressed
 			if(screen == music) {
 				int baseTime = nSysTime;
 				int time = 0;
-				while((nLCDButtons == 2) && (time - baseTime < holdTime)) {
+				while((nLCDButtons == 2) && (time - baseTime < holdSwitch)) {
 					time = nSysTime;
 				}
-				if((time - baseTime) >= holdTime) {
+				if((time - baseTime) >= holdSwitch) {
 					playSong(song);
 				} else {
 					if(screen == music)
 						song++;
-					if(song > 1)
+					if(song > 2)
 						song = 0;
 				}
 
+			} else if (screen == bias) {
+				int baseTime = nSysTime;
+				int time = 0;
+				while((nLCDButtons == 2) && (time - baseTime < holdSwitch)) {
+					time = nSysTime;
+				}
+				if((time - baseTime) >= holdSwitch) {
+					biasScreen++;
+					if(biasScreen > 2)
+						biasScreen = 0;
+					clearLCDLine(1);
+					displayLCDCenteredString(1, "Switching");
+				} else {
+					if(biasScreen == lowBiasScreen)
+						lowPowerBias = (lowPowerBias > 8 ) ? -10 : (lowPowerBias+2);
+					else if(biasScreen == midBiasScreen)
+						midPowerBias = (midPowerBias > 8 ) ? -10 : (midPowerBias+2);
+					else
+						highPowerBias = (highPowerBias > 8) ? -10 : (highPowerBias+2);
+				}
 			} else if (screen == name) {
 				if(lastLazerBtn == false) {
 					SensorValue[laser] = !SensorValue[laser];
@@ -93,16 +115,19 @@ task LCD()
 				if(stat > 8)
 					stat = 0;
 			}	else {
-				chosenAuto = screen;
-				if(chosenAuto > 5) {
-					chosenAuto = 0;
+				int baseTime = nSysTime;
+				int time = 0;
+				while((nLCDButtons == 2) && (time - baseTime < holdSwitch)) {
+					time = nSysTime;
 				}
-				if(userControl) {
-					/*stopTask(intake);
-					wait1Msec(2000);
-					runAuto(chosenAuto);
-					startTask(drive);
-					startTask(intake);*/
+				if((time - baseTime) >= holdSwitch) {
+					autoPage++;
+					if(autoPage > 5)
+						autoPage = 0;
+					clearLCDLine(1);
+					displayLCDCenteredString(1, "Switching");
+				} else {
+					chosenAuto = autoPage;
 				}
 			}
 		}
@@ -113,19 +138,7 @@ task LCD()
 		clearLCDLine(0);
 		clearLCDLine(1);
 
-		if(screen == redShootNum) {
-			displayLCDCenteredString(0, "Red Shoot");
-		} else if(screen == autoTwo) {
-			displayLCDCenteredString(0, "Red Side");
-		} else if(screen == autoThree) {
-			displayLCDCenteredString(0, "Blue Bottom");
-		} else if(screen == autoFour) {
-			displayLCDCenteredString(0, "Blue Side");
-		} else if(screen == autoFive) {
-			displayLCDCenteredString(0, "Defense >:D");
-		} else if(screen == autoSix) {
-			displayLCDCenteredString(0, "Prog Skills");
-		} else if(screen == battery) {
+		if(screen == battery) {
 			//displayLCDString(0, 0, "Primary: ");
 			//sprintf(mainBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0,'V');
 			//displayNextLCDString(mainBattery);
@@ -141,8 +154,22 @@ task LCD()
 			displayLCDCenteredString(0, "Song");
 			if(song == 0)
 				displayLCDCenteredString(1, "Mario");
+			else if(song == 1)
+				displayLCDCenteredString(1, "Imperial March");
 			else
 				displayLCDCenteredString(1, "Jingle Bells");
+		} else if(screen == bias) {
+			displayLCDCenteredString(0, "Power Bias");
+			if(biasScreen == lowBiasScreen) {
+				displayLCDString(1, 0, "Low Bias: ");
+				displayNextLCDNumber(lowPowerBias);
+			} else if(biasScreen == midBiasScreen) {
+				displayLCDString(1, 0, "Mid Bias: ");
+				displayNextLCDNumber(midPowerBias);
+			} else {
+				displayLCDString(1, 0, "High Bias: ");
+				displayNextLCDNumber(highPowerBias);
+			}
 		} else if(screen == stats) {
 			displayLCDCenteredString(0, "Stats");
 			if(stat == 0) {
@@ -151,32 +178,44 @@ task LCD()
 			} else if (stat == 2) {
 				displayLCDString(1, 0, "AvgSpeed:");
 				displayNextLCDNumber(0);
-			} else if (stat == 2) {
+			} else if (stat == 3) {
 				displayLCDString(1, 0, "TopSpeed:");
 				displayNextLCDNumber(maxSpeed);
-			} else if (stat == 2) {
+			} else if (stat == 4) {
 				displayLCDString(1, 0, "LowShots:");
 				displayNextLCDNumber(lowShots);
-			} else if (stat == 2) {
+			} else if (stat == 5) {
 				displayLCDString(1, 0, "MidShots:");
 				displayNextLCDNumber(midShots);
-			} else if (stat == 2) {
+			} else if (stat == 6) {
 				displayLCDString(1, 0, "HighShots:");
 				displayNextLCDNumber(highShots);
-			} else if (stat == 2) {
+			} else if (stat == 7) {
 				displayLCDString(1, 0, "Collisions:");
 				displayNextLCDNumber(collisions);
-			} else if (stat == 2) {
+			} else if (stat == 8) {
 				displayLCDString(1, 0, "BrakesDep:");
 				displayNextLCDNumber(brakeCount);
 			}
 		} else if(screen == games) {
 			displayLCDCenteredString(0, "Games");
 			displayLCDCenteredString(1, "Coming Soon");
-		}
-
-		if((screen < 6) && (screen == chosenAuto)) {
-			displayLCDCenteredString(1, "Selected");
+		} else {
+			if(autoPage == redShootNum) {
+				displayLCDCenteredString(0, "Red Shoot");
+			} else if(autoPage == autoTwo) {
+				displayLCDCenteredString(0, "Red Side");
+			} else if(autoPage == autoThree) {
+				displayLCDCenteredString(0, "Blue Bottom");
+			} else if(autoPage == autoFour) {
+				displayLCDCenteredString(0, "Blue Side");
+			} else if(autoPage == autoFive) {
+				displayLCDCenteredString(0, "Defense >:D");
+			} else if(autoPage == autoSix) {
+				displayLCDCenteredString(0, "Prog Skills");
+			}
+			if(chosenAuto == autoPage)
+				displayLCDCenteredString(1, "Selected");
 		}
 			if(SensorValue[greenLED] == 1 && (rpmGoal == rpmHigh))
 				turnOn(green);
@@ -198,8 +237,25 @@ task LCD()
 
 task speaker()
 {
+	bool lastPlayBtn = false;
+	while(true)
+	{
+		if(vexRT[Btn8U] && !lastPlayBtn) {
+			lastPlayBtn = true;
+			if(!bSoundActive) {
+				playDeathMarch();
+			}
+		} else if(!vexRT[Btn8U]) {
+			lastPlayBtn = false;
+		}
+		if(lifted && competitionMode && !bSoundActive)
+		{
+			flyWheelOn = false;
+			rollerOn = false;
+			playDeathMarch();
+		}
 
-	while(bSoundActive){}
+	}
 }
 
 void PlayTune(string music)
@@ -255,10 +311,18 @@ void PlayJingleBells()
 	PlayTune(JingleBells2);
 }
 
+void playDeathMarch()
+{
+	playSoundFile("imp.wav");
+	while(bSoundActive){}
+	playSoundFile("imp2.wav");
+}
 void playSong(int song)
 {
 	if(song == 0)
 		playMario();
+	else if(song == 1)
+		playDeathMarch();
 	else
 		PlayJingleBells();
 }
