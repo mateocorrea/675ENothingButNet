@@ -14,6 +14,7 @@
 #define rampBtn2 vexRT[Btn7L]
 #define brakeBtn vexRT[Btn5U]
 
+bool lifted = false;
 bool braking = false;
 bool cubicMapping = false;
 bool lastRampBtn = false;
@@ -25,10 +26,10 @@ int liftCount = 0;
 int autoBrakeTime = 3000;
 int brakePower = 25;
 int brakeTime = 35;
-int accelXBias = 0;
-int accelYBias = 0;
-int collisions = 0.0;
-int brakeCount = 0.0;
+int accelXBias = 100;
+int accelYBias = 100;
+int collisions = 0;
+int brakeCount = 0;
 
 int mapped(int x);
 task drive();
@@ -76,6 +77,7 @@ task pneumatics()
 				liftCount++;
 			} else if(liftCount == 1) {
 				releaseLift();
+				lifted = true;
 				liftCount++;
 			} else {
 				lockLift();
@@ -137,6 +139,8 @@ void gyroTurn(int goal)
 	gyro = 0;
 	while(abs(gyro) < abs(goal))
     {
+    	if(userControl)
+    		break;
         int difference = abs(goal) - abs(gyro);
         int power = difference / 2;
         if(goal > 0) {
@@ -174,6 +178,8 @@ void driveDistance(int goal)
     clearTimer(T1);
 
     while(!(abs(leftDrive) > abs(goal) - allowableError) || !(abs(rightDrive) > abs(goal) - allowableError)){
+    		if(userControl)
+    			break;
         if(time1[T1] > abs(goal) * 3)
             break;
 
@@ -223,6 +229,8 @@ void encoderTurn(int goal)
     clearTimer(T1);
 
     while(!(abs(leftDrive) > abs(goal) - allowableError) || !(abs(rightDrive) > abs(goal) - allowableError)){
+    	if(userControl)
+    		break;
         if(time1[T1] > abs(goal) * 5)
             break;
 
@@ -313,11 +321,13 @@ int tolerableAccel(int direction)
     int allowableY = 50;
 
     if(direction == X) {
+    	return abs(accelXBias);
         if(accelX > accelXBias)
             return accelXBias + allowableX;
         else
             return accelXBias - allowableX;
     } else {
+    	return abs(accelYBias);
         if(accelX > accelYBias)
             return accelYBias + allowableY;
         else
@@ -332,17 +342,25 @@ task calculateAccelBiases()
     int xSum = 0;
     int ySum = 0;
 
-    while(true) {
-        xSum = (xValues * accelXBias) + accelX;
-        ySum = (yValues * accelYBias) + accelY;
+    while(true) {/*
+    		if( !userControl || ((abs(leftVertStick) < threshold) && (abs(rightVertStick) < threshold)))
+    		{
+    			writeDebugStreamLine("running");
+    			xSum = (xValues * accelXBias) + abs(SensorValue[accelerometerX]);
+        	ySum = (yValues * accelYBias) + abs(SensorValue[accelerometerY]);
 
-        accelXBias = round((xSum * 1.0) / (xValues+1));
-        accelYBias = round((ySum * 1.0) / (yValues+1));
+        	accelXBias = round((xSum * 1.0) / (xValues+1));
+        	accelYBias = round((ySum * 1.0) / (yValues+1));
 
-        xValues = (xValues >= 2000) ? 1000 : (xValues+1);
-        yValues = (yValues >= 2000) ? 1000 : (yValues+1);
+        	accelXBias = 50;
+        	accelYBias = 50;
 
-        wait1Msec(10);
+        	xValues = (xValues >= 2000) ? 1000 : (xValues+1);
+        	yValues = (yValues >= 2000) ? 1000 : (yValues+1);
+
+       		wait1Msec(10);
+    		}*/
+
     }
 }
 
@@ -358,8 +376,8 @@ task positionTracker() {
 
 		float deltaTime = ((nSysTime - lastPosTime) > 0) ? abs(nSysTime - lastPosTime) : timeLapse;
 
-		float trueAccelX = (abs(accelX) > abs(tolerableAccel(X))) ? (accelX * conversionFactor) : 0;
-		float trueAccelY = (abs(accelY) > abs(tolerableAccel(Y))) ? (accelY * conversionFactor) : 0;
+		float trueAccelX = (abs(accelX) > abs(accelXBias)) ? (accelX * conversionFactor) : 0;
+		float trueAccelY = (abs(accelY) > abs(accelYBias)) ? (accelY * conversionFactor) : 0;
 
 		float speedX = oldSpeedX + ((trueAccelX + oldAccelX)/2.0 * deltaTime/1000);
 		float speedY = oldSpeedY + ((trueAccelY + oldAccelY)/2.0 * deltaTime/1000);
