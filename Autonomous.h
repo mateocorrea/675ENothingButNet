@@ -150,7 +150,7 @@ void blueBot()
         encoderTurn(-183); // turn to goal
 
     /* Shoot the balls at the goal */
-    motor [chain]= -127
+    motor [chain]= -127;
     wait1Msec (500);
     motor[chain] = autoShootSpeed;
 }

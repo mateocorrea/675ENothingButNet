@@ -397,7 +397,7 @@ void slowStart()
     wait1Msec(50);
     flyEncLeft = 0;
     flyEncRight = 0;
-    
+
     removableTime = 500;
 }
 
@@ -555,7 +555,7 @@ void setPIDConstants()
 			}
         } else { // SIDE SHOTS IN AUTONOMOUS (FOR GOOD BALLS)
             KpL = 0.02200000;
-            KpR = KpL:
+            KpR = KpL;
             KiL = 0.00003000;
             KiR = KiL;
             KdL = 0.00004000;
