@@ -152,31 +152,43 @@ void blueBot()
 
 void blueSide()
 {
+    motor[roller] = 0;
     /* Drive away from tile and turn towards the pile of balls */
-    driveDistance(-1470);
-    wait1Msec(500);
+    driveDistance(-420);
+    wait1Msec(300);
     if(useGyroTurn)
-        gyroTurn(-358);
+        gyroTurn(150);
     else
-        encoderTurn(-235); // turn towards pile
-    wait1Msec(500);
-
+        encoderTurn(230);
+    wait1Msec(300);
+    driveDistance(-590);
+    wait1Msec(300);
+    if(useGyroTurn)
+        gyroTurn(-400);
+   	else
+        encoderTurn(-335);
+    
     /* Drive towards the piles and pick them up */
-    driveDistance(1070);
-    motor[chain] = 70;
-    wait1Msec(850);
+    driveDistance(330);
+    wait1Msec(100);
+    motor[roller] = 127;
+    wait1Msec(500);
+    motor[chain] = 127;
+    wait1Msec(300);
+    motor[roller] = 0;
+    wait1Msec(100);
+    
+    drivePower(-80, -80);
+    wait1Msec(120);
+    motor[roller] = 127;
+    drivePower(100,100);
+   	wait1Msec(260);
+   	drivePower(0,0);
+   	wait1Msec(300);
     motor[chain] = 0;
-
+    
     /* Drive away from the wall and turn towards the goal */
     driveDistance(-250);
-    wait1Msec(500);
-    if(useGyroTurn)
-        gyroTurn(240);
-    else
-        encoderTurn(223); // turn to goal
-
-    /* Shoot the balls at the goal */
-    motor[chain] = autoShootSpeed;
 }
 
 void defense()
@@ -191,7 +203,7 @@ void progSkills()
     /* Shoot the first batch of preloads for 17.5 seconds */
     clearTimer(T1);
     motor[chain] = autoShootSpeed;
-    while(time1[T1] < 22000){
+    while(time1[T1] < 18000){
     }
     motor[chain] = 0;
 

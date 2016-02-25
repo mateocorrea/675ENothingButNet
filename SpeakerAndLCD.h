@@ -6,8 +6,6 @@ void PlayJingleBells();
 void playSong(int song);
 void playDeathMarch();
 
-
-
 const int NaturalNotes[7]    = { 14080, 15804, 8372, 9397, 10548, 11175, 12544 }; /* A9, B9, C9, D9, E9, F9, G9 */
 const int AccidentalNotes[7] = { 14917,     0, 8870, 9956,     0, 11840, 13290 }; /* A#9, x, C#9, D#9, x, F#9, G#9  */
 
@@ -28,9 +26,6 @@ int biasScreen = 0;
 int lowBiasScreen = 0;
 int midBiasScreen = 1;
 int highBiasScreen = 2;
-
-
-
 
 task LCD()
 {
@@ -202,11 +197,11 @@ task LCD()
 			displayLCDCenteredString(1, "Coming Soon");
 		} else {
 			if(autoPage == redShootNum) {
-				displayLCDCenteredString(0, "Red Shoot");
+				displayLCDCenteredString(0, "PickupInsideRed");
 			} else if(autoPage == autoTwo) {
 				displayLCDCenteredString(0, "Red Side");
 			} else if(autoPage == autoThree) {
-				displayLCDCenteredString(0, "Blue Bottom");
+				displayLCDCenteredString(0, "Shoot 4"); // blue bottom
 			} else if(autoPage == autoFour) {
 				displayLCDCenteredString(0, "Blue Side");
 			} else if(autoPage == autoFive) {
