@@ -48,7 +48,8 @@ void runAuto(int chosen) {
 
         /* Stop shooting & set the flywheel rpm to the next rpm */
         motor[chain] = 0;
-        rpmGoal = (chosen % 2 == 0) ? insideShot : outsideShot;
+        if(chosen != autoThree)
+        	rpmGoal = (chosen % 2 == 0) ? insideShot : outsideShot;
         stopTask(calculateAccelBiases);
     }
 
@@ -69,27 +70,9 @@ void runAuto(int chosen) {
 
 void redShoot()
 {
-    /* Turn on intake & turn towards the pile of balls */
-    motor[chain] = 70;
-    if(useGyroTurn)
-        gyroTurn(-100);
-    else
-        encoderTurn(-85); // turn towards pile
-    wait1Msec(500);
-
-    /* Drive towards the piles and pick them up */
-    driveDistance(500);
-    wait1Msec(400);
-    motor[chain] = 0;
-
-    /* Turn towards the goal */
-    if(useGyroTurn)
-        gyroTurn(200);
-    else
-        encoderTurn(183); // turn to goal
-
-    /* Shoot the balls at the goal */
-    motor[chain] = autoShootSpeed;
+    driveDistance(-2000);
+    encoderTurn(-900);
+    driveDistance(2000);
 }
 
 void redSide()
@@ -108,7 +91,7 @@ void redSide()
     if(useGyroTurn)
     	gyroTurn(400);
    	else
-   		encoderTurn(335);
+   		encoderTurn(360);
 
     /* Drive towards the piles and pick them up */
     driveDistance(330);
@@ -166,8 +149,8 @@ void blueSide()
     if(useGyroTurn)
         gyroTurn(-400);
    	else
-        encoderTurn(-335);
-    
+        encoderTurn(-345);
+
     /* Drive towards the piles and pick them up */
     driveDistance(330);
     wait1Msec(100);
@@ -177,7 +160,7 @@ void blueSide()
     wait1Msec(300);
     motor[roller] = 0;
     wait1Msec(100);
-    
+
     drivePower(-80, -80);
     wait1Msec(120);
     motor[roller] = 127;
@@ -186,13 +169,15 @@ void blueSide()
    	drivePower(0,0);
    	wait1Msec(300);
     motor[chain] = 0;
-    
+
     /* Drive away from the wall and turn towards the goal */
     driveDistance(-250);
 }
 
 void defense()
 {
+    driveDistance(-2000);
+    encoderTurn(900);
     driveDistance(2000);
 }
 

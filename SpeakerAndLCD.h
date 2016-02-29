@@ -62,6 +62,8 @@ task LCD()
 			screen--;
 			if(screen < 0)
 				screen = 11;
+			if((screen > 0) && (screen < 6))
+				screen = 0;
 		} else if(nLCDButtons == 2) { //center pressed
 			if(screen == music) {
 				int baseTime = nSysTime;
@@ -116,13 +118,15 @@ task LCD()
 					time = nSysTime;
 				}
 				if((time - baseTime) >= holdSwitch) {
+					chosenAuto = autoPage;
+					clearLCDLine(1);
+					displayLCDCenteredString(1, "Selected");
+				} else {
 					autoPage++;
 					if(autoPage > 5)
 						autoPage = 0;
-					clearLCDLine(1);
-					displayLCDCenteredString(1, "Switching");
-				} else {
-					chosenAuto = autoPage;
+
+
 				}
 			}
 		}
@@ -197,7 +201,7 @@ task LCD()
 			displayLCDCenteredString(1, "Coming Soon");
 		} else {
 			if(autoPage == redShootNum) {
-				displayLCDCenteredString(0, "PickupInsideRed");
+				displayLCDCenteredString(0, "Defense Red");
 			} else if(autoPage == autoTwo) {
 				displayLCDCenteredString(0, "Red Side");
 			} else if(autoPage == autoThree) {
@@ -205,7 +209,7 @@ task LCD()
 			} else if(autoPage == autoFour) {
 				displayLCDCenteredString(0, "Blue Side");
 			} else if(autoPage == autoFive) {
-				displayLCDCenteredString(0, "Defense >:D");
+				displayLCDCenteredString(0, "Defense Blue");
 			} else if(autoPage == autoSix) {
 				displayLCDCenteredString(0, "Prog Skills");
 			}
