@@ -116,7 +116,7 @@ task LCD()
 			display("Games", "Coming Soon");
 		} else {
 			if(autoPage == redShootNum) {
-				displayLCDCenteredString(0, "PickupInsideRed");
+				displayLCDCenteredString(0, "Defense Red");
 			} else if(autoPage == autoTwo) {
 				displayLCDCenteredString(0, "Red Side");
 			} else if(autoPage == autoThree) {
@@ -124,7 +124,7 @@ task LCD()
 			} else if(autoPage == autoFour) {
 				displayLCDCenteredString(0, "Blue Side");
 			} else if(autoPage == autoFive) {
-				displayLCDCenteredString(0, "Defense >:D");
+				displayLCDCenteredString(0, "Defense Blue");
 			} else if(autoPage == autoSix) {
 				displayLCDCenteredString(0, "Prog Skills");
 			}
@@ -295,5 +295,7 @@ void centerClick()
 			stat = 0;
 	} else if(screen == autonomous) {
 		chosenAuto = autoPage;
+        clearLCDLine(1);
+        displayLCDCenteredString(1, "Selected");
 	}
 }
