@@ -25,6 +25,7 @@ void runAuto(int chosen) {
     /* Start tasks needed in autonomous and disable unnecessary ones */
     startTask(flyWheelPower);
     rpmGoal = 156;
+    startTask(calculateAccelBiases);
     stopTask(drive);
 
     /* Warm-up the flywheel and reset the gyro meanwhile */
@@ -39,16 +40,17 @@ void runAuto(int chosen) {
     SensorType[in3] = sensorGyro;
 
     if(chosen < 5) {
-        /* Set the conveyor speed and shoot for (initialShootTime) seconds */
-        motor[conveyor] = autoShootSpeed;
+        /* Set the chain speed and shoot for (initialShootTime) seconds */
+        motor[chain] = autoShootSpeed;
         wait1Msec(initialShootTime);
         if(chosen == autoThree) //blue bot
         	wait1Msec(1000);
 
         /* Stop shooting & set the flywheel rpm to the next rpm */
-        motor[conveyor] = 0;
+        motor[chain] = 0;
         if(chosen != autoThree)
         	rpmGoal = (chosen % 2 == 0) ? insideShot : outsideShot;
+        stopTask(calculateAccelBiases);
     }
 
     /* Run the selected autonomous program */
@@ -96,7 +98,7 @@ void redSide()
     wait1Msec(100);
     motor[roller] = 127;
     wait1Msec(500);
-    motor[conveyor] = 127;
+    motor[chain] = 127;
     wait1Msec(300);
     motor[roller] = 0;
     wait1Msec(100);
@@ -108,7 +110,7 @@ void redSide()
    	wait1Msec(260);
    	drivePower(0,0);
    	wait1Msec(300);
-    motor[conveyor] = 0;
+    motor[chain] = 0;
 
 
 
@@ -124,7 +126,7 @@ void redSide()
 
     /* Shoot the balls at the goal */
 
-   // motor[conveyor] = autoShootSpeed
+   // motor[chain] = autoShootSpeed
 }
 
 void blueBot()
@@ -154,7 +156,7 @@ void blueSide()
     wait1Msec(100);
     motor[roller] = 127;
     wait1Msec(500);
-    motor[conveyor] = 127;
+    motor[chain] = 127;
     wait1Msec(300);
     motor[roller] = 0;
     wait1Msec(100);
@@ -166,7 +168,7 @@ void blueSide()
    	wait1Msec(260);
    	drivePower(0,0);
    	wait1Msec(300);
-    motor[conveyor] = 0;
+    motor[chain] = 0;
 
     /* Drive away from the wall and turn towards the goal */
     driveDistance(-250);
@@ -185,10 +187,10 @@ void progSkills()
 
     /* Shoot the first batch of preloads for 17.5 seconds */
     clearTimer(T1);
-    motor[conveyor] = autoShootSpeed;
+    motor[chain] = autoShootSpeed;
     while(time1[T1] < 18000){
     }
-    motor[conveyor] = 0;
+    motor[chain] = 0;
 
     /* Drive a litle bit away from the tile */
     driveDistance(-200); // move away from
@@ -218,5 +220,5 @@ void progSkills()
         encoderTurn(345);
 
     /* Shoot */
-    motor[conveyor] = autoShootSpeed;
+    motor[chain] = autoShootSpeed;
 }
