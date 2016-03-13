@@ -211,8 +211,8 @@ void drivePower(int left, int right)
 		releaseBrake();
 	}
 
-	motor[driveLeft] = left;
-	motor[driveRight] = right;
+	motor[leftDrive] = left;
+	motor[rightDrive] = right;
 	if(!punchersActivated)
 		transPower(left, right);
 }
