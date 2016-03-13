@@ -212,7 +212,7 @@ void flyWheelMotors(float power)
 		minPower = MIN_POWER;
 		maxPower = MAX_POWER;
 	}
-	if(power < minPower)
+	if(power < minPower && flyWheelOn)
 		power = minPower;
 	if(flySpeed > maxPower)
 		power = maxPower;
