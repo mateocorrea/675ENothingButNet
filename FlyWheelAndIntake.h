@@ -8,7 +8,6 @@
 #define rollerBtn vexRT[Btn8R]
 #define rollerOutBtn vexRT[Btn8D]
 
-
 ///////////////// FLYWHEEL CONSTANTS ////////////////////
 int rpmLow = 102;
 int rpmMid = 120;

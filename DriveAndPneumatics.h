@@ -12,24 +12,19 @@
 #define brakeBtn vexRT[Btn5U]
 #define transBtn vexRT[Btn7D]
 #define puncherBtn vexRT[Btn6U]
+#define puncherDelayBtn vexRT[Btn5D]
 
 bool lifted = false;
 bool braking = false;
 bool punchersActivated = false;
 int threshold = 15;
 int liftCount = 0;
-int brakePower = 25;
-int brakeTime = 35;
-int brakeCount = 0;
 
 task drive();
 task pneumatics();
 void drivePower(int left, int right);
-void driveBrake(int direction);
 void releaseBrake();
 void actuateBrake();
-void releaseLift();
-void lockLift();
 void shiftTransmission();
 void deploy();
 void encoderTurn(int goal);
@@ -39,17 +34,21 @@ void transPower(int left, int right);
 
 task drive()
 {
+	bool lastPuncherDelay = false;
 	while(true) {
-
 		drivePower(vexRT(Ch3), vexRT(Ch2));
-
-    if(punchersActivated) {
-        if(puncherBtn) {
-      		 transPower(127, 127);
-    		} else {
-       		 transPower(0,0);
-    		}
-    }
+		if(punchersActivated) {
+			if(puncherBtn) {
+				if(puncherDelayBtn && !lastPuncherDelay) {
+					transPower(127, 80);
+					wait1Msec(400);
+				} else if (!puncherDelayBtn)
+					lastPuncherDelay = false;
+				transPower(127, 127);
+			} else {
+				transPower(0,0);
+			}
+		}
 	}
 }
 
@@ -59,7 +58,7 @@ task pneumatics()
 	bool lastRampBtn = false;
 	bool lastTransBtn = false;
 	deployer = 0;
-	lockLift();
+	lock = 0; // lock lift
 	while(true) {
 		/* Ramp */
 		if(rampBtn == 1 && rampBtn2 == 1 && lastRampBtn == false) {
@@ -67,11 +66,11 @@ task pneumatics()
 				deploy();
 				liftCount++;
 			} else if(liftCount == 1) {
-				releaseLift();
+				lock = 1; // release lift
 				lifted = true;
 				liftCount++;
 			} else {
-				lockLift();
+				lock = 0; // lock lift
 				liftCount = 0;
 			}
 			lastRampBtn = true;
@@ -90,19 +89,18 @@ task pneumatics()
 			lastBrakeBtn = false;
 		}
 
-        /* Puncher Activation */
+		/* Puncher Activation */
 		if(transBtn == 1 && !lastTransBtn)
-            shiftTransmission();
-        else
-            lastTransBtn = false;
-
+			shiftTransmission();
+		else if(!transBtn)
+			lastTransBtn = false;
 	}
 }
 
 void shiftTransmission()
 {
-    transmission = (punchersActivated) ? 0 : 1;
-    punchersActivated = !punchersActivated;
+	transmission = (punchersActivated) ? 0 : 1;
+	punchersActivated = !punchersActivated;
 }
 
 void deploy()
@@ -112,23 +110,10 @@ void deploy()
 	deployer = 0;
 }
 
-void lockLift()
-{
-	lock = 0;
-}
-
-void releaseLift()
-{
-	lock = 1;
-}
-
 void actuateBrake()
 {
-	if(!braking) {
-		brake = 1;
-		braking = true;
-		brakeCount++;
-	}
+	brake = 1;
+	braking = true;
 }
 
 void releaseBrake()
@@ -139,135 +124,97 @@ void releaseBrake()
 
 void driveDistance(int goal)
 {
-    float driveKp = 0.35;
-    float driveKd = 0.0;
+	float driveKp = 0.45;
+	int leftDriveError;
+	int rightDriveError;
+	int maxPower = 120;
+	leftDriveEnc = 0;
+	rightDriveEnc = 0;
+	clearTimer(T1);
 
-    int leftDriveError;
-    int leftDriveLastError;
-    int leftDriveDerivative;
-    int rightDriveError;
-    int rightDriveLastError;
-    int rightDriveDerivative;
-    int maxPower = 105;
-    int allowableError = 0;
+	while(!(abs(leftDrive) > abs(goal)) || !(abs(rightDrive) > abs(goal))) {
+		if(userControl)
+			break;
+		if(time1[T1] > abs(goal) * 5)
+			break;
 
-    leftDriveEnc = 0;
-    rightDriveEnc = 0;
-    clearTimer(T1);
+		// Proportional
+		leftDriveError = (abs(goal) - abs(leftDrive));
+		rightDriveError = (abs(goal) - abs(rightDrive));
 
-    while(!(abs(leftDrive) > abs(goal) - allowableError) || !(abs(rightDrive) > abs(goal) - allowableError)){
-    		if(userControl)
-    			break;
-        if(time1[T1] > abs(goal) * 3)
-            break;
+		// PID
+		int leftPidDrive = round(driveKp * leftDriveError);
+		int rightPidDrive = round(driveKp * rightDriveError);
+		leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
+		rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
 
-        // Proportional
-        leftDriveError = (abs(goal) - abs(leftDrive));
-        rightDriveError = (abs(goal) - abs(rightDrive));
-
-        // Derivative
-        leftDriveDerivative = leftDriveError - leftDriveLastError;
-        rightDriveDerivative = rightDriveError - rightDriveLastError;
-        leftDriveLastError = leftDriveError;
-        rightDriveLastError = rightDriveError;
-
-        // PID
-        int leftPidDrive = round(((driveKp * leftDriveError) + (driveKd * leftDriveDerivative)));
-        int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
-        leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
-        rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
-
-        leftPidDrive = (goal < 0) ? -leftPidDrive : leftPidDrive;
-        rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
-
-        drivePower(leftPidDrive, rightPidDrive);
-    }
-    driveBrake(goal);
-    // check for overshoot
+		leftPidDrive = (goal < 0) ? -leftPidDrive : leftPidDrive;
+		rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
+		drivePower(leftPidDrive, rightPidDrive);
+	}
+	int brakePower = 40;
+	int brakeTime = 50;
+	if(goal < 0)
+		drivePower(brakePower, brakePower);
+	else
+		drivePower(-brakePower, -brakePower);
+	wait1Msec(brakeTime);
+	drivePower(0, 0);
 }
 
 void encoderTurn(int goal)
 {
-    float driveKp = 0.38;
-    float driveKd = 0.0;
+	float driveKp = 0.45;
+	int leftDriveError;
+	int rightDriveError;
+	int maxPower = 110;
+	leftDriveEnc = 0;
+	rightDriveEnc = 0;
+	clearTimer(T1);
 
-    int leftDriveError;
-    int leftDriveLastError;
-    int leftDriveDerivative;
-    int rightDriveError;
-    int rightDriveLastError;
-    int rightDriveDerivative;
-    int maxPower = 105;
-    int allowableError = 0;
+	while(!(abs(leftDrive) > abs(goal)) || !(abs(rightDrive) > abs(goal))){
+		if(userControl)
+			break;
+		if(time1[T1] > abs(goal) * 5)
+			break;
 
-    leftDriveEnc = 0;
-    rightDriveEnc = 0;
-    clearTimer(T1);
+		// Proportional
+		leftDriveError = (abs(goal) - abs(leftDrive));
+		rightDriveError = (abs(goal) - abs(rightDrive));
 
-    while(!(abs(leftDrive) > abs(goal) - allowableError) || !(abs(rightDrive) > abs(goal) - allowableError)){
-    	if(userControl)
-    		break;
-        if(time1[T1] > abs(goal) * 5)
-            break;
+		// PID
+		int leftPidDrive = round(driveKp * leftDriveError);
+		int rightPidDrive = round(driveKp * rightDriveError);
+		leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
+		rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
 
-        // Proportional
-        leftDriveError = (abs(goal) - abs(leftDrive));
-        rightDriveError = (abs(goal) - abs(rightDrive));
-
-        // Derivative
-        leftDriveDerivative = leftDriveError - leftDriveLastError;
-        rightDriveDerivative = rightDriveError - rightDriveLastError;
-        leftDriveLastError = leftDriveError;
-        rightDriveLastError = rightDriveError;
-
-        // PID
-        int leftPidDrive = round(((driveKp * leftDriveError) + (driveKd * leftDriveDerivative)));
-        int rightPidDrive = round(((driveKp * rightDriveError) + (driveKd * rightDriveDerivative)));
-        leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
-        rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
-
-        rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
-        leftPidDrive = (goal < 0) ? leftPidDrive : -leftPidDrive;
-
-        drivePower(leftPidDrive, rightPidDrive);
-    }
-
-    if(goal > 0) {
-  		drivePower(brakePower+5, -brakePower-5);
-    } else {
-        drivePower(-brakePower-5, brakePower+5);
-    }
-    wait1Msec(brakeTime);
-    drivePower(0,0);
+		rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
+		leftPidDrive = (goal < 0) ? leftPidDrive : -leftPidDrive;
+		drivePower(leftPidDrive, rightPidDrive);
+	}
+	int brakePower = 40;
+	int brakeTime = 50;
+	if(goal > 0)
+		drivePower(brakePower, -brakePower);
+	else
+		drivePower(-brakePower, brakePower);
+	wait1Msec(brakeTime);
+	drivePower(0,0);
 }
 
 void drivePower(int left, int right)
 {
 	left = (abs(left) < threshold) ? 0 : left;
-  	right = (abs(right) < threshold) ? 0 : right;
+	right = (abs(right) < threshold) ? 0 : right;
 
-  	if((right != 0) || (left != 0)) {
-  		clearTimer(T4);
-  		releaseBrake();
-  	}
+	if((right != 0) || (left != 0)) {
+		releaseBrake();
+	}
 
-  	motor[driveLeft] = left;
-  	motor[driveRight] = right;
-  	if(!punchersActivated)	{
-  		motor[topLeftTrans] = left;
-  		motor[botLeftTrans] = left;
-  		motor[topRightTrans] = right;
-  		motor[botRightTrans] = right;
-  	}
-}
-
-void driveBrake(int direction) {
-    if(direction < 0)
-        drivePower(brakePower, brakePower);
-    else
-        drivePower(-brakePower, -brakePower);
-    wait1Msec(brakeTime);
-    drivePower(0, 0);
+	motor[driveLeft] = left;
+	motor[driveRight] = right;
+	if(!punchersActivated)
+		transPower(left, right);
 }
 
 void gyroTurnTo(int goal, int direction)
@@ -282,32 +229,31 @@ void gyroTurnTo(int goal, int direction)
 void transPower(int left, int right)
 {
 	motor[topLeftTrans] = left;
-  motor[botLeftTrans] = left;
-  motor[topRightTrans] = right;
-  motor[botRightTrans] = right;
+	motor[botLeftTrans] = left;
+	motor[topRightTrans] = right;
+	motor[botRightTrans] = right;
 }
 
 void gyroTurn(int goal)
 {
 	gyro = 0;
 	while(abs(gyro) < abs(goal))
-    {
-    	if(userControl)
-    		break;
-        int difference = abs(goal) - abs(gyro);
-        int power = difference / 2;
-        if(goal > 0) {
-            drivePower(-power, power);
-        } else {
-            drivePower(power, -power);
-        }
-    }
-
-    if(goal > 0) {
-        drivePower(brakePower, -brakePower);
-    } else {
-  		drivePower(-brakePower, brakePower);
-    }
-    wait1Msec(brakeTime);
-    drivePower(0,0);
-  }
+	{
+		if(userControl)
+			break;
+		int difference = abs(goal) - abs(gyro);
+		int power = difference / 2;
+		if(goal > 0)
+			drivePower(-power, power);
+		else
+			drivePower(power, -power);
+	}
+	int brakePower = 40;
+	int brakeTime = 50;
+	if(goal > 0)
+		drivePower(brakePower, -brakePower);
+	else
+		drivePower(-brakePower, brakePower);
+	wait1Msec(brakeTime);
+	drivePower(0,0);
+}
