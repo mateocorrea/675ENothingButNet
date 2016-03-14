@@ -228,10 +228,10 @@ void gyroTurnTo(int goal, int direction)
 
 void transPower(int left, int right)
 {
-	motor[topLeftTrans] = left;
-	motor[botLeftTrans] = left;
-	motor[topRightTrans] = right;
-	motor[botRightTrans] = right;
+	motor[topLeftTrans] = -left;
+	motor[botLeftTrans] = -left;
+	motor[topRightTrans] = -right;
+	motor[botRightTrans] = -right;
 }
 
 void gyroTurn(int goal)
