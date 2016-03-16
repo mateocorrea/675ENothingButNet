@@ -10,20 +10,19 @@ void displayStrings(char *x, char *y);
 void centerClick();
 void centerHold();
 
-bool lastLazerBtn = false;
-
-int battery = 0;
-int name = 1;
-int auto = 2;
+int name = 0;
+int auto = 1;
+int sensors = 2;
 int music = 3;
-int games = 4;
-int stats = 5;
-int bias = 6;
+int bias = 4;
+int games = 5;
+int battery = 6;
 int MAX_SCREEN = 6;
 int screen = name;
 int chosenAuto = autoTwo;
 int holdSwitch = 1000;
 
+int sensorPage = 0;
 int autoPage = 0;
 int biasScreen = 0;
 int song = 0;
@@ -67,19 +66,30 @@ task LCD()
 				centerClick();
 			}
 		}
-		if(nLCDButtons != 2)
-			lastLazerBtn = false;
-		while(nLCDButtons != 0) {}
+		while(nLCDButtons != 0) {} // wait till you let go of button
 
 		clearLCDLine(0);
 		clearLCDLine(1);
-
-		if(screen == battery) {
-			//displayLCDString(0, 0, "Primary: ");
-			//sprintf(mainBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0,'V');
-			//displayNextLCDString(mainBattery);
-			displayNum("Gyro: ", SensorValue[gyroSensor]);
-			displayNum("PowerExp: ", flyBattery);
+        
+        if(screen == battery) {
+            displayLCDString(0, 0, "Primary: ");
+            sprintf(mainBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0,'V');
+            displayNextLCDString(mainBattery);
+            displayNum("PowerExp: ", flyBattery);
+        } else if(screen == sensors) {
+            displayLCDCenteredString(0, "Sensors");
+			if(sensors == 0)
+                displayNum("Gyro: ", SensorValue[gyroSensor]);
+            else if (sensorPage == 1)
+                displayNum("AccelX: ", SensorValue[accelerometerX]);
+            else if (sensorPage == 2)
+                displayNum("AccelY: ", SensorValue[accelerometerY]);
+            else if (sensorPage == 3)
+                displayNum("RightEnc: ", rightDriveEnc);
+            else if (sensorPage == 4)
+                displayNum("LeftEnc: ", leftDriveEnc);
+            else if (sensorPage == 5)
+                displayNum("FlyEnc: ", flywheelEncoder);
 		} else if(screen == name) {
 			displayStrings("The Real", "Slim Shady");
 		} else if(screen == music) {
@@ -243,15 +253,13 @@ void centerHold()
 {
 	if(screen == music)
 		playSong(song);
-	else if(screen == bias)
-	{
+	else if(screen == bias) {
 		biasScreen++;
 		if(biasScreen > 2)
 			biasScreen = 0;
 		clearLCDLine(1);
 		displayLCDCenteredString(1, "Switching");
-	} else if(screen == auto)
-	{
+	} else if(screen == auto) {
 		autoPage++;
 		if(autoPage > 5)
 			autoPage = 0;
@@ -273,15 +281,15 @@ void centerClick()
 			midPowerBias = (midPowerBias > 8 ) ? -10 : (midPowerBias+2);
 		else
 			highPowerBias = (highPowerBias > 8) ? -10 : (highPowerBias+2);
-	} else if (screen == name) {
-		//code
-	} else if(screen == stats) {
-		// code
 	} else if(screen == auto) {
 		chosenAuto = autoPage;
         clearLCDLine(1);
         displayLCDCenteredString(1, "Selected");
-	} else if(screen == 10000) {
+    } else if(screen == sensors) {
+        sensorPage++;
+        if(sensorPage > 5)
+            sensorPage = 0;
+    } else if(screen == 10000) {
 		displayStatusAndTime();
 		gyroTurnTo(2000, -1);
 	}
