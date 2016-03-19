@@ -9,32 +9,32 @@
 #define rollerOutBtn vexRT[Btn8D]
 
 ///////////////// FLYWHEEL CONSTANTS ////////////////////
-int rpmLow = 102;
-int rpmMid = 120;
-int rpmHigh = 158;
-int lowSpeed = 40;
-int midSpeed = 55;
-int highSpeed = 80;
+int rpmLow = 73;
+int rpmMid = 80;
+int rpmHigh = 90;
+int lowSpeed = 43;
+int midSpeed = 60;
+int highSpeed = 50;
 /////////////////////////////////////////////////////////
 float Kp = 1.0;
 float Ki = 1.0;
 float Kd = 1.0;
 /////////////////////////////////////////////////////////
-float KpStable = 0.01900500;
-float KiStable = 0.00000200;
-float KdStable = 0.05000000;
+float KpStable = 0.21900500;
+float KiStable = 0.000000003;
+float KdStable = 0.2;
 /////////////////////////////////////////////////////////
-float KpLow = 0.0675;
-float KiLow = 0.00675;
-float KdLow = 0.6753;
+float KpLow = 0.3275;
+float KiLow = 0.000050;
+float KdLow = 0.40;
 /////////////////////////////////////////////////////////
-float KpMid = 0.018;
-float KiMid = 0.00350;
-float KdMid = 0.4;
+float KpMid = 0.95;
+float KiMid = 0.090000;
+float KdMid = 0.00;
 /////////////////////////////////////////////////////////
 float KpHigh = 0.01600000;
-float KiHigh = 0.0024000;
-float KdHigh = 0.002000;
+float KiHigh = 0.00000;
+float KdHigh = 0.00000;
 
 
 //            VARIABLES AND FUNCTIONS                  //
@@ -53,7 +53,7 @@ float lastTime = 0;
 float oldFilter = 0.0;
 int lastFlyWheelTime = 0;
 int removableTime = 0;
-int MAX_POWER = 120;
+int MAX_POWER = 127;
 int MIN_POWER = 35;
 int maxPower = MAX_POWER;
 int minPower = MIN_POWER;
@@ -88,10 +88,8 @@ void powerBias(int change);
 
 task flyWheelPower() {
 	resetFlyWheel();
-	while(true)
-	{
-		if(flyWheelOn)
-		{
+	while(true) {
+		if(flyWheelOn) {
 			if(startup)
 				slowStart();
 			startup = false;
@@ -101,8 +99,7 @@ task flyWheelPower() {
 			pidChange(rpmGoal + powerBias());
 			flyWheelMotors(flySpeed);
 		}
-		else
-		{
+		else {
 			if(!startup)
 				slowStop();
 			startup = true;
@@ -122,13 +119,11 @@ task flyWheelControl()
 
 	while(true)
 	{
-		if(!flyWheelBtn)
-		{
+		if(!flyWheelBtn) {
 			clearTimer(T2);
 			justSwitchedFlywheel = false;
 		}
-		if((time1[T2] >= 1000) && !justSwitchedFlywheel)
-		{
+		if((time1[T2] >= 1000) && !justSwitchedFlywheel) {
 			flyWheelOn = !flyWheelOn;
 			justSwitchedFlywheel = true;
 			if(flyWheelOn == true)
@@ -136,8 +131,7 @@ task flyWheelControl()
 		}
 
 		// Flywheel speed selection //
-		if(speedBtn && !lastSpeedBtn)
-		{
+		if(speedBtn && !lastSpeedBtn)	{
 			if(rpmGoal == rpmLow) {
 				flySpeed = midSpeed;
 				rpmGoal = rpmMid;
@@ -173,7 +167,7 @@ task intake()
 	bool lastRollerBtn = false;
 	while(true) {
 		/* Intake Power */
-		motor[conveyor] = intakeSpeed * (intakeBtn - outtakeBtn);
+		motor[conveyor] = intakeSpeed * (intakeBtn - outtakeBtn) * !punchersActivated;
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false)
@@ -182,7 +176,7 @@ task intake()
 			lastRollerBtn = true;
 		} else if (rollerBtn == 0)
 			lastRollerBtn = false;
-		motor[roller] = (rollerOutBtn) ? -127 : (127 * rollerOn);
+		motor[roller] = (rollerOutBtn) ? -127 : (127 * rollerOn * !punchersActivated);
 	}
 }
 
@@ -201,10 +195,10 @@ void flyWheelMotors(float power)
 {
 	if(rpmGoal == rpmLow) {
 		minPower = MIN_POWER;
-		maxPower = 70;
+		maxPower = 88;
 	} else if (rpmGoal == rpmMid) {
 		minPower = 40;
-		maxPower = 94;
+		maxPower = MAX_POWER;
 	} else if (rpmGoal == rpmHigh) {
 		minPower = 65;
 		maxPower = MAX_POWER;
@@ -212,17 +206,21 @@ void flyWheelMotors(float power)
 		minPower = MIN_POWER;
 		maxPower = MAX_POWER;
 	}
-	if(power < minPower && flyWheelOn)
+	if((power < minPower) && flyWheelOn) {
 		power = minPower;
-	if(flySpeed > maxPower)
+		flySpeed = minPower;
+	}
+	if(flySpeed > maxPower) {
 		power = maxPower;
+		flySpeed = maxPower;
+	}
 	int x = round(power);
 	motor[rightFlywheel] = x;
 	motor[leftFlywheel] = x;
 }
 void pidChange(int goal)
 {
-	float deltaTime = ((nSysTime - lastTime) > 0) ? abs(nSysTime - lastTime - removableTime) : encoderTimer;
+	int deltaTime = ((nSysTime - lastTime) > 0) ? abs(nSysTime - lastTime - removableTime) : encoderTimer;
 	removableTime = 0;
 	if(deltaTime < 1)
 		deltaTime = 1;
@@ -231,6 +229,9 @@ void pidChange(int goal)
 	float error = voltageCorrection(goal) - rpm;
 	if((vexRT[Btn6U] && !vexRT[Btn8U]))
 		averageRPMError(abs(error));
+
+	////// Proportional /////
+  //float p = (Kp * pow(5, (abs(error)/20))) * error;
 
 	////// Integral //////
 	integral = integral + (error * deltaTime);
@@ -242,6 +243,8 @@ void pidChange(int goal)
 
 	// PID //
 	float change = (Kp * error) + (Ki * integral) + (Kd * derivative);
+	//float change = p + (Ki * integral) + (Kd * derivative);
+
 
 	// Adjust Speed //
 	flySpeed = (goal == 0) ? (flySpeed * oldFilter + ((1.0 - oldFilter) * change)) : flySpeed + change;
@@ -282,9 +285,9 @@ void slowStart()
 	}
 	if (rpmGoal == rpmMid) {
 		flySpeed = midSpeed;
-		} else if(rpmGoal == rpmLow) {
+	} else if(rpmGoal == rpmLow) {
 		flySpeed = lowSpeed;
-		} else {
+	} else {
 		rpmGoal = rpmHigh;
 		flySpeed = highSpeed;
 	}
@@ -345,7 +348,7 @@ void powerBias(int change)
 
 void setPIDConstants()
 {
-	if(intakeBtn) {
+	if(!intakeBtn) {
 		Kp = KpStable;
 		Ki = KiStable;
 		Kd = KdStable;
@@ -354,7 +357,7 @@ void setPIDConstants()
 			Kp = KpLow;
 			Ki = KiLow;
 			Kd = KdLow;
-		} else if (rpmGoal == rpmLow) {
+		} else if (rpmGoal == rpmMid) {
 			Kp = KpMid;
 			Ki = KiMid;
 			Kd = KdMid;

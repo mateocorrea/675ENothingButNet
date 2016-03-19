@@ -726,7 +726,7 @@ void minimalPIDChange(int goal)
 
     ////// Proportional /////
     float pLeft = (KpL * pow(4, (abs(leftError)/20))) * leftError;
-    float pRight = (KpR * pow(4, (abs(leftError)/20))) * rightError;
+    float pRight = (KpR * pow(4, (abs(rightError)/20))) * rightError;
 
     ////// Integral //////
     averageRPMError(leftError, rightError);

@@ -70,7 +70,7 @@ task LCD()
 
 		clearLCDLine(0);
 		clearLCDLine(1);
-        
+
         if(screen == battery) {
             displayLCDString(0, 0, "Primary: ");
             sprintf(mainBattery, "%1.2f%c", nImmediateBatteryLevel/1000.0,'V');
@@ -107,9 +107,6 @@ task LCD()
 				displayNum("Mid Bias: ", midPowerBias);
 			else
 				displayNum("High Bias: ", highPowerBias);
-		} else if(screen == stats) {
-			displayLCDCenteredString(0, "Stats");
-			displayLCDCenteredString(1, "Leaving Soon");
 		} else if(screen == games) {
 			displayStrings("Games", "Coming Soon");
 		} else {

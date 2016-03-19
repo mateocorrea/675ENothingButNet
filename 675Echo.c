@@ -3,10 +3,10 @@
 #pragma config(Sensor, in2,    accelerometerY, sensorAccelerometer)
 #pragma config(Sensor, in3,    gyroSensor,     sensorGyro)
 #pragma config(Sensor, in4,    flyBattery,     sensorAnalog)
-#pragma config(Sensor, dgtl1,  brakePistons,   sensorDigitalOut)
-#pragma config(Sensor, dgtl2,  lockPistons,    sensorDigitalOut)
+#pragma config(Sensor, dgtl1,  brakePistons,                          sensorDigitalOut)
+#pragma config(Sensor, dgtl2,  transPiston,    sensorDigitalOut)
 #pragma config(Sensor, dgtl3,  deployerPistons, sensorDigitalOut)
-#pragma config(Sensor, dgtl4,  transPiston,    sensorDigitalOut)
+#pragma config(Sensor, dgtl4,  lockPistons,    sensorDigitalOut)
 #pragma config(Sensor, dgtl5,  yellowLED,      sensorDigitalOut)
 #pragma config(Sensor, dgtl6,  greenLED,       sensorDigitalOut)
 #pragma config(Sensor, dgtl7,  redLED,         sensorDigitalOut)
@@ -31,8 +31,8 @@ bool competitionMode = false;
 #pragma platform(VEX)
 #pragma competitionControl(Competition)
 #include "cool.c"
-#include "FlyWheelAndIntake.h"
 #include "DriveAndPneumatics.h"
+#include "FlyWheelAndIntake.h"
 #include "Autonomous.h"
 #include "SpeakerAndLCD.h"
 

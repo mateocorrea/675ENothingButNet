@@ -2,7 +2,7 @@
 #define deployer SensorValue[deployerPistons]
 #define brake SensorValue[brakePistons]
 #define gyro SensorValue[gyroSensor]
-#define transmission SensorValue[gyroSensor]
+#define transmission SensorValue[transPiston]
 #define leftDriveEnc nMotorEncoder[leftDrive]
 #define rightDriveEnc nMotorEncoder[rightDrive]
 #define accelX SensorValue[accelerometerX]
@@ -10,13 +10,14 @@
 #define rampBtn vexRT[Btn7D]
 #define rampBtn2 vexRT[Btn7L]
 #define brakeBtn vexRT[Btn5U]
-#define transBtn vexRT[Btn7D]
+#define transBtn vexRT[Btn8U]
 #define puncherBtn vexRT[Btn6U]
 #define puncherDelayBtn vexRT[Btn5D]
 
 bool lifted = false;
 bool braking = false;
 bool punchersActivated = false;
+bool punchersOn = false;
 int threshold = 15;
 int liftCount = 0;
 
@@ -34,20 +35,17 @@ void transPower(int left, int right);
 
 task drive()
 {
-	bool lastPuncherDelay = false;
+	bool lastPuncherBtn = false;
 	while(true) {
 		drivePower(vexRT(Ch3), vexRT(Ch2));
+
 		if(punchersActivated) {
-			if(puncherBtn) {
-				if(puncherDelayBtn && !lastPuncherDelay) {
-					transPower(127, 80);
-					wait1Msec(400);
-				} else if (!puncherDelayBtn)
-					lastPuncherDelay = false;
-				transPower(127, 127);
-			} else {
-				transPower(0,0);
-			}
+			if(puncherBtn && !lastPuncherBtn) {
+				punchersOn = !punchersOn;
+				lastPuncherBtn = true;
+			}	else if(!puncherBtn)
+				lastPuncherBtn = false;
+			transPower(127 * punchersOn, 127 * punchersOn);
 		}
 	}
 }
@@ -57,6 +55,8 @@ task pneumatics()
 	bool lastBrakeBtn = false;
 	bool lastRampBtn = false;
 	bool lastTransBtn = false;
+	punchersActivated = false;
+	transmission = 1;
 	deployer = 0;
 	lock = 0; // lock lift
 	while(true) {
@@ -90,17 +90,26 @@ task pneumatics()
 		}
 
 		/* Puncher Activation */
-		if(transBtn == 1 && !lastTransBtn)
+		if(transBtn == 1 && !lastTransBtn) {
 			shiftTransmission();
-		else if(!transBtn)
+			lastTransBtn = true;
+		}	else if(!transBtn)
 			lastTransBtn = false;
-	}
+		}
 }
 
 void shiftTransmission()
 {
-	transmission = (punchersActivated) ? 0 : 1;
-	punchersActivated = !punchersActivated;
+	//transmission = (punchersActivated) ? 1 : 0;
+	//punchersActivated = !punchersActivated;
+	if(punchersActivated)	{
+		transmission = 1;
+		punchersActivated = false;
+	} else {
+		transmission = 0;
+		punchersOn = false;
+		punchersActivated = true;
+	}
 }
 
 void deploy()
@@ -228,7 +237,7 @@ void gyroTurnTo(int goal, int direction)
 
 void transPower(int left, int right)
 {
-    int dir = (punchersActivated) ? -1 : 1;
+  int dir = (punchersActivated) ? -1 : 1;
 	motor[topLeftTrans] = left * dir;
 	motor[botLeftTrans] = left * dir;
 	motor[topRightTrans] = right * dir;
