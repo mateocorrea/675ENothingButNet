@@ -10,7 +10,7 @@
 
 ///////////////// FLYWHEEL CONSTANTS ////////////////////
 int rpmLow = 73;
-int rpmMid = 80;
+int rpmMid = 82;
 int rpmHigh = 90;
 int lowSpeed = 43;
 int midSpeed = 60;

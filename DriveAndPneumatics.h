@@ -32,6 +32,7 @@ void encoderTurn(int goal);
 void gyroTurn(int goal);
 void gyroTurnTo(int goal, int direction);
 void transPower(int left, int right);
+void driveDistance(int goal);
 
 task drive()
 {
@@ -47,6 +48,30 @@ task drive()
 				lastPuncherBtn = false;
 			transPower(127 * punchersOn, 127 * punchersOn);
 		}
+	}
+}
+
+void drivePowerForClicks(int power, int goal)
+{
+	leftDriveEnc = 0;
+	rightDriveEnc = 0;
+
+	int straightGyro = gyro;
+
+	while(!(abs(leftDriveEnc) > (abs(goal))) || !(abs(rightDriveEnc) > (abs(goal)))) {
+		int leftPower = power;
+		int rightPower = power;
+
+		int dir = (goal < 0) ? -1 : 1;
+
+		if(gyro < (straightGyro))
+			leftPower -= (abs(straightGyro - gyro)/2) * dir;
+		else if (gyro > (straightGyro))
+			rightPower -= (abs(straightGyro - gyro)/2) * dir;
+
+		leftPower = (goal < 0) ? -leftPower : leftPower;
+		rightPower = (goal < 0) ? -rightPower : rightPower;
+		drivePower(leftPower, rightPower);
 	}
 }
 
@@ -139,29 +164,42 @@ void driveDistance(int goal)
 	int maxPower = 120;
 	leftDriveEnc = 0;
 	rightDriveEnc = 0;
+	int lastValue = 0;
 	clearTimer(T1);
 
-	while(!(abs(leftDrive) > abs(goal)) || !(abs(rightDrive) > abs(goal))) {
-		if(userControl)
-			break;
-		if(time1[T1] > abs(goal) * 5)
-			break;
+	int straightGyro = gyro;
+
+	while(!(abs(leftDriveEnc) > abs(goal)) || !(abs(rightDriveEnc) > abs(goal))) {
+		/*if(userControl)
+			break;*/
+		/*if(time1[T1] > abs(goal) * 5)
+			break;*/
 
 		// Proportional
-		leftDriveError = (abs(goal) - abs(leftDrive));
-		rightDriveError = (abs(goal) - abs(rightDrive));
+		leftDriveError = (abs(goal) - abs(leftDriveEnc));
+		rightDriveError = (abs(goal) - abs(rightDriveEnc));
 
 		// PID
 		int leftPidDrive = round(driveKp * leftDriveError);
 		int rightPidDrive = round(driveKp * rightDriveError);
-		leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
-		rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
+
+		int bias = 0;
+		if(lastValue == (abs(leftDriveEnc) + abs(rightDriveEnc)))
+			bias = 20;
+		leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive+bias; // limit to a maxPower
+		rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive+bias;
+
+		if(gyro < (straightGyro))
+			leftPidDrive -= (abs(straightGyro - gyro)/2);
+		else if (gyro > (straightGyro))
+			rightPidDrive -= (abs(straightGyro - gyro)/2);
 
 		leftPidDrive = (goal < 0) ? -leftPidDrive : leftPidDrive;
 		rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
 		drivePower(leftPidDrive, rightPidDrive);
+		lastValue = (abs(leftDriveEnc) + abs(rightDriveEnc));
 	}
-	int brakePower = 40;
+	int brakePower = 20;
 	int brakeTime = 50;
 	if(goal < 0)
 		drivePower(brakePower, brakePower);
@@ -173,23 +211,21 @@ void driveDistance(int goal)
 
 void encoderTurn(int goal)
 {
-	float driveKp = 0.45;
+	float driveKp = 0.80;
 	int leftDriveError;
 	int rightDriveError;
 	int maxPower = 110;
 	leftDriveEnc = 0;
 	rightDriveEnc = 0;
 	clearTimer(T1);
+	int lastValue = 0;
 
-	while(!(abs(leftDrive) > abs(goal)) || !(abs(rightDrive) > abs(goal))){
-		if(userControl)
-			break;
-		if(time1[T1] > abs(goal) * 5)
-			break;
+	while(!(abs(leftDriveEnc) > (abs(goal)-7)) || !(abs(rightDriveEnc) > (abs(goal)-7))){
+		lastValue = abs(leftDriveEnc) + abs(rightDriveEnc);
 
 		// Proportional
-		leftDriveError = (abs(goal) - abs(leftDrive));
-		rightDriveError = (abs(goal) - abs(rightDrive));
+		leftDriveError = (abs(goal) - abs(leftDriveEnc));
+		rightDriveError = (abs(goal) - abs(rightDriveEnc));
 
 		// PID
 		int leftPidDrive = round(driveKp * leftDriveError);
@@ -197,12 +233,17 @@ void encoderTurn(int goal)
 		leftPidDrive = (abs(leftPidDrive) > maxPower) ? maxPower : leftPidDrive; // limit to a maxPower
 		rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive;
 
-		rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
-		leftPidDrive = (goal < 0) ? leftPidDrive : -leftPidDrive;
+		int bias = 0;
+		if(lastValue == (abs(leftDriveEnc) + abs(rightDriveEnc)))
+			bias = 20;
+		rightPidDrive = (goal < 0) ? -rightPidDrive-bias : rightPidDrive+bias;
+		leftPidDrive = (goal < 0) ? leftPidDrive+bias : -leftPidDrive-bias;
+
 		drivePower(leftPidDrive, rightPidDrive);
+		lastValue = (abs(leftDriveEnc) + abs(rightDriveEnc));
 	}
-	int brakePower = 40;
-	int brakeTime = 50;
+	int brakePower = 25;
+	int brakeTime = 40;
 	if(goal > 0)
 		drivePower(brakePower, -brakePower);
 	else

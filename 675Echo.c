@@ -44,6 +44,7 @@ void pre_auton()
 	SensorType[in3] = sensorGyro;
 	wait1Msec(1000);
 	startTask(LCD);
+	transmission = 1;
 }
 
 task autonomous()

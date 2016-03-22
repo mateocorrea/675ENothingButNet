@@ -21,36 +21,8 @@ void defense();
 void progSkills();
 
 void runAuto(int chosen) {
-
     /* Start tasks needed in autonomous and disable unnecessary ones */
     startTask(flyWheelPower);
-    rpmGoal = 156;
-    stopTask(drive);
-
-    /* Warm-up the flywheel and reset the gyro meanwhile */
-    SensorType[in3] = sensorNone;
-    motor[roller] = 127;
-    wait1Msec(warmupTime);
-    if(chosen == autoThree) //blue bot
-    {
-    	wait1Msec(warmupTime);
-    	wait1Msec(warmupTime);
-    }
-    SensorType[in3] = sensorGyro;
-
-    if(chosen < 5) {
-        /* Set the conveyor speed and shoot for (initialShootTime) seconds */
-        motor[conveyor] = autoShootSpeed;
-        wait1Msec(initialShootTime);
-        if(chosen == autoThree) //blue bot
-        	wait1Msec(1000);
-
-        /* Stop shooting & set the flywheel rpm to the next rpm */
-        motor[conveyor] = 0;
-        if(chosen != autoThree)
-        	rpmGoal = (chosen % 2 == 0) ? insideShot : outsideShot;
-    }
-
     /* Run the selected autonomous program */
     if(chosen == 0)
         redShoot();
@@ -68,16 +40,29 @@ void runAuto(int chosen) {
 
 void redShoot()
 {
-    driveDistance(-2000);
-    encoderTurn(-900);
-    driveDistance(2000);
+		transmission = 1;
+    flyWheelOn = true;
+    rpmGoal = rpmMid;
+
+    driveDistance(621);
+    wait1Msec(250);
+   	encoderTurn(132);
+   	wait1Msec(250);
+   	drivePowerForClicks(100, 300);
+   	motor[roller] = 127;
+   	motor[conveyor] = 127;
+   	drivePowerForClicks(80, 800);
+   	motor[conveyor] = 0;
+   	driveDistance(1000);
+   	motor[conveyor] = 127;
+
 }
 
 void redSide()
 {
     motor[roller] = 0;
     /* Drive away from tile and turn towards the pile of balls */
-    driveDistance(-420);
+    driveDistance(200);
     wait1Msec(300);
     if(useGyroTurn)
         gyroTurn(-150);

@@ -19,7 +19,7 @@ int games = 5;
 int battery = 6;
 int MAX_SCREEN = 6;
 int screen = name;
-int chosenAuto = autoTwo;
+int chosenAuto = redShootNum;
 int holdSwitch = 1000;
 
 int sensorPage = 0;
@@ -78,7 +78,7 @@ task LCD()
             displayNum("PowerExp: ", flyBattery);
         } else if(screen == sensors) {
             displayLCDCenteredString(0, "Sensors");
-			if(sensors == 0)
+						if(sensorPage == 0)
                 displayNum("Gyro: ", SensorValue[gyroSensor]);
             else if (sensorPage == 1)
                 displayNum("AccelX: ", SensorValue[accelerometerX]);
