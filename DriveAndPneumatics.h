@@ -65,9 +65,9 @@ void drivePowerForClicks(int power, int goal)
 		int dir = (goal < 0) ? -1 : 1;
 
 		if(gyro < (straightGyro))
-			leftPower -= (abs(straightGyro - gyro)/2) * dir;
+			leftPower -= (abs(straightGyro - gyro)/3) * dir;
 		else if (gyro > (straightGyro))
-			rightPower -= (abs(straightGyro - gyro)/2) * dir;
+			rightPower -= (abs(straightGyro - gyro)/3) * dir;
 
 		leftPower = (goal < 0) ? -leftPower : leftPower;
 		rightPower = (goal < 0) ? -rightPower : rightPower;
@@ -190,9 +190,9 @@ void driveDistance(int goal)
 		rightPidDrive = (abs(rightPidDrive) > maxPower) ? maxPower : rightPidDrive+bias;
 
 		if(gyro < (straightGyro))
-			leftPidDrive -= (abs(straightGyro - gyro)/2);
+			leftPidDrive -= (abs(straightGyro - gyro)/3);
 		else if (gyro > (straightGyro))
-			rightPidDrive -= (abs(straightGyro - gyro)/2);
+			rightPidDrive -= (abs(straightGyro - gyro)/3);
 
 		leftPidDrive = (goal < 0) ? -leftPidDrive : leftPidDrive;
 		rightPidDrive = (goal < 0) ? -rightPidDrive : rightPidDrive;
@@ -220,7 +220,7 @@ void encoderTurn(int goal)
 	clearTimer(T1);
 	int lastValue = 0;
 
-	while(!(abs(leftDriveEnc) > (abs(goal)-7)) || !(abs(rightDriveEnc) > (abs(goal)-7))){
+	while(!(abs(leftDriveEnc) > (abs(goal))) || !(abs(rightDriveEnc) > (abs(goal)))){
 		lastValue = abs(leftDriveEnc) + abs(rightDriveEnc);
 
 		// Proportional

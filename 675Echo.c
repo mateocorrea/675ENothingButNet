@@ -63,7 +63,6 @@ task usercontrol()
 	userControl = true;
 
 	clearDebugStream();
-	rpmGoal = rpmHigh;
 	if(getTaskState(LCD) == taskStateStopped)
 		startTask(LCD);
 	if(getTaskState(flyWheelPower) == taskStateStopped)

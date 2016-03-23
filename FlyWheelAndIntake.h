@@ -7,11 +7,13 @@
 #define raiseBtn vexRT[Btn8L]
 #define rollerBtn vexRT[Btn8R]
 #define rollerOutBtn vexRT[Btn8D]
+//define T2 flywheelTimer
+//define T3 longShotTimer
 
 ///////////////// FLYWHEEL CONSTANTS ////////////////////
-int rpmLow = 73;
-int rpmMid = 82;
-int rpmHigh = 90;
+int rpmLow = 69;
+int rpmMid = 84;
+int rpmHigh = 110;
 int lowSpeed = 43;
 int midSpeed = 60;
 int highSpeed = 50;
@@ -20,7 +22,7 @@ float Kp = 1.0;
 float Ki = 1.0;
 float Kd = 1.0;
 /////////////////////////////////////////////////////////
-float KpStable = 0.21900500;
+float KpStable = 0.3300500;
 float KiStable = 0.000000003;
 float KdStable = 0.2;
 /////////////////////////////////////////////////////////
@@ -32,19 +34,20 @@ float KpMid = 0.95;
 float KiMid = 0.090000;
 float KdMid = 0.00;
 /////////////////////////////////////////////////////////
-float KpHigh = 0.01600000;
+float KpHigh = 0.400000;
 float KiHigh = 0.00000;
 float KdHigh = 0.00000;
 
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
-float rpmGoal = rpmHigh;
+float rpmGoal = rpmMid;
 float rpm = 0.0;
 float averageError = 0.0;
 float flySpeed = 0.0;
 /////////////////////////////////////////////////////////
 bool flyWheelOn = false;
+bool autoShooting = false;
 bool rollerOn = true;
 bool startup = true; // If false, flywheel is running, else flywheel is off
 float oldError = 0.0;
@@ -113,6 +116,7 @@ task flyWheelControl()
 {
 	lastFlyWheelTime = nSysTime;
 	bool justSwitchedFlywheel = false;
+	bool justSwitchedLongShot = false;
 	bool lastRaiseBtn = false;
 	bool lastLowerBtn = false;
 	bool lastSpeedBtn = false;
@@ -129,15 +133,31 @@ task flyWheelControl()
 			if(flyWheelOn == true)
 				resetFlyWheel();
 		}
-
+		// SOMETHINB ABOUT BURBINE (2.163)
+		// MATEO PRESENTS IN LLLH TO BUZZERD AND ROBBINS
+		// ANDREI S., HANVILE Z. TRAN Q.,
 		// Flywheel speed selection //
-		if(speedBtn && !lastSpeedBtn)	{
+		if(!speedBtn) {
+			clearTimer(T3);
+			justSwitchedLongShot = false;
+		}
+
+		//holding
+		if((time1[T3] >= 750) && !justSwitchedLongShot) {
+			flySpeed = highSpeed;
+			rpmGoal = rpmHigh;
+			justSwitchedLongShot = true;
+		}
+		//pressing
+		if((time1[T3] < 750) && speedBtn && !lastSpeedBtn)	{
 			if(rpmGoal == rpmLow) {
 				flySpeed = midSpeed;
 				rpmGoal = rpmMid;
 			} else if (rpmGoal == rpmMid) {
-				flySpeed = highSpeed;
-				rpmGoal = rpmHigh;
+				/*flySpeed = highSpeed;
+				rpmGoal = rpmHigh;*/
+				flySpeed = lowSpeed;
+				rpmGoal = rpmLow;
 			} else {
 				flySpeed = lowSpeed;
 				rpmGoal = rpmLow;
@@ -148,12 +168,12 @@ task flyWheelControl()
 
 		/* Power Bias */
 		if(raiseBtn == 1 && lastRaiseBtn == false) {
-			powerBias(2);
+			powerBias(1);
 			lastRaiseBtn = true;
 		} else if (raiseBtn == 0)
 			lastRaiseBtn = false;
 		if(lowerBtn == 1 && lastLowerBtn == false) {
-			powerBias(-2);
+			powerBias(-1);
 			lastLowerBtn = true;
 		} else if (lowerBtn == 0)
 			lastLowerBtn = false;
@@ -348,7 +368,9 @@ void powerBias(int change)
 
 void setPIDConstants()
 {
-	if(!intakeBtn) {
+	if(userControl)
+		autoShooting = false;
+	if(!intakeBtn && !autoShooting) {
 		Kp = KpStable;
 		Ki = KiStable;
 		Kd = KdStable;
