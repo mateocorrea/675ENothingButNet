@@ -11,7 +11,7 @@
 //define T3 longShotTimer
 
 ///////////////// FLYWHEEL CONSTANTS ////////////////////
-int rpmLow = 69;
+int rpmLow = 70;
 int rpmMid = 84;
 int rpmHigh = 110;
 int lowSpeed = 43;
@@ -26,9 +26,9 @@ float KpStable = 0.3300500;
 float KiStable = 0.000000003;
 float KdStable = 0.2;
 /////////////////////////////////////////////////////////
-float KpLow = 0.3275;
+float KpLow = 0.4075;
 float KiLow = 0.000050;
-float KdLow = 0.40;
+float KdLow = 0.25;
 /////////////////////////////////////////////////////////
 float KpMid = 0.95;
 float KiMid = 0.090000;
@@ -187,6 +187,7 @@ task intake()
 	bool lastRollerBtn = false;
 	while(true) {
 		/* Intake Power */
+		intakeSpeed = (rpmGoal == rpmMid) ? 80 : 237;
 		motor[conveyor] = intakeSpeed * (intakeBtn - outtakeBtn) * !punchersActivated;
 
 		/* Roller Power */

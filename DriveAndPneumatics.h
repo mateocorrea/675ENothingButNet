@@ -20,6 +20,8 @@ bool punchersActivated = false;
 bool punchersOn = false;
 int threshold = 15;
 int liftCount = 0;
+int oldRight = 0;
+int oldLeft = 0;
 
 task drive();
 task pneumatics();
@@ -254,17 +256,36 @@ void encoderTurn(int goal)
 
 void drivePower(int left, int right)
 {
-	left = (abs(left) < threshold) ? 0 : left;
-	right = (abs(right) < threshold) ? 0 : right;
+	int leftPower = (abs(left) < threshold) ? 0 : left;
+	int rightPower = (abs(right) < threshold) ? 0 : right;
 
-	if((right != 0) || (left != 0)) {
+	if((rightPower != 0) || (leftPower != 0)) {
 		releaseBrake();
 	}
 
-	motor[leftDrive] = left;
-	motor[rightDrive] = right;
+	if(userControl) {
+		int maxDif = 5;
+		if(abs(left - oldLeft) > maxDif) {
+			if(left > oldLeft)
+				leftPower = oldLeft + maxDif;
+			else
+				leftPower = oldLeft - maxDif;
+		}
+		if(abs(right - oldRight) > maxDif) {
+			if(right > oldRight)
+				rightPower = oldRight + maxDif;
+			else
+				rightPower = oldRight - maxDif;
+		}
+	}
+
+	motor[leftDrive] = leftPower;
+	motor[rightDrive] = rightPower;
 	if(!punchersActivated)
-		transPower(left, right);
+		transPower(leftPower, rightPower);
+
+	oldLeft = leftPower;
+	oldRight = rightPower;
 }
 
 void gyroTurnTo(int goal, int direction)
