@@ -27,9 +27,9 @@ float KpStable = 0.3300500;
 float KiStable = 0.000000003;
 float KdStable = 0.2;
 /////////////////////////////////////////////////////////
-float KpLow = 0.4075;
-float KiLow = 0.000050;
-float KdLow = 0.25;
+float KpLow = 1.9375; //0.9075
+float KiLow = 0.0030;
+float KdLow = 0.2;
 /////////////////////////////////////////////////////////
 float KpMid = 0.95;
 float KiMid = 0.090000;
@@ -220,7 +220,7 @@ void flyWheelMotors(float power)
 {
 	if(rpmGoal == rpmLow) {
 		minPower = MIN_POWER;
-		maxPower = 88;
+		maxPower = 126;
 	} else if (rpmGoal == rpmMid) {
 		minPower = 40;
 		maxPower = MAX_POWER;

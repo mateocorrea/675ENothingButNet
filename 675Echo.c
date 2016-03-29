@@ -14,6 +14,7 @@
 #pragma config(Sensor, dgtl6,  greenLED,       sensorDigitalOut)
 #pragma config(Sensor, dgtl7,  redLED,         sensorDigitalOut)
 #pragma config(Sensor, dgtl8,  sonar,          sensorSONAR_cm)
+#pragma config(Sensor, dgtl10, limitswitch,    sensorTouch)
 #pragma config(Sensor, I2C_1,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Sensor, I2C_3,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
