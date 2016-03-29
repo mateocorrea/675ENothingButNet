@@ -7,6 +7,7 @@
 #define raiseBtn vexRT[Btn8L]
 #define rollerBtn vexRT[Btn8R]
 #define rollerOutBtn vexRT[Btn8D]
+#define intakeLimit SensorValue[limitSwitch]
 //define T2 flywheelTimer
 //define T3 longShotTimer
 
@@ -187,8 +188,11 @@ task intake()
 	bool lastRollerBtn = false;
 	while(true) {
 		/* Intake Power */
-		intakeSpeed = (rpmGoal == rpmMid) ? 80 : 237;
-		motor[conveyor] = intakeSpeed * (intakeBtn - outtakeBtn) * !punchersActivated;
+		intakeSpeed = (rpmGoal == rpmMid) ? 80 : 127;
+        if(intakeBtn && outtakeBtn)
+            motor[conveyor] = intakeSpeed * !punchersActivated;
+        else
+            motor[conveyor] = intakeSpeed * ((intakeBtn * !intakeLimit) - outtakeBtn) * !punchersActivated;
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false)
