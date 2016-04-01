@@ -186,13 +186,31 @@ task flyWheelControl()
 task intake()
 {
 	bool lastRollerBtn = false;
+	bool firstHold = true;
 	while(true) {
 		/* Intake Power */
 		intakeSpeed = (rpmGoal == rpmMid) ? 80 : 127;
-        if(intakeBtn && outtakeBtn)
-            motor[conveyor] = intakeSpeed * !punchersActivated;
-        else
-            motor[conveyor] = intakeSpeed * ((intakeBtn * !intakeLimit) - outtakeBtn) * !punchersActivated;
+    if(vexRT[Btn5U]) {
+        motor[conveyor] = intakeSpeed * !punchersActivated;
+      	firstHold = true;
+  	} else if(outtakeBtn) {
+  			motor[conveyor] = -intakeSpeed *!punchersActivated;
+  			firstHold = true;
+    } else {
+    		if(intakeLimit) {
+    			if(firstHold) {
+    				motor[conveyor] = -100;
+    				wait1Msec(20);
+    				motor[conveyor] = 0;
+    				firstHold = false;
+    			} else {
+    				motor[conveyor] = 0;
+    			}
+    		} else {
+    			motor[conveyor] = intakeSpeed * !punchersActivated * intakeBtn;
+    		}
+    }
+
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false)
