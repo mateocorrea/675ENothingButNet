@@ -329,3 +329,38 @@ void gyroTurn(int goal)
 	wait1Msec(brakeTime);
 	drivePower(0,0);
 }
+
+void followLineForClicks(int power, int goal)
+{
+	int dir = (goal < 0) ? -1 : 1;
+	int black = 2820;
+	leftDriveEnc = 0;
+	rightDriveEnc = 0;
+	int leftIntegral = 0;
+	int rightIntegral = 0;
+	int oldLeftError = 0;
+	int oldRightError = 0;
+	float lineP = 0.5;
+	float lineI = 0.00;
+	float lineD = 0.0;
+
+	while(!(abs(leftDriveEnc) > (abs(goal))) || !(abs(rightDriveEnc) > (abs(goal)))) {
+		int leftPower = power;
+		int rightPower = power;
+		int leftError = (SensorValue[leftLine] < black) ? abs(SensorValue[leftLine] - black) : 0; // how much white it has
+		int rightError = (SensorValue[rightLine] < black) ? abs(SensorValue[rightLine] - black) : 0; // how much white it has
+
+		if(SensorValue[midLine] >= black) { //on black ;
+			rightIntegral += rightError;
+			leftIntegral += leftError;
+			leftPower -= (leftError*lineP + leftIntegral*lineI + (leftError-oldLeftError)*lineD) * dir;
+			rightPower -= (rightError*lineP + rightIntegral*lineI + (rightError-oldRightError)*lineD) * dir;
+		} else { // middle on white
+			leftIntegral = 0;
+			rightIntegral = 0;
+		}
+		drivePower(leftPower*dir, rightPower*dir);
+		oldLeftError = leftError;
+		oldRightError = rightError;
+	}
+}

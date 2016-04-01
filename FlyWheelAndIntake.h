@@ -189,10 +189,10 @@ task intake()
 	while(true) {
 		/* Intake Power */
 		intakeSpeed = (rpmGoal == rpmMid) ? 80 : 127;
-        if(intakeBtn && outtakeBtn)
-            motor[conveyor] = intakeSpeed * !punchersActivated;
-        else
-            motor[conveyor] = intakeSpeed * ((intakeBtn * !intakeLimit) - outtakeBtn) * !punchersActivated;
+    if(intakeBtn && outtakeBtn)
+        motor[conveyor] = intakeSpeed * !punchersActivated;
+    else
+        motor[conveyor] = intakeSpeed * ((intakeBtn * !intakeLimit) - outtakeBtn) * !punchersActivated;
 
 		/* Roller Power */
 		if(rollerBtn == 1 && lastRollerBtn == false)
