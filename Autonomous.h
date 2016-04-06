@@ -36,9 +36,11 @@ void runAuto(int chosen) {
 
 void redShoot()
 {
-	flyWheelOn = true;
-	rpmGoal = rpmMid;
-	driveDistance(621);
+	//flyWheelOn = true;
+	//rpmGoal = rpmMid;
+	flyWheelOn = false;
+	followLineForClicks(110, 2000);
+	/*fdriveDistance(621);
 	wait1Msec(250);
 	encoderTurn(120);
 	wait1Msec(250);
@@ -66,7 +68,7 @@ void redShoot()
 	wait1Msec(100);
 	encoderTurn(300);
 	wait1Msec(100);
-	driveDistance(600);
+	driveDistance(600);*/
 }
 
 void redSide()

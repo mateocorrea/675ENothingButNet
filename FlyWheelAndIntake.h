@@ -1,6 +1,7 @@
 #define flywheelEncoder nMotorEncoder[leftFlywheel]
 #define speedBtn vexRT[Btn5D]
 #define intakeBtn vexRT[Btn6U]
+#define shootBtn vexRT[Btn5U]
 #define outtakeBtn vexRT[Btn6D]
 #define flyWheelBtn vexRT[Btn7U]
 #define lowerBtn vexRT[Btn7R]
@@ -13,7 +14,7 @@
 
 ///////////////// FLYWHEEL CONSTANTS ////////////////////
 int rpmLow = 70;
-int rpmMid = 84;
+int rpmMid = 85;
 int rpmHigh = 110;
 int lowSpeed = 43;
 int midSpeed = 60;
@@ -48,7 +49,7 @@ float averageError = 0.0;
 float flySpeed = 0.0;
 /////////////////////////////////////////////////////////
 bool flyWheelOn = false;
-bool autoShooting = false;
+bool autoShooting = true;
 bool rollerOn = true;
 bool startup = true; // If false, flywheel is running, else flywheel is off
 float oldError = 0.0;
@@ -189,12 +190,12 @@ task intake()
 	bool firstHold = true;
 	while(true) {
 		/* Intake Power */
-		intakeSpeed = (rpmGoal == rpmMid) ? 80 : 127;
+		intakeSpeed = (rpmGoal == rpmMid) ? 65 : 127;
     if(vexRT[Btn5U]) {
         motor[conveyor] = intakeSpeed * !punchersActivated;
       	firstHold = true;
   	} else if(outtakeBtn) {
-  			motor[conveyor] = -intakeSpeed *!punchersActivated;
+  			motor[conveyor] = -127 *!punchersActivated;
   			firstHold = true;
     } else {
     		if(intakeLimit) {
@@ -207,7 +208,7 @@ task intake()
     				motor[conveyor] = 0;
     			}
     		} else {
-    			motor[conveyor] = intakeSpeed * !punchersActivated * intakeBtn;
+    			motor[conveyor] = 127 * !punchersActivated * intakeBtn;
     		}
     }
 
@@ -392,7 +393,7 @@ void setPIDConstants()
 {
 	if(userControl)
 		autoShooting = false;
-	if(!intakeBtn && !autoShooting) {
+	if(!shootBtn && !autoShooting) {
 		Kp = KpStable;
 		Ki = KiStable;
 		Kd = KdStable;

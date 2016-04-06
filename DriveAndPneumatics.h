@@ -340,24 +340,38 @@ void followLineForClicks(int power, int goal)
 	int rightIntegral = 0;
 	int oldLeftError = 0;
 	int oldRightError = 0;
-	float lineP = 0.5;
+	float lineP = 0.2;
 	float lineI = 0.00;
 	float lineD = 0.0;
+	bool lastRight = false;
 
-	while(!(abs(leftDriveEnc) > (abs(goal))) || !(abs(rightDriveEnc) > (abs(goal)))) {
+	while(abs(leftDriveEnc) < abs(goal)) {
 		int leftPower = power;
 		int rightPower = power;
 		int leftError = (SensorValue[leftLine] < black) ? abs(SensorValue[leftLine] - black) : 0; // how much white it has
 		int rightError = (SensorValue[rightLine] < black) ? abs(SensorValue[rightLine] - black) : 0; // how much white it has
+		int midError = (SensorValue[midLine] < black) ? abs(SensorValue[midLine] - black) : 0;
 
-		if(SensorValue[midLine] >= black) { //on black ;
+		if(leftError == 0)
+			leftIntegral = 0;
+		if(rightError == 0)
+			rightIntegral = 0;
+
+		if(rightError > leftError)
+			lastRight = true;
+		else
+			lastRight = false;
+
+		if( (leftError == 0) && (rightError == 0) && (midError == 0) ) { // ironically, no error is huge error
+			if(lastRight)
+				rightPower -= 50 * dir;
+			else
+				leftPower -= 50 * dir;
+		}	else if(!((leftError == 0) && (rightError == 0))) { // right or left has some white
 			rightIntegral += rightError;
 			leftIntegral += leftError;
 			leftPower -= (leftError*lineP + leftIntegral*lineI + (leftError-oldLeftError)*lineD) * dir;
 			rightPower -= (rightError*lineP + rightIntegral*lineI + (rightError-oldRightError)*lineD) * dir;
-		} else { // middle on white
-			leftIntegral = 0;
-			rightIntegral = 0;
 		}
 		drivePower(leftPower*dir, rightPower*dir);
 		oldLeftError = leftError;
