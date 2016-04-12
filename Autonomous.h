@@ -101,6 +101,18 @@ void redSide()
 
 void blueBot()
 {
+    flyWheelOn = true;
+    motor[roller] = 127;
+    rpmGoal = rpmHigh;
+    wait1Msec(3000);
+    
+    for(int i = 0; i < 4; i++) {
+        while(intakeLimit == 1) {
+            motor[conveyor] = 100;
+        }
+        motor[conveyor] = 0;
+        wait1Msec(1000);
+    }
 }
 
 void blueSide()
