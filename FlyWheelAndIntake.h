@@ -14,8 +14,8 @@
 
 ///////////////// FLYWHEEL CONSTANTS ////////////////////
 int rpmLow = 70;
-int rpmMid = 85;
-int rpmHigh = 122;
+int rpmMid = 82;
+int rpmHigh = 116;
 int lowSpeed = 43;
 int midSpeed = 60;
 int highSpeed = 50;
@@ -32,13 +32,13 @@ float KpLow = 1.9375; //0.9075
 float KiLow = 0.0030;
 float KdLow = 0.2;
 /////////////////////////////////////////////////////////
-float KpMid = 0.95;
+float KpMid = 1.05;
 float KiMid = 0.000000;
 float KdMid = 0.00;
 /////////////////////////////////////////////////////////
-float KpHigh = 0.750000;
+float KpHigh = 0.650000;
 float KiHigh = 0.00000;
-float KdHigh = 0.00000;
+float KdHigh = 0.000100;
 
 
 //            VARIABLES AND FUNCTIONS                  //
@@ -191,6 +191,7 @@ task intake()
 	while(true) {
 		/* Intake Power */
 		intakeSpeed = (rpmGoal == rpmMid) ? 65 : 127;
+
     if(vexRT[Btn5U]) {
         motor[conveyor] = intakeSpeed * !punchersActivated;
       	firstHold = true;

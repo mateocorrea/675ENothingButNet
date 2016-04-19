@@ -1,5 +1,6 @@
 task LCD();
 task speaker();
+task led();
 void playTune(string music);
 void playMario();
 void playJingleBells();
@@ -19,7 +20,7 @@ int games = 5;
 int battery = 6;
 int MAX_SCREEN = 6;
 int screen = name;
-int chosenAuto = redShootNum;
+int chosenAuto = 1;
 int holdSwitch = 1000;
 
 int sensorPage = 0;
@@ -138,6 +139,8 @@ task LCD()
 			turnOn(red);
 		else
 			SensorValue[redLED] = 1;
+
+
 		//Short delay for the LCD refresh rate
 		wait1Msec(100);
 		holdTime += 100;
@@ -161,6 +164,19 @@ task speaker()
 			rollerOn = false;
 			playDeathMarch();
 		}
+	}
+}
+
+task led()
+{
+	while(true)
+	{
+		if(vexRT[Btn5U] || autoShooting) {
+			SensorValue[hexLight] = !SensorValue[hexLight];
+		} else {
+			SensorValue[hexLight] = 0;
+		}
+		wait1Msec(45);
 	}
 }
 

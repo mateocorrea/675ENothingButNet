@@ -76,15 +76,23 @@ void redSide()
 	rpmGoal = rpmHigh;
 	flyWheelOn = true;
 	motor[roller] = 127;
-	wait1Msec(3000);
-
+	wait1Msec(4000);
+	drivePower(70, 70);
+	leftDriveEnc = 0;
+	while(abs(leftDriveEnc) < 195){}
+	drivePower(0,0);
+	wait1Msec(800);
 	for(int i = 0; i < 4; i++) {
-		motor[conveyor] = 60;
-		wait1Msec(200);
+		motor[conveyor] = 127;
+		wait1Msec(330);
 		motor[conveyor] = 0;
-		wait1Msec(500);
+		wait1Msec(1700*(i!=3) + 400*(i==3));
 	}
-
+	rpmGoal = rpmLow;
+	motor[conveyor] = 80;
+	encoderTurn(-110);
+	driveDistance(500);
+	/*
 	encoderTurn(-100);
 	driveDistance(621);
 	wait1Msec(250);
@@ -96,7 +104,7 @@ void redSide()
 	drivePowerForClicks(80, 800);
 	motor[conveyor] = 0;
 	driveDistance(1000);
-	motor[conveyor] = 127;
+	motor[conveyor] = 127;*/
 }
 
 void blueBot()
@@ -105,7 +113,7 @@ void blueBot()
     motor[roller] = 127;
     rpmGoal = rpmHigh;
     wait1Msec(3000);
-    
+
     for(int i = 0; i < 4; i++) {
         while(intakeLimit == 1) {
             motor[conveyor] = 100;

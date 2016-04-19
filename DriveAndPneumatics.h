@@ -67,9 +67,9 @@ void drivePowerForClicks(int power, int goal)
 		int dir = (goal < 0) ? -1 : 1;
 
 		if(gyro < (straightGyro))
-			leftPower -= (abs(straightGyro - gyro)/3) * dir;
+			leftPower -= (abs(straightGyro - gyro)/4) * dir;
 		else if (gyro > (straightGyro))
-			rightPower -= (abs(straightGyro - gyro)/3) * dir;
+			rightPower -= (abs(straightGyro - gyro)/4) * dir;
 
 		leftPower = (goal < 0) ? -leftPower : leftPower;
 		rightPower = (goal < 0) ? -rightPower : rightPower;
@@ -264,7 +264,7 @@ void drivePower(int left, int right)
 	}
 
 	if(userControl) {
-		int maxDif = 5;
+		int maxDif = 3;
 		if(abs(left - oldLeft) > maxDif) {
 			if(left > oldLeft)
 				leftPower = oldLeft + maxDif;

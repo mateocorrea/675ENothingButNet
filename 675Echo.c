@@ -2,10 +2,10 @@
 #pragma config(Sensor, in1,    accelerometerX, sensorAccelerometer)
 #pragma config(Sensor, in2,    accelerometerY, sensorAccelerometer)
 #pragma config(Sensor, in3,    gyroSensor,     sensorGyro)
-#pragma config(Sensor, in4,    flyBattery,     sensorAnalog)
 #pragma config(Sensor, in5,    rightLine,      sensorReflection)
 #pragma config(Sensor, in6,    midLine,        sensorReflection)
 #pragma config(Sensor, in7,    leftLine,       sensorReflection)
+#pragma config(Sensor, in8,    flyBattery,     sensorAnalog)
 #pragma config(Sensor, dgtl1,  brakePistons,   sensorDigitalOut)
 #pragma config(Sensor, dgtl2,  transPiston,    sensorDigitalOut)
 #pragma config(Sensor, dgtl3,  deployerPistons, sensorDigitalOut)
@@ -15,6 +15,7 @@
 #pragma config(Sensor, dgtl7,  redLED,         sensorDigitalOut)
 #pragma config(Sensor, dgtl8,  sonar,          sensorSONAR_cm)
 #pragma config(Sensor, dgtl10, limitSwitch,    sensorTouch)
+#pragma config(Sensor, dgtl12, hexLight,       sensorDigitalOut)
 #pragma config(Sensor, I2C_1,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Sensor, I2C_3,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
@@ -81,4 +82,6 @@ task usercontrol()
 		startTask(speaker);
 	if(getTaskState(intake) == taskStateStopped)
 		startTask(intake);
+	if(getTaskState(led) == taskStateStopped)
+		startTask(led);
 }
