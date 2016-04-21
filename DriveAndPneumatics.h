@@ -142,7 +142,7 @@ void shiftTransmission()
 void deploy()
 {
 	deployer = 1;
-	wait1Msec(400);
+	wait1Msec(800);
 	deployer = 0;
 }
 

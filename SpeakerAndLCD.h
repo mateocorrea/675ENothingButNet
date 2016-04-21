@@ -11,6 +11,7 @@ void displayStrings(char *x, char *y);
 void centerClick();
 void centerHold();
 
+int unactiveTime = 0;
 int name = 0;
 int auto = 1;
 int sensors = 2;
@@ -34,28 +35,30 @@ int song = 0;
 task LCD()
 {
 	int holdTime = 0;
-
+	//int shootFlashTime = 0;
 	bLCDBacklight = true;
 	string mainBattery, backupBattery;
 	while(true)
 	{
-		int flyBattery = SensorValue[in4];
-		if(flyBattery < 900) {
+		if(SensorValue[flyBattery] < 900) {
 			playSound(soundException);
 			while(bSoundActive){}
 		}
-
+		bLCDBacklight = !(unactiveTime >= 1000);
 		if(nLCDButtons == 0) { //nothing pressed
 			holdTime = 0;
 		} else if(nLCDButtons == 4) { //right button pressed
+			unactiveTime = 0;
 			screen++;
 			if(screen > MAX_SCREEN)
 				screen = 0;
 		} else if(nLCDButtons == 1) { // left button
+			unactiveTime = 0;
 			screen--;
 			if(screen < 0)
 				screen = MAX_SCREEN;
 		} else if(nLCDButtons == 2) { //center pressed
+			unactiveTime = 0;
 			int baseTime = nSysTime;
 			int time = 0;
 			while((nLCDButtons == 2) && (time - baseTime < holdSwitch)) {
@@ -127,23 +130,23 @@ task LCD()
 			if(chosenAuto == autoPage)
 				displayLCDCenteredString(1, "Selected");
 		}
-		if(SensorValue[greenLED] == 1 && (rpmGoal == rpmHigh))
-			turnOn(green);
-		else
-			SensorValue[greenLED] = 1;
-		if(SensorValue[yellowLED] == 1 && (rpmGoal == rpmMid))
-			turnOn(yellow);
-		else
-			SensorValue[yellowLED] = 1;
-		if(SensorValue[redLED] == 1 && (rpmGoal == rpmLow))
-			turnOn(red);
-		else
-			SensorValue[redLED] = 1;
+
 
 
 		//Short delay for the LCD refresh rate
-		wait1Msec(100);
-		holdTime += 100;
+		wait1Msec(15);
+		holdTime += 15;
+		unactiveTime += 15;
+		/*shootFlashTime += 15;
+
+		if(shootFlashTime == 45) {
+			if(vexRT[Btn5U] || autoShooting) {
+				SensorValue[hexLight] = !SensorValue[hexLight];
+			} else {
+				SensorValue[hexLight] = 0;
+			}
+			shootFlashTime = 0;
+		}*/
 	}
 }
 
@@ -164,11 +167,20 @@ task speaker()
 			rollerOn = false;
 			playDeathMarch();
 		}
+		while(vexRT[Btn5U]) {
+			if(!bSoundActive) {
+				playTone(1200, 300);
+				wait1Msec(250);
+				clearSounds();
+				wait1Msec(250);
+			}
+		}
 	}
 }
 
 task led()
 {
+	int speedFlasher = 0;
 	while(true)
 	{
 		if(vexRT[Btn5U] || autoShooting) {
@@ -176,7 +188,24 @@ task led()
 		} else {
 			SensorValue[hexLight] = 0;
 		}
+		if(speedFlasher == 7) {
+			if(SensorValue[greenLED] == 1 && (rpmGoal == rpmHigh))
+				turnOn(green);
+			else
+				SensorValue[greenLED] = 1;
+			if(SensorValue[yellowLED] == 1 && (rpmGoal == rpmMid))
+				turnOn(yellow);
+			else
+				SensorValue[yellowLED] = 1;
+			if(SensorValue[redLED] == 1 && (rpmGoal == rpmLow))
+				turnOn(red);
+			else
+				SensorValue[redLED] = 1;
+			speedFlasher = 0;
+		}
 		wait1Msec(45);
+		speedFlasher++;
+
 	}
 }
 
@@ -273,11 +302,11 @@ void centerHold()
 		clearLCDLine(1);
 		displayLCDCenteredString(1, "Switching");
 	} else if(screen == auto) {
-		autoPage++;
-		if(autoPage > 5)
-			autoPage = 0;
-		clearLCDLine(1);
-		displayLCDCenteredString(1, "Switching");
+		chosenAuto = autoPage;
+    clearLCDLine(1);
+    displayLCDCenteredString(1, "Selected");
+
+
 	}
 }
 
@@ -295,14 +324,14 @@ void centerClick()
 		else
 			highPowerBias = (highPowerBias > 8) ? -10 : (highPowerBias+2);
 	} else if(screen == auto) {
-		chosenAuto = autoPage;
-        clearLCDLine(1);
-        displayLCDCenteredString(1, "Selected");
-    } else if(screen == sensors) {
-        sensorPage++;
+		autoPage++;
+		if(autoPage > 5)
+			autoPage = 0;
+  } else if(screen == sensors) {
+     sensorPage++;
         if(sensorPage > 5)
             sensorPage = 0;
-    } else if(screen == 10000) {
+  } else if(screen == 10000) {
 		displayStatusAndTime();
 		gyroTurnTo(2000, -1);
 	}

@@ -16,17 +16,17 @@
 int rpmLow = 70;
 int rpmMid = 82;
 int rpmHigh = 116;
-int lowSpeed = 43;
+int lowSpeed = 45;
 int midSpeed = 60;
-int highSpeed = 50;
+int highSpeed = 100;
 /////////////////////////////////////////////////////////
 float Kp = 1.0;
 float Ki = 1.0;
 float Kd = 1.0;
 /////////////////////////////////////////////////////////
-float KpStable = 0.3300500;
-float KiStable = 0.000000003;
-float KdStable = 0.2;
+float KpStable = 0.4000;//0.330000;
+float KiStable = 0.0;//0.000000003;
+float KdStable = 0.4;//0.2;
 /////////////////////////////////////////////////////////
 float KpLow = 1.9375; //0.9075
 float KiLow = 0.0030;
@@ -49,7 +49,7 @@ float averageError = 0.0;
 float flySpeed = 0.0;
 /////////////////////////////////////////////////////////
 bool flyWheelOn = false;
-bool autoShooting = true;
+bool autoShooting = false;
 bool rollerOn = true;
 bool startup = true; // If false, flywheel is running, else flywheel is off
 float oldError = 0.0;
