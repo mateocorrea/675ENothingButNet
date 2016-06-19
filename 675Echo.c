@@ -61,6 +61,7 @@ task autonomous()
 
 task usercontrol()
 {
+	rpmGoal = rpmLow;
 	if(getTaskState(autonomous) == taskStateRunning)
 		stopTask(autonomous);
 	if(getTaskState(flyWheelPower) == taskStateRunning)

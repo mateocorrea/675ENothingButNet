@@ -21,7 +21,7 @@ int games = 5;
 int battery = 6;
 int MAX_SCREEN = 6;
 int screen = name;
-int chosenAuto = 1;
+int chosenAuto = 0;
 int holdSwitch = 1000;
 
 int sensorPage = 0;
@@ -44,7 +44,7 @@ task LCD()
 			playSound(soundException);
 			while(bSoundActive){}
 		}
-		bLCDBacklight = !(unactiveTime >= 1000);
+		bLCDBacklight = !(unactiveTime >= 2000);
 		if(nLCDButtons == 0) { //nothing pressed
 			holdTime = 0;
 		} else if(nLCDButtons == 4) { //right button pressed
@@ -126,6 +126,18 @@ task LCD()
 				displayLCDCenteredString(0, "Defense Blue");
 			} else if(autoPage == autoSix) {
 				displayLCDCenteredString(0, "Prog Skills");
+			} else if(autoPage == innerRedBarShot) {
+				displayLCDCenteredString(0, "IRBS");
+			} else if(autoPage == innerBlueBarShot) {
+				displayLCDCenteredString(0, "pick this");
+			} else if(autoPage == outerRedBarShot) {
+				displayLCDCenteredString(0, "ORBS");
+			} else if(autoPage == outerBlueBarShot) {
+				displayLCDCenteredString(0, "OBBS");
+			} else if(autoPage == blueHoard) {
+				displayLCDCenteredString(0, "BH");
+			} else if(autoPage == redHoard) {
+				displayLCDCenteredString(0, "RH");
 			}
 			if(chosenAuto == autoPage)
 				displayLCDCenteredString(1, "Selected");
@@ -325,7 +337,7 @@ void centerClick()
 			highPowerBias = (highPowerBias > 8) ? -10 : (highPowerBias+2);
 	} else if(screen == auto) {
 		autoPage++;
-		if(autoPage > 5)
+		if(autoPage > 11)
 			autoPage = 0;
   } else if(screen == sensors) {
      sensorPage++;

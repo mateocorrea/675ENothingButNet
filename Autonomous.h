@@ -7,6 +7,12 @@ int autoThree = 2;
 int autoFour = 3;
 int autoFive = 4;
 int autoSix = 5;
+int innerRedBarShot = 6;
+int innerBlueBarShot = 7;
+int outerRedBarShot = 8;
+int outerBlueBarShot = 9;
+int blueHoard = 10;
+int redHoard = 11;
 
 void runAuto(int chosen);
 void redShoot();
@@ -15,6 +21,12 @@ void blueBot();
 void blueSide();
 void defense();
 void progSkills();
+void IRBS();
+void IBBS();
+void ORBS();
+void OBBS();
+void BH();
+void RH();
 
 void runAuto(int chosen) {
 	/* Start tasks needed in autonomous and disable unnecessary ones */
@@ -30,16 +42,37 @@ void runAuto(int chosen) {
 		blueSide();
 	else if(chosen == 4)
 		defense();
+	else if(chosen == innerBlueBarShot)
+		IBBS();
+	else if(chosen == innerRedBarShot)
+		IRBS();
+	else if(chosen == outerBlueBarShot)
+		OBBS();
+	else if(chosen == outerRedBarShot)
+		ORBS();
+	else if(chosen == blueHoard)
+		BH();
+	else if(chosen == redHoard)
+		RH();
 	else
 		progSkills();
 }
 
 void redShoot()
 {
+
+
+	flyWheelOn = false;
+	leftDriveEnc = 0;
+	drivePower(127, 127);
+	while(abs(leftDriveEnc) < 3000)
+	{
+	}
+	drivePower(0,0);
 	//flyWheelOn = true;
 	//rpmGoal = rpmMid;
-	flyWheelOn = false;
-	followLineForClicks(110, 2000);
+	//flyWheelOn = false;
+	//followLineForClicks(110, 2000);
 	/*fdriveDistance(621);
 	wait1Msec(250);
 	encoderTurn(120);
@@ -76,12 +109,12 @@ void redSide()
 	rpmGoal = rpmHigh;
 	flyWheelOn = true;
 	motor[roller] = 127;
-	wait1Msec(4000);
 	drivePower(70, 70);
-	leftDriveEnc = 0;
-	while(abs(leftDriveEnc) < 195){}
+	wait1Msec(350);
 	drivePower(0,0);
-	wait1Msec(800);
+	wait1Msec(4000);
+	autoShooting = true;
+	wait1Msec(3000);
 	for(int i = 0; i < 4; i++) {
 		motor[conveyor] = 127;
 		wait1Msec(330);
@@ -166,9 +199,14 @@ void blueSide()
 
 void defense()
 {
-	driveDistance(-2000);
-	encoderTurn(900);
-	driveDistance(2000);
+	rpmGoal = rpmLow;
+	// go straight, score 4
+	driveDistance(3000);
+	autoShooting = true;
+	motor[conveyor] = 127;
+	wait1Msec(3000);
+	motor[conveyor] = 0;
+	autoShooting = false;
 }
 
 void progSkills()
@@ -211,4 +249,105 @@ void progSkills()
 
 	/* Shoot */
 	motor[conveyor] = autoShootSpeed;
+}
+
+void IRBS()
+{
+	rpmGoal = rpmLow;
+	motor[roller] = 127;
+	// go straight, score 4
+	drivePower(127, 127);
+	leftDriveEnc = 0;
+	while(abs(leftDriveEnc) < 3320){}
+	drivePower(-20, -20);
+	wait1Msec(40);
+	drivePower(0,0);
+	wait1Msec(400);
+	drivePower(-100, 100);
+	rightDriveEnc = 0;
+	wait1Msec(90);
+	drivePower(0,0);
+	wait1Msec(1000);
+	autoShooting = true;
+	motor[conveyor] = 127;
+	wait1Msec(3000);
+	motor[conveyor] = 0;
+	autoShooting = false;
+}
+
+void ORBS()
+{
+	rpmGoal = rpmLow;
+	motor[roller] = 127;
+	// go straight, score 4
+	drivePower(127, 127);
+	leftDriveEnc = 0;
+	while(abs(leftDriveEnc) < 3320){}
+	drivePower(-20, -20);
+	wait1Msec(40);
+	drivePower(0,0);
+	wait1Msec(400);
+	drivePower(100, -100);
+	leftDriveEnc = 0;
+	wait1Msec(200);
+	drivePower(0,0);
+	wait1Msec(1000);
+	autoShooting = true;
+	motor[conveyor] = 127;
+	wait1Msec(3000);
+	motor[conveyor] = 0;
+	autoShooting = false;
+
+	leftDriveEnc = 0;
+	drivePower(100, -100);
+	while(abs(leftDriveEnc) < 400){}
+	drivePower(0,0);
+	wait1Msec(300);
+
+	leftDriveEnc = 0;
+	drivePower(120, 120);
+	while(abs(leftDriveEnc) < 700){}
+	drivePower(-25, -25);
+	wait1Msec(40);
+	drivePower(0,0);
+
+
+}
+
+// pick this
+void IBBS()
+{
+	rpmGoal = rpmLow;
+	motor[roller] = 127;
+	// go straight, score 4
+
+	drivePower(127, 127);
+	leftDriveEnc = 0;
+	while(abs(leftDriveEnc) < 3350){}
+	drivePower(-20, -20);
+	wait1Msec(40);
+	drivePower(0,0);
+	//drivePowerForClicks(127, 3320);
+
+	wait1Msec(2500);
+	autoShooting = true;
+	wait1Msec(100);
+	motor[conveyor] = 127;
+	wait1Msec(3000);
+	motor[conveyor] = 0;
+	rpmGoal = rpmLow;
+	autoShooting = false;
+}
+
+void OBBS()
+{
+	IRBS();
+}
+
+void BH()
+{
+}
+
+void RH()
+{
 }

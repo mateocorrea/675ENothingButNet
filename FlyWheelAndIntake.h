@@ -43,7 +43,7 @@ float KdHigh = 0.000100;
 
 //            VARIABLES AND FUNCTIONS                  //
 /////////////////////////////////////////////////////////
-float rpmGoal = rpmMid;
+float rpmGoal = rpmLow;
 float rpm = 0.0;
 float averageError = 0.0;
 float flySpeed = 0.0;
@@ -395,7 +395,8 @@ void setPIDConstants()
 {
 	if(userControl)
 		autoShooting = false;
-	if(!shootBtn && !autoShooting) {
+	//if(!shootBtn || (!autoShooting && !userControl)) {
+	if(!shootBtn && userControl) {
 		Kp = KpStable;
 		Ki = KiStable;
 		Kd = KdStable;
@@ -413,5 +414,11 @@ void setPIDConstants()
 			Ki = KiHigh;
 			Kd = KdHigh;
 		}
+	}
+
+	if(!userControl) {
+		Kp = KpHigh;
+		Ki = KiHigh;
+		Kd = KdHigh;
 	}
 }
